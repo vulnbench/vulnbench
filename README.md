@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/vulnbench.png" alt="VulnBench" width="600">
+</p>
+
 # VulnBench: Can LLMs Fix Real-World Security Vulnerabilities?
 
 **A benchmark for evaluating large language models on open-source security patch generation.**
@@ -125,8 +129,8 @@ This replaces traditional deterministic diff-matching, which we found systematic
 ### Setup
 
 ```bash
-git clone https://github.com/ghostsecuritydev/APPSEC_BENCH.git
-cd APPSEC_BENCH
+git clone https://github.com/ghostsecuritydev/vulnbench.git
+cd vulnbench
 pip install -r requirements.txt
 
 # Set your API key
@@ -230,7 +234,7 @@ If you use VulnBench in your research, please cite:
   title={VulnBench: Evaluating LLMs on Real-World Security Patch Generation},
   author={Ghost Security},
   year={2026},
-  url={https://github.com/appsecbench/appsec_bench/}
+  url={https://github.com/ghostsecuritydev/vulnbench}
 }
 ```
 
