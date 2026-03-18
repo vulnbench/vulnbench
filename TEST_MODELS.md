@@ -8,7 +8,9 @@ All models are accessed via OpenRouter. Use `openrouter/` prefix with LiteLLM.
 | openai/gpt-5.2 | |
 | openai/gpt-5.3-codex | |
 | openai/gpt-5.4 | |
+| x-ai/grok-4.1-fast | |
 | minimax/minimax-m2.5 | |
+| minimax/minimax-m2.7 | |
 | google/gemini-3-flash-preview | |
 | deepseek/deepseek-v3.2 | |
 | moonshotai/kimi-k2.5 | |
