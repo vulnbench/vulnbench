@@ -252,6 +252,7 @@ def _write_outputs(
             "version": "1.0.0",
             "generated_at": now,
             "total_instances": len(instances),
+            "benchmark_role": "full",
             "tier_distribution": tier_counts,
             "ecosystem_distribution": eco_counts,
         },
@@ -273,10 +274,12 @@ def _write_outputs(
 
     mini_db = BenchmarkDatabase(
         metadata={
-            "name": "VulnBench-mini",
+            "name": "VulnBench-200",
             "version": "1.0.0",
             "generated_at": now,
             "total_instances": len(mini),
+            "benchmark_role": "curated_subset",
+            "selection_method": "tier-balanced high-quality subset with ecosystem diversity constraints",
             "tier_distribution": mini_tier,
             "ecosystem_distribution": mini_eco,
         },

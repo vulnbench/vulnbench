@@ -143,6 +143,30 @@ def main():
         help=f"LiteLLM model ID for the judge (default: {JUDGE_MODEL})",
     )
     parser.add_argument(
+        "--include-source",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Include vulnerable source snippets in prompts (default: true)",
+    )
+    parser.add_argument(
+        "--file-hint-mode",
+        choices=("none", "description", "gold"),
+        default="description",
+        help="How to localize source files: none, description-derived, or gold hints",
+    )
+    parser.add_argument(
+        "--max-source-files",
+        type=int,
+        default=3,
+        help="Max number of source files to include in prompt context",
+    )
+    parser.add_argument(
+        "--max-source-chars",
+        type=int,
+        default=6000,
+        help="Max total source characters to include in prompt context",
+    )
+    parser.add_argument(
         "--output",
         type=str,
         default="results/comparison.json",
@@ -187,7 +211,15 @@ def main():
         results: list[InstanceResult] = []
         pbar = tqdm(instances, desc=f"  {model_name}")
         for instance in pbar:
-            result = evaluate_instance(instance, adapter, judge_model=args.judge_model)
+            result = evaluate_instance(
+                instance,
+                adapter,
+                judge_model=args.judge_model,
+                include_source=args.include_source,
+                file_hint_mode=args.file_hint_mode,
+                max_source_files=args.max_source_files,
+                max_source_chars=args.max_source_chars,
+            )
             results.append(result)
             pbar.set_postfix(
                 passed=sum(1 for r in results if r.passed),
@@ -198,6 +230,9 @@ def main():
             results,
             benchmark_path=args.benchmark,
             model_name=model_name,
+            judge_model=args.judge_model,
+            include_source=args.include_source,
+            file_hint_mode=args.file_hint_mode,
         )
         reports[model_name] = report
 
@@ -222,6 +257,8 @@ def main():
             "judge_model": args.judge_model,
             "temperature": args.temperature,
             "max_tokens": args.max_tokens,
+            "include_source": args.include_source,
+            "file_hint_mode": args.file_hint_mode,
         },
         models=args.models,
         reports=reports,

@@ -225,10 +225,10 @@
 
 <div class="hero">
   <h1>VulnBench Results</h1>
-  <p class="subtitle">Can LLMs Fix Real-World Security Vulnerabilities? We tested 16 frontier models on 200 real CVEs.</p>
+  <p class="subtitle">Public leaderboard for the curated VulnBench-200 subset. The full VulnBench dataset contains 1,650 CVEs.</p>
   <div class="meta">
     <span><span class="num">16</span> Models Evaluated</span>
-    <span><span class="num">200</span> CVE Instances</span>
+    <span><span class="num">200</span> Curated Instances</span>
     <span><span class="num">55</span> CWE Types</span>
     <span><span class="num">7</span> Ecosystems</span>
     <span><span class="num">$49.34</span> Total Cost</span>
@@ -241,7 +241,7 @@
   <div class="stats-grid">
     <div class="stat-card">
       <div class="value">57.0%</div>
-      <div class="label">Best Pass Rate (GPT-5.3 Codex)</div>
+      <div class="label">Best Curated-200 Pass Rate</div>
     </div>
     <div class="stat-card">
       <div class="value">~22%</div>
@@ -784,7 +784,7 @@
       </div>
       <div class="tier-card">
         <h3>Prompt</h3>
-        <p style="font-size:0.9em;color:var(--text-muted);">Each model receives: CVE description + severity, CWE-specific guidance, list of affected files, vulnerable source code. The task: generate a minimal unified diff that fixes the vulnerability.</p>
+        <p style="font-size:0.9em;color:var(--text-muted);">Each model receives CVE text, CWE guidance, and runtime source context when localization succeeds. Gold affected-file hints are supported only as a separate ablation mode.</p>
       </div>
       <div class="tier-card">
         <h3>Scoring (LLM-as-Judge)</h3>
@@ -796,7 +796,7 @@
 </div>
 
 <div class="footer">
-  <p><strong>VulnBench</strong> by <a href="https://github.com/ghostsecuritydev">Ghost Security</a> &mdash; Presented at RSA Conference 2026</p>
+  <p><strong>VulnBench</strong> by <a href="https://github.com/vulnbench">Ghost Security</a> &mdash; Presented at RSA Conference 2026</p>
   <p style="margin-top:6px;">Data sourced from GitHub Advisory Database and NVD. All models evaluated via OpenRouter.</p>
 </div>
 

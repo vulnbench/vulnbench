@@ -43,6 +43,8 @@ class TaskPrompt(BaseModel):
     cwe_category: str = ""
     cwe_guidance: str = ""
     affected_files_hint: list[str] = Field(default_factory=list)
+    source_context: str = ""
+    source_context_files: list[str] = Field(default_factory=list)
     instructions: str = ""
 
 

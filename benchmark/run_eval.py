@@ -31,6 +31,7 @@ import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Iterable
 
 import litellm
 from tqdm import tqdm
@@ -41,6 +42,7 @@ from benchmark.eval_models import (
     InstanceResult,
     PatchAnalysis,
 )
+from benchmark.source_manager import download_source
 from src.benchmark_models import BenchmarkDatabase, BenchmarkInstance
 
 logging.basicConfig(
@@ -83,8 +85,19 @@ Scoring guide:
 - 0.0-0.1: Wrong, empty, or irrelevant patch
 """
 
+SOURCE_CONTEXT_FILE_LIMIT = 3
+SOURCE_CONTEXT_CHAR_LIMIT = 6000
+DESCRIPTION_FILE_RE = re.compile(
+    r"\b([A-Za-z0-9_./-]+\.(?:py|js|ts|tsx|jsx|java|rb|php|rs|swift|go|c|cc|cpp|h|hpp|cs|scala|kt|kts|m|mm|vue|svelte))\b"
+)
 
-def render_prompt(instance: BenchmarkInstance) -> str:
+
+def render_prompt(
+    instance: BenchmarkInstance,
+    *,
+    include_file_hints: bool = False,
+    source_context: str = "",
+) -> str:
     """Render a BenchmarkInstance's TaskPrompt into a single flat string."""
     tp = instance.task_prompt
     parts = [tp.system_context, "", tp.vulnerability_description]
@@ -93,14 +106,21 @@ def render_prompt(instance: BenchmarkInstance) -> str:
         parts.append(f"\nCWE Category: {tp.cwe_category}")
     if tp.cwe_guidance:
         parts.append(f"Guidance: {tp.cwe_guidance}")
-    if tp.affected_files_hint:
+    if include_file_hints and tp.affected_files_hint:
         parts.append(f"\nAffected files: {', '.join(tp.affected_files_hint)}")
+    if source_context:
+        parts.append(f"\nVulnerable source context:\n{source_context}")
 
     parts.append(f"\n{tp.instructions}")
     return "\n".join(parts)
 
 
-def render_prompt_parts(instance: BenchmarkInstance) -> tuple[str, str]:
+def render_prompt_parts(
+    instance: BenchmarkInstance,
+    *,
+    include_file_hints: bool = False,
+    source_context: str = "",
+) -> tuple[str, str]:
     """Render a BenchmarkInstance's TaskPrompt into (system_msg, user_msg)."""
     tp = instance.task_prompt
 
@@ -111,8 +131,10 @@ def render_prompt_parts(instance: BenchmarkInstance) -> tuple[str, str]:
         user_parts.append(f"\nCWE Category: {tp.cwe_category}")
     if tp.cwe_guidance:
         user_parts.append(f"Guidance: {tp.cwe_guidance}")
-    if tp.affected_files_hint:
+    if include_file_hints and tp.affected_files_hint:
         user_parts.append(f"\nAffected files: {', '.join(tp.affected_files_hint)}")
+    if source_context:
+        user_parts.append(f"\nVulnerable source context:\n{source_context}")
     user_parts.append(f"\n{tp.instructions}")
 
     user_msg = "\n".join(user_parts)
@@ -214,13 +236,27 @@ Judge whether the candidate patch correctly fixes the vulnerability."""
 
         score = float(result.get("score", 0.0))
         score = max(0.0, min(1.0, score))
-        verdict = result.get("verdict", "fail").lower()
+        raw_verdict = str(result.get("verdict", "fail")).lower()
         reasoning = result.get("reasoning", "")
+        cost_usd = response._hidden_params.get("response_cost", 0.0) or 0.0
+
+        normalized_verdict = "pass" if score >= 0.5 and raw_verdict == "pass" else "fail"
+        consistent = raw_verdict in {"pass", "fail"} and (
+            (raw_verdict == "pass" and score >= 0.5)
+            or (raw_verdict == "fail" and score < 0.5)
+        )
+        if not consistent:
+            reasoning = (
+                f"[judge disagreement normalized to {normalized_verdict}] {reasoning}"
+            ).strip()
 
         return PatchAnalysis(
             judge_score=round(score, 4),
             judge_reasoning=reasoning,
-            judge_verdict=verdict,
+            judge_verdict=normalized_verdict,
+            raw_judge_verdict=raw_verdict,
+            judge_consistent=consistent,
+            judge_cost_usd=round(cost_usd, 6),
         )
 
     except Exception as e:
@@ -245,18 +281,41 @@ def evaluate_instance(
     instance: BenchmarkInstance,
     adapter,
     judge_model: str = JUDGE_MODEL,
+    *,
+    include_source: bool = True,
+    file_hint_mode: str = "description",
+    max_source_files: int = SOURCE_CONTEXT_FILE_LIMIT,
+    max_source_chars: int = SOURCE_CONTEXT_CHAR_LIMIT,
 ) -> InstanceResult:
     """Evaluate a single benchmark instance."""
     is_litellm = _is_litellm_adapter(adapter)
+    include_file_hints = file_hint_mode == "gold"
+    source_context = ""
+
+    if include_source:
+        source_context = build_source_context(
+            instance,
+            file_hint_mode=file_hint_mode,
+            max_files=max_source_files,
+            max_chars=max_source_chars,
+        )
 
     # Generate patch
     start = time.monotonic()
     try:
         if is_litellm:
-            system_msg, user_msg = render_prompt_parts(instance)
+            system_msg, user_msg = render_prompt_parts(
+                instance,
+                include_file_hints=include_file_hints,
+                source_context=source_context,
+            )
             raw_output = adapter.generate_patch(user_msg, system_prompt=system_msg)
         else:
-            prompt = render_prompt(instance)
+            prompt = render_prompt(
+                instance,
+                include_file_hints=include_file_hints,
+                source_context=source_context,
+            )
             raw_output = adapter.generate_patch(prompt)
     except Exception as e:
         logger.warning("Adapter failed for %s: %s", instance.instance_id, e)
@@ -279,7 +338,7 @@ def evaluate_instance(
     # Judge the patch
     analysis = judge_patch(instance, model_patch, judge_model=judge_model)
     score = analysis.judge_score
-    passed = analysis.judge_verdict == "pass" or score >= 0.5
+    passed = analysis.judge_verdict == "pass"
 
     return InstanceResult(
         instance_id=instance.instance_id,
@@ -294,7 +353,119 @@ def evaluate_instance(
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
         cost_usd=cost_usd,
+        judge_cost_usd=analysis.judge_cost_usd,
     )
+
+
+def derive_description_files(instance: BenchmarkInstance) -> list[str]:
+    """Extract likely vulnerable filenames from the advisory text."""
+    desc = instance.task_prompt.vulnerability_description
+    seen: set[str] = set()
+    derived: list[str] = []
+    for match in DESCRIPTION_FILE_RE.findall(desc):
+        candidate = match.strip("`'\"()[]{}")
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            derived.append(candidate)
+    return derived
+
+
+def iter_repo_files(root: Path) -> Iterable[Path]:
+    """Yield source-like files from a repository snapshot."""
+    for path in root.rglob("*"):
+        if not path.is_file():
+            continue
+        if ".git" in path.parts or "node_modules" in path.parts:
+            continue
+        yield path
+
+
+def resolve_source_files(
+    source_dir: Path,
+    instance: BenchmarkInstance,
+    *,
+    file_hint_mode: str,
+    max_files: int,
+) -> list[Path]:
+    """Resolve source files for prompt context using the configured localization mode."""
+    relative_paths: list[str]
+    if file_hint_mode == "gold":
+        relative_paths = list(instance.task_prompt.affected_files_hint)
+    elif file_hint_mode == "description":
+        relative_paths = derive_description_files(instance)
+    else:
+        relative_paths = []
+
+    matched: list[Path] = []
+    seen: set[Path] = set()
+
+    for rel in relative_paths:
+        exact = source_dir / rel
+        candidates: list[Path] = []
+        if exact.exists() and exact.is_file():
+            candidates.append(exact)
+        else:
+            basename = Path(rel).name
+            for path in iter_repo_files(source_dir):
+                if path.name == basename:
+                    candidates.append(path)
+
+        for candidate in candidates:
+            if candidate not in seen:
+                matched.append(candidate)
+                seen.add(candidate)
+                if len(matched) >= max_files:
+                    return matched
+
+    return matched
+
+
+def build_source_context(
+    instance: BenchmarkInstance,
+    *,
+    file_hint_mode: str,
+    max_files: int,
+    max_chars: int,
+) -> str:
+    """Load vulnerable source snippets for the prompt."""
+    if not instance.download_url:
+        return ""
+
+    source_dir = download_source(instance.download_url, instance.instance_id)
+    if not source_dir:
+        return ""
+
+    files = resolve_source_files(
+        source_dir,
+        instance,
+        file_hint_mode=file_hint_mode,
+        max_files=max_files,
+    )
+    if not files:
+        return ""
+
+    snippets: list[str] = []
+    remaining = max_chars
+
+    for path in files:
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+
+        rel = path.relative_to(source_dir)
+        header = f"File: {rel}"
+        budget = max(0, remaining - len(header) - 8)
+        if budget <= 0:
+            break
+
+        snippet = text[:budget].rstrip()
+        snippets.append(f"{header}\n```{path.suffix.lstrip('.') or 'text'}\n{snippet}\n```")
+        remaining -= len(snippets[-1])
+        if remaining <= 0:
+            break
+
+    return "\n\n".join(snippets)
 
 
 def compute_aggregate(results: list[InstanceResult]) -> AggregateMetrics:
@@ -360,6 +531,9 @@ def build_report(
     benchmark_path: str,
     model_name: str | None = None,
     adapter_name: str | None = None,
+    judge_model: str = JUDGE_MODEL,
+    include_source: bool = True,
+    file_hint_mode: str = "description",
 ) -> EvalReport:
     """Build an EvalReport from results and metadata."""
     aggregate = compute_aggregate(results)
@@ -368,7 +542,9 @@ def build_report(
         "benchmark": benchmark_path,
         "evaluated_at": datetime.now(timezone.utc).isoformat() + "Z",
         "total_instances": len(results),
-        "judge_model": JUDGE_MODEL,
+        "judge_model": judge_model,
+        "include_source": include_source,
+        "file_hint_mode": file_hint_mode,
     }
     if model_name:
         metadata["model"] = model_name
@@ -388,7 +564,7 @@ def print_report_summary(aggregate: AggregateMetrics) -> None:
     print("  VulnBench Evaluation Report")
     print(f"{'=' * 60}")
     print(f"  Instances evaluated:   {aggregate.total_instances}")
-    print(f"  Passed (score >= 0.5): {aggregate.total_passed}")
+    print(f"  Passed:                {aggregate.total_passed}")
     print(f"  Pass rate:             {aggregate.pass_rate:.1%}")
     print(f"  Mean judge score:      {aggregate.mean_score:.3f}")
     print(f"  Mean gen time:         {aggregate.mean_generation_time_s:.1f}s")
@@ -451,6 +627,34 @@ def main():
         help=f"LiteLLM model ID for the judge (default: {JUDGE_MODEL})",
     )
     parser.add_argument(
+        "--include-source",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Include vulnerable source snippets in the model prompt (default: true)",
+    )
+    parser.add_argument(
+        "--file-hint-mode",
+        choices=("none", "description", "gold"),
+        default="description",
+        help=(
+            "How to localize source files for prompt context: "
+            "'none' disables file hints, 'description' derives filenames from advisory text, "
+            "'gold' uses dataset affected_files_hint derived from the fix."
+        ),
+    )
+    parser.add_argument(
+        "--max-source-files",
+        type=int,
+        default=SOURCE_CONTEXT_FILE_LIMIT,
+        help="Max number of source files to include in prompt context",
+    )
+    parser.add_argument(
+        "--max-source-chars",
+        type=int,
+        default=SOURCE_CONTEXT_CHAR_LIMIT,
+        help="Max total source characters to include in prompt context",
+    )
+    parser.add_argument(
         "--output",
         type=str,
         default="results/eval_report.json",
@@ -499,7 +703,15 @@ def main():
     results: list[InstanceResult] = []
     pbar = tqdm(instances, desc="Evaluating")
     for instance in pbar:
-        result = evaluate_instance(instance, adapter, judge_model=args.judge_model)
+        result = evaluate_instance(
+            instance,
+            adapter,
+            judge_model=args.judge_model,
+            include_source=args.include_source,
+            file_hint_mode=args.file_hint_mode,
+            max_source_files=args.max_source_files,
+            max_source_chars=args.max_source_chars,
+        )
         results.append(result)
         pbar.set_postfix(
             passed=sum(1 for r in results if r.passed),
@@ -512,6 +724,9 @@ def main():
         benchmark_path=args.benchmark,
         model_name=model_name,
         adapter_name=adapter_name,
+        judge_model=args.judge_model,
+        include_source=args.include_source,
+        file_hint_mode=args.file_hint_mode,
     )
 
     output_path = Path(args.output)

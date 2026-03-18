@@ -47,6 +47,18 @@ def main():
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-tokens", type=int, default=4096)
     parser.add_argument("--judge-model", type=str, default=JUDGE_MODEL)
+    parser.add_argument(
+        "--include-source",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+    )
+    parser.add_argument(
+        "--file-hint-mode",
+        choices=("none", "description", "gold"),
+        default="description",
+    )
+    parser.add_argument("--max-source-files", type=int, default=3)
+    parser.add_argument("--max-source-chars", type=int, default=6000)
     parser.add_argument("--output", type=str, default="results/best_of_n.json")
     parser.add_argument("--limit", type=int, default=0)
 
@@ -80,7 +92,15 @@ def main():
         results: list[InstanceResult] = []
         pbar = tqdm(instances, desc=f"Run {run_idx}/{args.runs}")
         for instance in pbar:
-            result = evaluate_instance(instance, adapter, judge_model=args.judge_model)
+            result = evaluate_instance(
+                instance,
+                adapter,
+                judge_model=args.judge_model,
+                include_source=args.include_source,
+                file_hint_mode=args.file_hint_mode,
+                max_source_files=args.max_source_files,
+                max_source_chars=args.max_source_chars,
+            )
             results.append(result)
             pbar.set_postfix(
                 passed=sum(1 for r in results if r.passed),
@@ -91,6 +111,9 @@ def main():
             results,
             benchmark_path=args.benchmark,
             model_name=args.model,
+            judge_model=args.judge_model,
+            include_source=args.include_source,
+            file_hint_mode=args.file_hint_mode,
         )
         all_run_reports.append(report)
 

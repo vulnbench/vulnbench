@@ -12,7 +12,10 @@ class PatchAnalysis(BaseModel):
 
     judge_score: float = 0.0  # 0.0-1.0 from judge
     judge_reasoning: str = ""  # Judge's explanation
-    judge_verdict: str = ""  # "pass" or "fail"
+    judge_verdict: str = ""  # normalized "pass" or "fail"
+    raw_judge_verdict: str = ""  # original verdict emitted by the judge
+    judge_consistent: bool = True
+    judge_cost_usd: float = 0.0
 
 
 class InstanceResult(BaseModel):

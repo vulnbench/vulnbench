@@ -2,15 +2,15 @@
 
 ---
 
-**Can AI fix real security vulnerabilities? We tested 16 frontier LLMs to find out.**
+**Can AI help patch real security vulnerabilities? We tested 16 frontier LLMs to find out.**
 
-We built VulnBench — a benchmark of 200 real CVEs across 7 ecosystems and 55 vulnerability types — and evaluated every major LLM on security patch generation. The results are now public.
+We built VulnBench — a full benchmark of 1,650 real CVEs plus a curated 200-instance evaluation subset across 7 ecosystems and 55 vulnerability types — and evaluated frontier LLMs on the curated subset. The results are now public.
 
 **Key findings:**
 
-The best model (GPT-5.3 Codex) patches 57% of real-world vulnerabilities. The median model? Just ~22%. Even on the "easiest" category — pattern-matching fixes like XSS and SQL injection — no model breaks 62%.
+On the curated 200-instance subset, the best model (GPT-5.3 Codex) patches 57% of instances. The median model? Just ~22%. Even on the "easiest" category — pattern-matching fixes like XSS and SQL injection — no model breaks 62%.
 
-**Top 5 Leaderboard (VulnBench-200):**
+**Top 5 Leaderboard (Curated VulnBench-200 subset):**
 1. GPT-5.3 Codex — 57.0%
 2. Claude Opus 4.6 — 45.5%
 3. GPT-5.4 — 42.5%
@@ -25,9 +25,9 @@ The best model (GPT-5.3 Codex) patches 57% of real-world vulnerabilities. The me
 
 - The gap between frontier and mid-tier models is massive. The top 5 models all exceed 42%. After that, there's a steep cliff — #8 (Claude Haiku 4.5) is already down to 25%.
 
-- Total cost to evaluate all 16 models across 200 instances: $49.34. LLM evaluation is remarkably cheap.
+- Total cost to evaluate all 16 models across the curated 200-instance subset: $49.34.
 
-**How we scored:** LLM-as-judge (Claude Opus 4.6) comparing candidate patches against ground-truth fix commits — evaluating root cause, safety, and scope. This replaced deterministic diff-matching, which systematically undervalues correct patches with different syntax.
+**How we scored:** LLM-as-judge (Claude Opus 4.6) comparing candidate patches against ground-truth fix commits — evaluating root cause, safety, and scope. The current repo now reports source-enabled runs, separates gold file-hint ablations, and includes judge-audit utilities for contradiction analysis and human review sampling.
 
 The full benchmark, evaluation harness, and all results are open source. Link in comments.
 

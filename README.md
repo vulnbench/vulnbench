@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="docs/vulnbench.png" alt="VulnBench" width="600">
+  <img src="docs/vuln_bench.png" alt="VulnBench" width="600">
 </p>
 
 # VulnBench: Can LLMs Fix Real-World Security Vulnerabilities?
 
 **A benchmark for evaluating large language models on open-source security patch generation.**
 
-VulnBench tests whether AI models can generate correct security patches for real CVE vulnerabilities. We evaluated **16 frontier LLMs** across **200 real-world CVEs** spanning 7 ecosystems, 55 CWE types, and 3 difficulty tiers — using an LLM-as-judge evaluation methodology scored by Claude Opus 4.6.
+VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evaluation subset of 200 instances**. The public leaderboard in this repo is currently reported on the curated `VulnBench-200` subset, not the full benchmark. The evaluation harness can include vulnerable source context at runtime and supports both no-hint and gold-hint localization modes.
 
 > Presented at **RSA Conference 2026** by [Ghost Security](https://ghost.security)
 
@@ -14,9 +14,11 @@ VulnBench tests whether AI models can generate correct security patches for real
 
 ## Key Findings
 
-The best model — **GPT-5.3 Codex** — successfully patches **57% of real-world vulnerabilities**, while the median model achieves only ~22%. No model exceeds 62% on even the easiest vulnerability class (Tier 1: pattern-matching fixes like XSS and SQL injection), revealing significant room for improvement in AI-assisted security remediation.
+On the curated `VulnBench-200` subset, the best model — **GPT-5.3 Codex** — successfully patches **57% of instances**, while the median model achieves only ~22%. No model exceeds 62% on even the easiest vulnerability class (Tier 1: pattern-matching fixes like XSS and SQL injection), revealing significant room for improvement in AI-assisted security remediation.
 
 ### VulnBench-200 Leaderboard
+
+This leaderboard is for the **curated 200-instance evaluation subset**. It should not be treated as equivalent to a full-benchmark score.
 
 | Rank | Model | Pass Rate | Mean Score | Instances | Cost |
 |:----:|-------|:---------:|:----------:|:---------:|-----:|
@@ -75,8 +77,8 @@ VulnBench is constructed from real CVEs sourced from the GitHub Advisory Databas
 | Property | Value |
 |----------|-------|
 | **CVEs in database** | 10,000+ (2013-2026) |
-| **Benchmark instances** | 1,650 (full) / 200 (evaluated) |
-| **Unique repositories** | 200 |
+| **Benchmark instances** | 1,650 (full) / 200 (curated evaluation subset) |
+| **Unique repositories** | 888 (full) / 200 (curated subset) |
 | **Ecosystems** | npm, pip, Maven, RubyGems, Composer, Rust, Swift |
 | **CWE types** | 55 unique |
 | **Severity distribution** | 21 critical, 42 high, 137 medium |
@@ -103,18 +105,25 @@ VulnBench is constructed from real CVEs sourced from the GitHub Advisory Databas
 Each model receives:
 1. The CVE description and severity information
 2. CWE-specific guidance for the vulnerability class
-3. The list of affected source files
-4. The vulnerable source code
+3. Optional vulnerable source context from the affected repository snapshot
+4. Optional file localization hints, configurable at evaluation time
 5. Instructions to generate a minimal unified diff that fixes the vulnerability
+
+Default evaluation settings in this repo are conservative:
+
+- `--include-source` is enabled by default
+- `--file-hint-mode description` derives file localization only from filenames present in the advisory text
+- `--file-hint-mode gold` is still supported for ablations, but should be reported separately because those hints come from the reference fix
+- Benchmark generation scrubs direct patch hashes, commit URLs, exact fix references, and versioned patch hints from advisory text
 
 **Scoring** uses an LLM-as-judge approach (Claude Opus 4.6) that compares each candidate patch against the ground-truth fix commit:
 
 - **Root cause**: Does the patch address the underlying vulnerability?
 - **Safety**: Does it avoid introducing new security issues?
 - **Scope**: Does it cover the full extent of the required fix?
-- Score range: 0.0 - 1.0. Pass threshold: score >= 0.5 or judge verdict "pass"
+- Score range: 0.0 - 1.0. An instance passes only when the judge returns `verdict="pass"` and `score >= 0.5`
 
-This replaces traditional deterministic diff-matching, which we found systematically undervalues semantically correct patches that differ syntactically from the reference.
+The harness stores normalized and raw judge verdicts, flags score/verdict disagreements, and tracks judge cost separately so judge behavior can be audited directly.
 
 ---
 
@@ -129,7 +138,7 @@ This replaces traditional deterministic diff-matching, which we found systematic
 ### Setup
 
 ```bash
-git clone https://github.com/ghostsecuritydev/vulnbench.git
+git clone https://github.com/vulnbench/vulnbench.git
 cd vulnbench
 pip install -r requirements.txt
 
@@ -144,20 +153,53 @@ echo "OPENROUTER_API_KEY=sk-or-..." > .env
 python -m benchmark.run_eval \
     --benchmark data/benchmark/vulnbench_200.json \
     --model openrouter/openai/gpt-5.4 \
+    --include-source \
+    --file-hint-mode description \
     --output results/my_eval.json
 
 # Compare multiple models
 python -m benchmark.compare \
     --benchmark data/benchmark/vulnbench_200.json \
     --models openrouter/openai/gpt-5.4 openrouter/anthropic/claude-sonnet-4.6 \
+    --include-source \
+    --file-hint-mode description \
     --output results/comparison.json
 
-# Best-of-N runs (accounts for variance)
+# Best-of-N runs (report separately from single-run scores)
 python -m benchmark.run_best_of_n \
     --benchmark data/benchmark/vulnbench_200.json \
     --model openrouter/openai/gpt-5.4 \
     --runs 3 \
+    --include-source \
+    --file-hint-mode description \
     --output results/best3_gpt-5.4.json
+```
+
+### Judge Validation
+
+```bash
+# Summarize contradictions / near-threshold cases
+python -m benchmark.judge_validation \
+    --report results/my_eval.json
+
+# Export a human review sample
+python -m benchmark.judge_validation \
+    --report results/my_eval.json \
+    --sample-output results/my_eval_review_sample.json \
+    --sample-size 50
+
+# Compare multiple reports (for inter-judge agreement or reruns)
+python -m benchmark.judge_validation \
+    --compare results/eval_judge_a.json results/eval_judge_b.json
+```
+
+### Sanitize Existing Benchmark Files
+
+```bash
+python -m benchmark.sanitize_dataset \
+    data/benchmark/vulnbench_full.json \
+    data/benchmark/vulnbench_200.json \
+    data/benchmark/vulnbench_mini.json
 ```
 
 ### Build Dataset from Scratch
@@ -219,8 +261,8 @@ Six sequential stages with checkpoint persistence (safe to interrupt and resume)
 | File | Description |
 |------|-------------|
 | `data/cve_database.json` | Full CVE database (10,000+ records) |
-| `data/benchmark/vulnbench_full.json` | Complete benchmark (1,650 instances) |
-| `data/benchmark/vulnbench_200.json` | Evaluated benchmark (200 instances, 200 unique repos) |
+| `data/benchmark/vulnbench_full.json` | Full benchmark (1,650 instances) |
+| `data/benchmark/vulnbench_200.json` | Curated 200-instance evaluation subset |
 | `results/v200_*.json` | Per-model evaluation reports |
 
 ---
@@ -234,7 +276,7 @@ If you use VulnBench in your research, please cite:
   title={VulnBench: Evaluating LLMs on Real-World Security Patch Generation},
   author={Ghost Security},
   year={2026},
-  url={https://github.com/ghostsecuritydev/vulnbench}
+  url={https://github.com/vulnbench/vulnbench}
 }
 ```
 
