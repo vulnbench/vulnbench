@@ -1,0 +1,986 @@
+{
+  "metadata": {
+    "benchmark": "data/benchmark/vulnbench_mini.json",
+    "evaluated_at": "2026-03-09T16:24:36.820760+00:00Z",
+    "total_instances": 50,
+    "judge_model": "openrouter/anthropic/claude-opus-4-6",
+    "model": "openrouter/openai/gpt-5.3-codex"
+  },
+  "aggregate": {
+    "total_instances": 50,
+    "total_passed": 29,
+    "pass_rate": 0.58,
+    "mean_score": 0.525,
+    "pass_rate_by_tier": {
+      "tier_1": 0.5294,
+      "tier_2": 0.6471,
+      "tier_3": 0.5625
+    },
+    "pass_rate_by_ecosystem": {
+      "maven": 0.75,
+      "npm": 0.5455,
+      "pip": 0.8333,
+      "rubygems": 0.3333,
+      "composer": 1.0,
+      "rust": 0.0,
+      "swift": 0.0
+    },
+    "mean_generation_time_s": 37.297,
+    "total_cost_usd": 1.39257,
+    "total_judge_cost_usd": 0.0,
+    "total_prompt_tokens": 26162,
+    "total_completion_tokens": 96199
+  },
+  "results": [
+    {
+      "instance_id": "vulnbench-CVE-2024-49771",
+      "cve_id": "CVE-2024-49771",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\nindex 7b3f4d1..a4c9c2e 100644\n--- a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n+++ b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n@@ -28,6 +28,7 @@ import java.io.InputStream;\n import java.util.zip.ZipEntry;\n import java.util.zip.ZipInputStream;\n+import java.nio.file.Path;\n \n /**\n  * InputStream helper methods.\n@@ -88,12 +89,14 @@ public final class InputStreamHelper\n          if (!entry.isDirectory())\n          {\n             File file = new File(directory, entry.getName());\n-            String fileCanonicalPath = file.getCanonicalPath();\n-            if (!fileCanonicalPath.startsWith(directoryCanonicalPath))\n+\n+            Path directoryPath = directory.getCanonicalFile().toPath();\n+            Path filePath = directoryPath.resolve(entry.getName()).normalize();\n+            if (!filePath.startsWith(directoryPath))\n             {\n                throw new IOException(\"Invalid ZIP entry\");\n             }\n-            file.getParentFile().mkdirs();\n+            file = filePath.toFile();\n+            file.getParentFile().mkdirs();\n             writeStreamToFile(zip, file);\n          }\n       }",
+      "generation_time_s": 21.298,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the same vulnerability using Path-based comparison instead of string-based comparison, which is the correct approach. However, it only modifies one of the two zip processing methods in the file. The gold patch modifies the `processZipStream` method (around line 174), while the candidate patch modifies a different method (around line 89, likely `extractZipEntry` or similar). The gold patch targets the `processZipStream` method starting at line 174, but the candidate patch targets code around line 89. This means the candidate may miss the vulnerable code path that the gold patch fixes, or it fixes a different location. The incomplete coverage means the vulnerability may still be exploitable through the unpatched code path.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 323,
+      "completion_tokens": 1169,
+      "cost_usd": 0.01693125,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43761",
+      "cve_id": "CVE-2025-43761",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\nindex 3c8e4f1a2b7d..7d0b1b85c8aa 100644\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n+++ b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n@@ -18,7 +18,7 @@\n \t},\n \t\"dependencies\": {\n \t\t\"@liferay/frontend-js-web\": \"*\",\n-\t\t\"ckeditor4\": \"4.24.0-lts\"\n+\t\t\"ckeditor4\": \"4.25.1-lts\"\n \t},\n \t\"devDependencies\": {\n \t\t\"liferay-npm-build-tools-common\": \"*\"\ndiff --git a/modules/apps/frontend-js/frontend-js-dependencies-web/package.json b/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\nindex 9b7a6e6f4c1d..f2c5b1c9e7a4 100644\n--- a/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n+++ b/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n@@ -22,7 +22,7 @@\n \t\t\"chart.js\": \"2.7.3\",\n \t\t\"clayui-css\": \"3.34.0\",\n \t\t\"clipboard\": \"2.0.11\",\n-\t\t\"ckeditor4\": \"4.24.0-lts\",\n+\t\t\"ckeditor4\": \"4.25.1-lts\",\n \t\t\"codemirror\": \"5.65.16\",\n \t\t\"d3\": \"5.16.0\",\n \t\t\"dompurify\": \"3.1.6\",",
+      "generation_time_s": 21.626,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch updates a different package ('ckeditor4' from 4.24.0-lts to 4.25.1-lts) than what the gold patch updates ('liferay-ckeditor' from 4.21.0-liferay.9 to 4.21.0-liferay.10). While both patches attempt to fix the XSS vulnerability by updating CKEditor dependencies, they target different package names and versions, suggesting the candidate is working with a different codebase version or making incorrect assumptions about which package contains the fix. The vulnerability specifically mentions the liferay-ckeditor package's sample files, and the gold patch's targeted update to liferay-ckeditor is the correct fix.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 369,
+      "completion_tokens": 1030,
+      "cost_usd": 0.01506575,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-27210",
+      "cve_id": "CVE-2026-27210",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/js/pannellum.js b/src/js/pannellum.js\nindex 9f3a2b1..b6c47e2 100644\n--- a/src/js/pannellum.js\n+++ b/src/js/pannellum.js\n@@ -1732,10 +1732,18 @@\n         }\n \n         if (hs.attributes) {\n-            for (var attr in hs.attributes) {\n-                div.setAttribute(attr, hs.attributes[attr]);\n+            for (var attr in hs.attributes) {\n+                if (!hs.attributes.hasOwnProperty(attr)) {\n+                    continue;\n+                }\n+                // Block inline event handler attributes (e.g., onclick),\n+                // which can execute arbitrary JavaScript.\n+                if (/^on/i.test(attr)) {\n+                    continue;\n+                }\n+                div.setAttribute(attr, hs.attributes[attr]);\n             }\n         }\n \n         if (hs.text && config.escapeHTML) {\n             div.appendChild(document.createTextNode(hs.text));",
+      "generation_time_s": 18.284,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch addresses the XSS risk from event handler attributes (on* attributes) but has several issues compared to the gold patch: 1) It applies the filter to a different element ('div' instead of 'a'), suggesting it may be patching the wrong location or a different code path. 2) It doesn't filter 'href' attributes, which the gold patch explicitly blocks when escapeHTML is enabled. 3) It doesn't normalize the key by removing non-ASCII characters, which could allow bypass via unicode characters. 4) It always blocks 'on*' attributes regardless of the escapeHTML setting, whereas the gold patch only filters when escapeHTML is enabled. While the candidate shows understanding of the event handler XSS vector, it misses important aspects and appears to target a different code location than where the vulnerability exists.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 494,
+      "completion_tokens": 873,
+      "cost_usd": 0.0130865,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-25228",
+      "cve_id": "CVE-2026-25228",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/interfaces/applicationData.js b/src/interfaces/applicationData.js\nindex 3d9c8a1..a6e2d44 100644\n--- a/src/interfaces/applicationData.js\n+++ b/src/interfaces/applicationData.js\n@@ -18,7 +18,7 @@ module.exports = function (app, server, config) {\n   }\n \n   function validateAppId(appid) {\n-    if (appid.includes('/') || appid.length >= 30) {\n+    if (appid.includes('/') || appid.includes('\\\\') || appid.length >= 30) {\n       return false\n     }\n     return true",
+      "generation_time_s": 24.032,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch correctly adds backslash validation to validateAppId(), which addresses the input validation aspect of the vulnerability. However, it misses the defense-in-depth path normalization and resolution check in pathForApplicationData() that the gold patch includes. The gold patch adds both the backslash check AND a resolved path validation to ensure the final path stays within the configuration directory. While the backslash check alone would prevent the specific PoC attack, the lack of path resolution validation means other potential bypass techniques (e.g., encoded characters or other platform-specific path separators) could still succeed. The candidate addresses the primary attack vector but provides incomplete protection compared to the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 1261,
+      "completion_tokens": 1263,
+      "cost_usd": 0.01988875,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-21892",
+      "cve_id": "CVE-2026-21892",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/parsl/monitoring/visualization/views.py b/parsl/monitoring/visualization/views.py\nindex 9f3e6c1..3a4a7d2 100644\n--- a/parsl/monitoring/visualization/views.py\n+++ b/parsl/monitoring/visualization/views.py\n@@ -6,6 +6,7 @@ import logging\n \n import networkx as nx\n import pandas as pd\n+from sqlalchemy import text\n \n from parsl.monitoring.visualization.app import app, db\n \n@@ -146,7 +147,7 @@ def dag_group_by_states(workflow_id):\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      )\n-               WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      )\n+               WHERE task.run_id=:workflow_id\"\"\")\n \n-    df = pd.read_sql_query(query, db.engine)\n+    df = pd.read_sql_query(query, db.engine, params={\"workflow_id\": workflow_id})\n@@ -225,10 +226,12 @@ def workflow_details(workflow_id):\n     # Task tries and statuses\n-    df_task_tries = pd.read_sql_query(\"\"\"SELECT task.task_id, task.task_func_name, try.try_id, status.task_status_name, status.timestamp\n-                                         FROM task, try LEFT JOIN status\n-                                         ON try.task_id = status.task_id and try.try_id = status.try_id and try.run_id = status.run_id\n-                                         WHERE task.task_id = try.task_id AND task.run_id='%s' and try.run_id='%s'\"\"\"\n-                                      % (workflow_id, workflow_id), db.engine)\n+    df_task_tries = pd.read_sql_query(\n+        text(\"\"\"SELECT task.task_id, task.task_func_name, try.try_id, status.task_status_name, status.timestamp\n+                FROM task, try LEFT JOIN status\n+                ON try.task_id = status.task_id and try.try_id = status.try_id and try.run_id = status.run_id\n+                WHERE task.task_id = try.task_id AND task.run_id=:workflow_id and try.run_id=:workflow_id\"\"\"),\n+        db.engine,\n+        params={\"workflow_id\": workflow_id},\n+    )\n \n     # ... existing processing logic continues unchanged ...",
+      "generation_time_s": 26.701,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses SQL injection in two locations but doesn't match the exact files/functions from the gold patch. The gold patch fixes the `workflow_dag_details` function and the `workflow_resources` function, while the candidate fixes `dag_group_by_states` and `workflow_details`. Additionally, the candidate patch for the first query wraps the string in `text()` but the query variable assignment seems incomplete (missing the `text()` wrapper or the `query =` assignment). The candidate also misses the `workflow_resources` function fix that the gold patch addresses. While it shows understanding of parameterized queries, it doesn't cover the same vulnerable code paths as the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 965,
+      "completion_tokens": 1656,
+      "cost_usd": 0.02487275,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-68143",
+      "cve_id": "CVE-2025-68143",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/src/git/src/mcp_server_git/server.py b/src/git/src/mcp_server_git/server.py\nindex 9f5e2aa..f4a6a3d 100644\n--- a/src/git/src/mcp_server_git/server.py\n+++ b/src/git/src/mcp_server_git/server.py\n@@ -312,15 +312,13 @@ def git_show(repo_path: str, revision: str) -> str:\n     return repo.git.show(revision)\n \n \n @server.tool()\n def git_init(path: str) -> str:\n-    \"\"\"Initialize a new Git repository at the provided path.\"\"\"\n-    target = Path(path).expanduser().resolve()\n-    target.mkdir(parents=True, exist_ok=True)\n-    Repo.init(target)\n-    return f\"Initialized empty Git repository at {target}\"\n+    \"\"\"Removed: mcp-server-git only operates on existing repositories.\"\"\"\n+    raise ValueError(\n+        \"git_init has been removed for security reasons. \"\n+        \"Use an existing Git repository path with the other git_* tools.\"\n+    )\n \n \n if __name__ == \"__main__\":\n     server.run()",
+      "generation_time_s": 25.924,
+      "patch_analysis": {
+        "judge_score": 0.45,
+        "judge_reasoning": "The candidate patch modifies the git_init function to raise an error instead of initializing a repository, but it still registers the tool via the @server.tool() decorator, meaning the tool endpoint remains available (just non-functional). The gold patch completely removes the git_init tool, its model class, and its enum entry so it no longer appears in the tool listing at all. Additionally, the candidate patch appears to be working on a different version of the codebase (using @server.tool() decorator pattern vs the class-based pattern in the gold patch), which raises questions about whether it's targeting the correct code. While the candidate does prevent actual repository initialization, leaving the tool registered is not as clean a fix and doesn't match the intended remediation of complete removal.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.45,
+      "passed": false,
+      "prompt_tokens": 330,
+      "completion_tokens": 1281,
+      "cost_usd": 0.0185115,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43795",
+      "cve_id": "CVE-2024-43795",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "rubygems",
+      "model_patch": "diff --git a/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js b/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\nindex 2f3b8b1..a4b9d3e 100644\n--- a/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n+++ b/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n@@ -34,11 +34,11 @@ function showLoginError() {\n   const params = new URLSearchParams(window.location.search)\n   const error = params.get('error')\n   if (error) {\n-    document.getElementById('login-error').innerHTML = decodeURIComponent(error)\n+    document.getElementById('login-error').textContent = decodeURIComponent(error)\n   }\n }\n \n function clearLoginError() {\n-  document.getElementById('login-error').innerHTML = ''\n+  document.getElementById('login-error').textContent = ''\n }\n \n showLoginError()\ndiff --git a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\nindex 6bd4aa7..4b36f8e 100644\n--- a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n+++ b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n@@ -18,7 +18,7 @@\n       </v-card-text>\n       <v-card-text>\n         <v-alert v-if=\"error\" type=\"error\" dense outlined>\n-          <span v-html=\"error\" />\n+          <span v-text=\"error\" />\n         </v-alert>\n       </v-card-text>\n       <v-card-actions>",
+      "generation_time_s": 14.911,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch addresses XSS through the error parameter by switching from innerHTML/v-html to textContent/v-text, which prevents script injection via the error query parameter. However, it completely misses the primary vulnerability in the redirect parameter handling. The gold patch sanitizes the redirect URL in both auth.js (stripping it to pathname+search only) and Login.vue (validating it starts with a single slash to prevent open redirect/XSS). The candidate patch modifies different code sections (error display) than what the gold patch targets (redirect handling), leaving the main reflected XSS vulnerability through the redirect parameter unpatched.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 293,
+      "completion_tokens": 905,
+      "cost_usd": 0.01318275,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9910",
+      "cve_id": "CVE-2025-9910",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/jsondiffpatch/src/formatters/html.ts b/packages/jsondiffpatch/src/formatters/html.ts\nindex 2f6f4d1..9b8f0a7 100644\n--- a/packages/jsondiffpatch/src/formatters/html.ts\n+++ b/packages/jsondiffpatch/src/formatters/html.ts\n@@ -1,5 +1,14 @@\n import BaseFormatter from './base';\n \n+const escapeHtml = (value: unknown) =>\n+  `${value}`\n+    .replace(/&/g, '&amp;')\n+    .replace(/</g, '&lt;')\n+    .replace(/>/g, '&gt;')\n+    .replace(/\"/g, '&quot;')\n+    .replace(/'/g, '&#39;');\n+\n export default class HtmlFormatter extends BaseFormatter {\n   typeFormattterErrorFormatter(context, err) {\n     context.out(`<pre class=\"jsondiffpatch-error\">${err}</pre>`);\n@@ -34,10 +43,12 @@ export default class HtmlFormatter extends BaseFormatter {\n   }\n \n   nodeBegin(context, key, leftKey, type, nodeType) {\n+    const safeLeftKey =\n+      leftKey === undefined || leftKey === null ? '' : escapeHtml(leftKey);\n     context.out(\n-      `<li class=\"jsondiffpatch-${type}\" data-key=\"${leftKey}\">`,\n+      `<li class=\"jsondiffpatch-${type}\" data-key=\"${safeLeftKey}\">`,\n     );\n-    if (leftKey !== undefined) {\n+    if (leftKey !== undefined && leftKey !== null) {\n       context.out(\n-        `<div class=\"jsondiffpatch-property-name\">${leftKey}</div>`,\n+        `<div class=\"jsondiffpatch-property-name\">${safeLeftKey}</div>`,\n       );\n     }\n   }",
+      "generation_time_s": 21.746,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the core XSS vulnerability in `nodeBegin` by escaping `leftKey` values in both the `data-key` attribute and the property name div, which is the primary attack vector described in the CVE. The escapeHtml function properly handles the key HTML entities (&, <, >, \", '). However, it misses escaping the error message in `typeFormattterErrorFormatter` (which the gold patch also fixes), and doesn't update the existing `htmlEscape` function signature. Despite these gaps, the main vulnerability in nodeBegin is addressed.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 374,
+      "completion_tokens": 1117,
+      "cost_usd": 0.0162925,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43954",
+      "cve_id": "CVE-2025-43954",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/ui/src/util/extendHeading.js b/ui/src/util/extendHeading.js\nindex 6f0e4f1..f4f3d7a 100644\n--- a/ui/src/util/extendHeading.js\n+++ b/ui/src/util/extendHeading.js\n@@ -12,12 +12,14 @@ export default function extendHeading (md, opts) {\n \n   md.renderer.rules.heading_open = function (tokens, idx, options, env, self) {\n     const token = tokens[ idx ]\n-    const title = tokens[ idx + 1 ] !== void 0 ? tokens[ idx + 1 ].content : ''\n+    const rawTitle = tokens[ idx + 1 ] !== void 0 ? tokens[ idx + 1 ].content : ''\n+    const title = md.utils.escapeHtml(rawTitle)\n     const level = Number(token.tag.slice(1))\n-    const id = slugify(title, slugMap)\n+    const id = slugify(rawTitle, slugMap)\n \n     if (env.toc !== void 0) {\n       env.toc.push({\n+        // keep TOC labels HTML-escaped to prevent header-based XSS\n         id,\n         level,\n         label: title\n@@ -26,7 +28,7 @@ export default function extendHeading (md, opts) {\n \n     token.attrSet('id', id)\n \n-    return `<${token.tag}${self.renderAttrs(token)}>${title}`\n+    return `<${token.tag}${self.renderAttrs(token)}>${title}`\n   }\n }",
+      "generation_time_s": 68.463,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the core XSS vulnerability by HTML-escaping the heading title content using `md.utils.escapeHtml(rawTitle)` before inserting it into the HTML output. While the implementation differs significantly from the gold patch (which takes a more comprehensive approach with token manipulation and anchor link handling), the candidate patch effectively mitigates the XSS attack vector described in the CVE - preventing XSS via headers by escaping HTML entities. The approach is simpler but addresses the root cause. Note that the file structure differs between the two versions (the candidate appears to be working with a different version of the codebase), but the fundamental fix of escaping HTML in heading content is present.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 242,
+      "completion_tokens": 2116,
+      "cost_usd": 0.0300475,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43411",
+      "cve_id": "CVE-2024-43411",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/core/ckeditor_version-check.js b/core/ckeditor_version-check.js\nindex 7b3d8d1..4c82f0f 100644\n--- a/core/ckeditor_version-check.js\n+++ b/core/ckeditor_version-check.js\n@@ -38,6 +38,25 @@\n \t\treturn xhr;\n \t}\n \n+\tfunction sanitizeVersionCheckUrl( url ) {\n+\t\turl = String( url || '' );\n+\n+\t\t// The version-check endpoint is remote, so do not trust URL values returned by the response.\n+\t\t// Allow only HTTPS URLs from the official CKEditor version-check host.\n+\t\tif ( !/^https:\\/\\/cke4\\.ckeditor\\.com(?:\\/|$)/i.test( url ) ) {\n+\t\t\treturn '';\n+\t\t}\n+\n+\t\treturn CKEDITOR.tools.htmlEncode( url );\n+\t}\n+\n+\tfunction sanitizeMessage( message ) {\n+\t\treturn CKEDITOR.tools.htmlEncode( String( message || '' ) );\n+\t}\n+\n \tfunction handleResponse( response ) {\n+\t\tvar safeLink;\n+\n \t\tif ( !response || !response.latestVersion ) {\n \t\t\treturn;\n \t\t}\n@@ -49,13 +68,18 @@\n \t\t\treturn;\n \t\t}\n \n+\t\tsafeLink = sanitizeVersionCheckUrl( response.url );\n+\n \t\tCKEDITOR.warn( 'editor-version-not-secure', {\n-\t\t\tversion: response.latestVersion,\n-\t\t\turl: response.url\n+\t\t\tversion: sanitizeMessage( response.latestVersion ),\n+\t\t\turl: safeLink\n \t\t} );\n \n \t\tif ( editor && editor.showNotification ) {\n-\t\t\teditor.showNotification( response.message, 'warning' );\n+\t\t\teditor.showNotification(\n+\t\t\t\tsanitizeMessage( response.message ),\n+\t\t\t\t'warning'\n+\t\t\t);\n \t\t}\n \t}",
+      "generation_time_s": 57.493,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to address XSS by sanitizing response data (HTML encoding messages and validating URLs), which shows understanding of the vulnerability. However, it takes a fundamentally different approach from the gold patch and misses key aspects: (1) it doesn't replace 'original' with a sanitized 'name' property in parseVersion(), meaning raw version strings from the response could still be injected into messages; (2) it doesn't wrap JSON.parse in a try-catch to handle malformed responses; (3) it doesn't address the multiple places where versionInfo.latest.original and versionInfo.current.original are interpolated into notification/console messages. The gold patch's approach of constructing a safe 'name' from parsed integer components is more robust than HTML encoding potentially malicious strings. The candidate also appears to modify a different code structure than what exists in the actual file.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 450,
+      "completion_tokens": 2952,
+      "cost_usd": 0.0421155,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-32472",
+      "cve_id": "CVE-2024-32472",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/element/embeddable.ts b/src/element/embeddable.ts\nindex 3f2a4ab..2a9e9d1 100644\n--- a/src/element/embeddable.ts\n+++ b/src/element/embeddable.ts\n@@ -12,7 +12,41 @@ import { normalizeLink } from \"../utils\";\n \n-const IFRAME_SANDBOX = \"allow-scripts allow-popups allow-forms allow-same-origin\";\n+const IFRAME_SANDBOX = \"allow-scripts allow-popups allow-forms\";\n+const IFRAME_SANDBOX_WITH_SAME_ORIGIN = `${IFRAME_SANDBOX} allow-same-origin`;\n+\n+const escapeHtmlAttr = (value: string) =>\n+  value\n+    .replace(/&/g, \"&amp;\")\n+    .replace(/\"/g, \"&quot;\")\n+    .replace(/</g, \"&lt;\")\n+    .replace(/>/g, \"&gt;\");\n+\n+/**\n+ * oEmbed responses may contain arbitrary HTML. We only accept iframe-based\n+ * embeds and construct srcdoc ourselves from parsed values.\n+ */\n+const toSafeSrcdoc = (html: string) => {\n+  const doc = new DOMParser().parseFromString(html, \"text/html\");\n+  const iframe = doc.querySelector(\"iframe\");\n+  if (!iframe) {\n+    return null;\n+  }\n+\n+  const src = iframe.getAttribute(\"src\");\n+  if (!src) {\n+    return null;\n+  }\n+\n+  let parsedSrc: URL;\n+  try {\n+    parsedSrc = new URL(src);\n+  } catch {\n+    return null;\n+  }\n+\n+  return `<iframe\n+    src=\"${escapeHtmlAttr(parsedSrc.toString())}\"\n+    frameborder=\"0\"\n+    allowfullscreen\n+  ></iframe>`;\n+};\n \n export type EmbeddableLink = {\n   type: string;\n@@ -22,6 +56,7 @@ export type EmbeddableLink = {\n   srcdoc?: string;\n   intrinsicSize?: { w: number; h: number };\n   warnings?: string[];\n+  allowSameOrigin?: boolean;\n };\n \n export const getEmbeddableLink = async (\n@@ -64,11 +99,20 @@ export const getEmbeddableLink = async (\n     const html = data?.html;\n \n     if (typeof html === \"string\" && html.trim()) {\n+      const srcdoc = toSafeSrcdoc(html);\n+      if (!srcdoc) {\n+        return null;\n+      }\n+\n       return {\n         type: \"generic\",\n-        srcdoc: html,\n+        srcdoc,\n         intrinsicSize,\n-        sandbox: IFRAME_SANDBOX,\n+        // keep least privilege by default; same-origin is only required by a\n+        // subset of known providers.\n+        sandbox: provider?.requiresSameOrigin\n+          ? IFRAME_SANDBOX_WITH_SAME_ORIGIN\n+          : IFRAME_SANDBOX,\n       };\n     }\n   } catch {\n@@ -115,7 +159,8 @@ export const getEmbeddableLink = async (\n       type: \"gist\",\n       srcdoc: `<script src=\"${encodeURI(\n         `${url.replace(/\\/$/, \"\")}.js`,\n-      )}\"></script>`,\n+      )}\"></script>`,\n+      sandbox: IFRAME_SANDBOX_WITH_SAME_ORIGIN,\n     };\n   }\n \n@@ -126,7 +171,7 @@ export const getEmbeddableLink = async (\n     return {\n       type: \"url\",\n       link: normalizedLink,\n-      sandbox: IFRAME_SANDBOX,\n+      sandbox: IFRAME_SANDBOX,\n     };\n   }",
+      "generation_time_s": 51.583,
+      "patch_analysis": {
+        "judge_score": 0.35,
+        "judge_reasoning": "The candidate patch attempts to address the XSS vulnerability by: (1) removing `allow-same-origin` from the default sandbox, (2) adding HTML sanitization via `toSafeSrcdoc`, and (3) adding `escapeHtmlAttr` for attribute escaping. However, it operates on a completely different code structure than the gold patch (different file version/API), and critically misses several key aspects: it doesn't implement the `ALLOW_SAME_ORIGIN` domain whitelist that the gold patch uses to restrict `allow-same-origin` to specific trusted domains, it relies on a `provider?.requiresSameOrigin` property that doesn't appear to be defined anywhere, and it doesn't cover all the return paths that the gold patch addresses (YouTube, Vimeo, Figma, Twitter, etc.). The `toSafeSrcdoc` approach of parsing HTML and reconstructing iframes is a reasonable sanitization strategy but doesn't match the gold patch's approach of constructing srcdoc content manually for known embed types. The patch shows understanding of the issue but the fix is insufficient in scope and implementation.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.35,
+      "passed": false,
+      "prompt_tokens": 506,
+      "completion_tokens": 2936,
+      "cost_usd": 0.0419895,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2016-15025",
+      "cve_id": "CVE-2016-15025",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/app/templates/src/server/_app.js b/app/templates/src/server/_app.js\nindex 6e2a8af..b7b8c24 100644\n--- a/app/templates/src/server/_app.js\n+++ b/app/templates/src/server/_app.js\n@@ -7,6 +7,15 @@ var favicon = require('serve-favicon');\n var logger = require('morgan');\n var bodyParser = require('body-parser');\n \n+function escapeHtml(value) {\n+    return String(value)\n+        .replace(/&/g, '&amp;')\n+        .replace(/</g, '&lt;')\n+        .replace(/>/g, '&gt;')\n+        .replace(/\"/g, '&quot;')\n+        .replace(/'/g, '&#39;');\n+}\n+\n module.exports = function(app) {\n     app.use(logger('dev'));\n     app.use(bodyParser.json());\n@@ -38,7 +47,7 @@ module.exports = function(app) {\n     app.use(function(req, res, next) {\n         res.status(404);\n         res.format({\n-            html: function() { res.render('404', { url: req.url }); },\n+            html: function() { res.render('404', { url: escapeHtml(req.url) }); },\n             json: function() { res.send({ error: 'Not found' }); },\n             default: function() { res.type('txt').send('Not found'); }\n         });",
+      "generation_time_s": 13.636,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch addresses the XSS vulnerability through a different approach - escaping HTML in the 404 error handler's URL output. While this does mitigate XSS by sanitizing user input before rendering, it differs from the gold patch's approach which routes asset paths (/js/*, /images/*, /styles/*) through the custom four0four.send404 handler instead of letting them fall through to the generic 404 handler. The candidate patch targets the generic 404 handler at the bottom of the file, which partially addresses XSS, but doesn't cover the same scope as the gold patch which specifically handles asset path requests to prevent reflected XSS through those routes.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 323,
+      "completion_tokens": 847,
+      "cost_usd": 0.01242325,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-25929",
+      "cve_id": "CVE-2022-25929",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/smoothie.js b/smoothie.js\nindex 5b8a3e1..a9d7c42 100644\n--- a/smoothie.js\n+++ b/smoothie.js\n@@ -98,6 +98,22 @@ var Util = {\n     return result;\n   },\n \n+  /**\n+   * Escape user-controlled content before injecting into HTML.\n+   */\n+  escapeHTML: function(value) {\n+    return String(value).replace(/[&<>\"'`]/g, function(ch) {\n+      return {\n+        '&': '&amp;',\n+        '<': '&lt;',\n+        '>': '&gt;',\n+        '\"': '&quot;',\n+        \"'\": '&#39;',\n+        '`': '&#96;'\n+      }[ch];\n+    });\n+  },\n+\n   // Binary search for index of closest value\n   binarySearch: function(data, value) {\n     var low = 0, high = data.length;\n@@ -842,10 +858,10 @@ SmoothieChart.prototype = {\n           if (typeof v === 'number') {\n             var label = timeSeries.options.tooltipLabel || '';\n             lines.push(\n-              '<span style=\"color:' + timeSeries.options.strokeStyle + ';\">' +\n-                label + ': ' + v.toFixed(this.options.tooltipFormatter) +\n+              '<span style=\"color:' + Util.escapeHTML(timeSeries.options.strokeStyle) + ';\">' +\n+                Util.escapeHTML(label) + ': ' + v.toFixed(this.options.tooltipFormatter) +\n               '</span>'\n             );\n           }\n         }\n         this.tooltipEl.innerHTML = lines.join('<br>');",
+      "generation_time_s": 27.716,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the root cause of the XSS vulnerability by escaping user-controlled values (strokeStyle and tooltipLabel) before inserting them into HTML strings. While the approach differs from the gold patch (HTML escaping vs DOM API usage), it effectively mitigates the XSS by properly sanitizing the dangerous inputs. The escapeHTML function covers the relevant dangerous characters. However, the candidate modifies a different code path than the gold patch (the gold patch modifies `SmoothieChart.tooltipFormatter` while the candidate modifies what appears to be a different tooltip rendering section), which could mean some vulnerable code paths are not covered. The candidate also doesn't address the `tooltipFormatter` function that the gold patch fixes, potentially leaving that code path vulnerable.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 259,
+      "completion_tokens": 1376,
+      "cost_usd": 0.01971725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2019-13127",
+      "cve_id": "CVE-2019-13127",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/javascript/examples/grapheditor/www/js/Dialogs.js b/javascript/examples/grapheditor/www/js/Dialogs.js\nindex 6e7a9d1..9b5ab8f 100644\n--- a/javascript/examples/grapheditor/www/js/Dialogs.js\n+++ b/javascript/examples/grapheditor/www/js/Dialogs.js\n@@ -1718,6 +1718,32 @@ ColorDialog.prototype.destroy = function()\n \t}\n };\n \n+/**\n+ * Sanitizes user-provided color values before they are applied to styles.\n+ * This prevents attribute/style injection via crafted values.\n+ */\n+ColorDialog.sanitizeColor = function(color)\n+{\n+\tcolor = mxUtils.trim((color != null) ? color : '');\n+\n+\t// Keep empty value behavior unchanged\n+\tif (color.length == 0)\n+\t{\n+\t\treturn color;\n+\t}\n+\n+\t// Allowed values used by mxGraph/draw.io:\n+\t// - hex colors (#RGB, #RRGGBB, #RRGGBBAA)\n+\t// - keyword colors (letters only)\n+\t// - special keywords\n+\tif (/^#([a-fA-F0-9]{3}|[a-fA-F0-9]{6}|[a-fA-F0-9]{8})$/.test(color) ||\n+\t\t/^[a-zA-Z]+$/.test(color) ||\n+\t\t/^(none|transparent|inherit|default)$/i.test(color))\n+\t{\n+\t\treturn color;\n+\t}\n+\n+\treturn '';\n+};\n \n /**\n  * Constructs a new color dialog.\n@@ -1839,7 +1865,7 @@ var ColorDialog = function(editorUi, color, apply, cancelFn)\n \tvar applyFunction = function()\n \t{\n \t\teditorUi.hideDialog();\n-\t\tapply(input.value);\n+\t\tapply(ColorDialog.sanitizeColor(input.value));\n \t};\n \n \tmxEvent.addListener(input, 'keydown', function(e)",
+      "generation_time_s": 48.286,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the root cause of the vulnerability (unsanitized color input leading to XSS) by introducing a sanitization function that validates color values against allowed patterns (hex colors, keyword colors, special keywords). While the implementation differs from the gold patch - it's applied at a different location in the code and uses a broader validation approach (allowing named colors and additional hex formats) - it effectively prevents the injection of malicious attributes like 'onMouseOver=alert(1) a=' since such values would not match any of the allowed patterns. The candidate patch also applies the fix at the applyFunction level which covers the apply path, though it modifies a different section of the file than the gold patch, suggesting it may be working with a slightly different version of the code.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 439,
+      "completion_tokens": 2202,
+      "cost_usd": 0.03159625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-1726",
+      "cve_id": "CVE-2022-1726",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/extensions/export/bootstrap-table-export.js b/src/extensions/export/bootstrap-table-export.js\nindex 6f6a9d1..f2d8b72 100644\n--- a/src/extensions/export/bootstrap-table-export.js\n+++ b/src/extensions/export/bootstrap-table-export.js\n@@ -18,6 +18,36 @@ $.extend($.fn.bootstrapTable.defaults, {\n   exportFooter: false\n })\n \n+const sanitizeHtml = html => {\n+  if (typeof html !== 'string') {\n+    return html\n+  }\n+\n+  const $root = $('<div>').html(html)\n+\n+  $root.find('script, iframe, object, embed, link, meta').remove()\n+  $root.find('*').each((i, el) => {\n+    $.each([].slice.call(el.attributes), (j, attr) => {\n+      const name = attr.name.toLowerCase()\n+      const value = (attr.value || '').replace(/\\s/g, '').toLowerCase()\n+\n+      if (name.indexOf('on') === 0) {\n+        $(el).removeAttr(attr.name)\n+        return\n+      }\n+\n+      if (\n+        ['href', 'src', 'xlink:href', 'formaction'].indexOf(name) !== -1 &&\n+        /^(javascript|vbscript|data):/.test(value)\n+      ) {\n+        $(el).removeAttr(attr.name)\n+      }\n+    })\n+  })\n+\n+  return $root.html()\n+}\n+\n $.extend($.fn.bootstrapTable.columnDefaults, {\n   forceExport: false,\n   forceHide: false\n@@ -153,10 +183,22 @@ BootstrapTable.prototype.initToolbar = function (...args) {\n         o.exportDataType = exportDataType === 'all' && o.pagination ? 'all' : exportDataType\n \n         this.trigger('export-started')\n-        this.$el.tableExport($.extend({\n+        const exportOptions = $.extend({\n           type: type,\n           escape: false\n-        }, o.exportOptions))\n+        }, o.exportOptions)\n+\n+        if (exportOptions.htmlContent) {\n+          const onCellHtmlData = exportOptions.onCellHtmlData\n+          exportOptions.onCellHtmlData = function (cell, rowIndex, colIndex, htmlData) {\n+            htmlData = Utils.calculateObjectValue(this, onCellHtmlData, [cell, rowIndex, colIndex, htmlData], htmlData)\n+            return sanitizeHtml(htmlData)\n+          }\n+        }\n+\n+        this.$el.tableExport(exportOptions)\n+\n         this.trigger('export-saved')\n \n         if (o.exportDataType === 'all' && o.pagination) {",
+      "generation_time_s": 50.751,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch attempts to fix the XSS vulnerability by adding HTML sanitization when `htmlContent` is true, but this approach is fundamentally different from the gold patch and less secure. The gold patch removes `escape: false` (which was the root cause allowing unescaped HTML output) and removes the default `onCellHtmlData` handler that returned raw HTML. The candidate keeps `escape: false` and tries to sanitize HTML content, which is a blocklist-based approach that could be bypassed. Additionally, the candidate patch appears to be based on a different version of the code (using prototype-based syntax vs class syntax), suggesting it may not apply correctly to the affected codebase.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 264,
+      "completion_tokens": 2766,
+      "cost_usd": 0.039186,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-24728",
+      "cve_id": "CVE-2022-24728",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/core/htmldataprocessor.js b/core/htmldataprocessor.js\nindex 9f3b2c1..d7c4a11 100644\n--- a/core/htmldataprocessor.js\n+++ b/core/htmldataprocessor.js\n@@ -165,6 +165,12 @@ CKEDITOR.htmlDataProcessor = function( editor ) {\n \t\t\t\tdata = protectSource( data, editor );\n \t\t\t}\n \n+\t\t\t// Normalize malformed HTML using the native parser before running CKEditor\n+\t\t\t// filters. This prevents parser-differential XSS payloads from bypassing\n+\t\t\t// sanitization rules.\n+\t\t\tif ( !dontFilter )\n+\t\t\t\tdata = normalizeHtml( data );\n+\n \t\t\t// Protect content of textareas. Do this before protecting regular tags,\n \t\t\t// so textareas are properly processed in highlighter (#13171).\n \t\t\tdata = protectTextareaContent( data );\n@@ -730,6 +736,34 @@ CKEDITOR.htmlDataProcessor = function( editor ) {\n \t\treturn data;\n \t}\n \n+\tfunction normalizeHtml( data ) {\n+\t\tvar doc, container;\n+\n+\t\tif ( typeof data != 'string' || typeof document == 'undefined' ) {\n+\t\t\treturn data;\n+\t\t}\n+\n+\t\ttry {\n+\t\t\t// Use a detached document when possible to avoid side effects.\n+\t\t\tif ( document.implementation && document.implementation.createHTMLDocument ) {\n+\t\t\t\tdoc = document.implementation.createHTMLDocument( '' );\n+\t\t\t} else {\n+\t\t\t\tdoc = document;\n+\t\t\t}\n+\n+\t\t\tcontainer = doc.createElement( 'div' );\n+\t\t\tcontainer.innerHTML = data;\n+\n+\t\t\treturn container.innerHTML;\n+\t\t} catch ( e ) {\n+\t\t\t// Keep original data if browser parser normalization fails.\n+\t\t\treturn data;\n+\t\t}\n+\t}\n+\n \tfunction protectSource( data, editor ) {\n \t\tvar protectedRegexs = editor.config.protectedSource,\n \t\t\tstore = editor._.dataStore;",
+      "generation_time_s": 69.458,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch takes a fundamentally different approach - normalizing HTML through the browser's native parser instead of randomizing protection markers. The gold patch fixes the vulnerability by generating a random number per processing call so that externally injected protection keywords (like `cke_temp`, `data-cke-{CKEDITOR.rnd}-`) cannot be predicted and exploited. The candidate's approach of normalizing HTML through innerHTML may help with some parser-differential attacks, but it doesn't address the core issue: that the protection markers used by CKEditor's HTML processing are predictable (using the static CKEDITOR.rnd value), allowing attackers to inject pre-crafted content that bypasses sanitization. Additionally, using innerHTML for normalization could itself strip or modify legitimate content and may not prevent all bypass vectors.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 395,
+      "completion_tokens": 3156,
+      "cost_usd": 0.04487525,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-27428",
+      "cve_id": "CVE-2020-27428",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/fixup-svg-string.js b/src/fixup-svg-string.js\nindex 8c2d7f1..d9a3b7e 100644\n--- a/src/fixup-svg-string.js\n+++ b/src/fixup-svg-string.js\n@@ -1,6 +1,18 @@\n const StringUtil = require('./util/string-util');\n \n+/**\n+ * Remove executable content from untrusted SVG markup.\n+ * Scratch costumes do not need script/event execution, so strip it.\n+ * @param {string} svgString SVG markup\n+ * @returns {string} sanitized SVG markup\n+ */\n+const sanitizeSvgString = function (svgString) {\n+    return svgString\n+        .replace(/<script[\\s\\S]*?>[\\s\\S]*?<\\/script>/gi, '')\n+        .replace(/\\son[a-z]+\\s*=\\s*(?:\"[^\"]*\"|'[^']*'|[^\\s>]+)/gi, '')\n+        .replace(/\\s(?:href|xlink:href)\\s*=\\s*(['\"])\\s*javascript:[\\s\\S]*?\\1/gi, '');\n+};\n+\n /**\n  * Apply substitutions to an SVG string before rendering.\n  * @param {string} svgString SVG to fix up.\n@@ -33,6 +45,8 @@ const fixupSvgString = function (svgString) {\n     svgString = svgString.replace(/<\\/svg>\\s*$/i, '');\n     svgString += '</svg>';\n \n+    svgString = sanitizeSvgString(svgString);\n+\n     return svgString;\n };",
+      "generation_time_s": 22.552,
+      "patch_analysis": {
+        "judge_score": 0.75,
+        "judge_reasoning": "The candidate patch addresses the XSS vulnerability by removing event handlers from SVG strings using a regex pattern `\\son[a-z]+\\s*=` which matches all `on*` event attributes, which is actually more comprehensive than the gold patch's explicit list approach. It also adds protection against `javascript:` URLs in href attributes and improves the script tag removal with global flag. However, it removes the existing sanitization code in the original file (lines 50-53) and replaces it with a new function called earlier, and the regex requires a leading whitespace (`\\s`) before `on`, which could potentially be bypassed in edge cases. The approach is reasonable and would effectively mitigate the described XSS vulnerability in most practical scenarios.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.75,
+      "passed": true,
+      "prompt_tokens": 247,
+      "completion_tokens": 1277,
+      "cost_usd": 0.01831025,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-46308",
+      "cve_id": "CVE-2023-46308",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "diff --git a/src/lib/nested_property.js b/src/lib/nested_property.js\nindex 3b3c5d1..8d9f7c2 100644\n--- a/src/lib/nested_property.js\n+++ b/src/lib/nested_property.js\n@@ -3,6 +3,10 @@\n \n var isNumeric = require('fast-isnumeric');\n \n+function isUnsafePropertyKey(key) {\n+    return key === '__proto__';\n+}\n+\n module.exports = function nestedProperty(container, propStr) {\n     if(typeof propStr !== 'string') {\n         throw new Error('bad property string');\n@@ -11,6 +15,7 @@ module.exports = function nestedProperty(container, propStr) {\n     var propParts = propStr.split('.');\n     var indexed = [];\n     var i, j, match;\n+    var hasUnsafeKey = false;\n \n     for(i = 0; i < propParts.length; i++) {\n         match = String(propParts[i]).match(/^([^\\[\\]]*)((\\[\\-?[0-9]*\\])+)$/);\n@@ -37,6 +42,10 @@ module.exports = function nestedProperty(container, propStr) {\n                 propParts.splice.apply(propParts, spliceArgs);\n             }\n         }\n+\n+        if(isUnsafePropertyKey(propParts[i])) {\n+            hasUnsafeKey = true;\n+        }\n     }\n \n     return {\n@@ -57,6 +66,10 @@ module.exports = function nestedProperty(container, propStr) {\n     };\n \n     function npGet() {\n+        if(hasUnsafeKey) {\n+            return;\n+        }\n+\n         var curCont = container;\n         var curPart;\n \n@@ -75,6 +88,10 @@ module.exports = function nestedProperty(container, propStr) {\n     }\n \n     function npSet(val) {\n+        if(hasUnsafeKey) {\n+            return;\n+        }\n+\n         var curCont = container;\n         var curPart;\n \ndiff --git a/test/jasmine/tests/lib_test.js b/test/jasmine/tests/lib_test.js\nindex 5a4f8f4..d96f217 100644\n--- a/test/jasmine/tests/lib_test.js\n+++ b/test/jasmine/tests/lib_test.js\n@@ -742,6 +742,22 @@ describe('Lib', function() {\n             expect(obj).toEqual({});\n         });\n \n+        it('should not allow setting __proto__ via nestedProperty', function() {\n+            var obj = {};\n+            var key = '_plotlyProtoPollutionTest';\n+\n+            expect({}[key]).toBe(undefined);\n+            Lib.nestedProperty(obj, '__proto__.' + key).set('polluted');\n+            expect({}[key]).toBe(undefined);\n+            expect(obj[key]).toBe(undefined);\n+        });\n+\n+        it('should not allow getting __proto__ via nestedProperty', function() {\n+            var obj = {};\n+            var key = '_plotlyProtoPollutionGetTest';\n+\n+            expect(Lib.nestedProperty(obj, '__proto__.' + key).get()).toBe(undefined);\n+        });\n+\n         it('returns null when categoryarray is not set and _initialCategories is set with []', function() {\n             var trace = {\n                 _fullInput: {xaxis: {type: 'category'}},",
+      "generation_time_s": 39.782,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability of prototype pollution through `__proto__` in `nestedProperty` by detecting unsafe keys and silently returning undefined/no-op for get/set operations instead of throwing an error. While the approach differs from the gold patch (silent failure vs throwing, and only checking `__proto__` rather than all `__`-prefixed properties), it effectively prevents the prototype pollution attack. The candidate also only checks for `__proto__` specifically rather than all dunder properties, which is slightly narrower but covers the main attack vector. The patch includes appropriate tests. One minor concern is that it doesn't throw an error like the gold patch does, which means callers won't know the operation failed, but the vulnerability is still mitigated.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 218,
+      "completion_tokens": 2298,
+      "cost_usd": 0.0325535,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-32050",
+      "cve_id": "CVE-2021-32050",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "diff --git a/src/LIBMONGOC_VERSION_CURRENT b/src/LIBMONGOC_VERSION_CURRENT\nindex 2d6c8ef..6f2d3b1 100644\n--- a/src/LIBMONGOC_VERSION_CURRENT\n+++ b/src/LIBMONGOC_VERSION_CURRENT\n@@ -1 +1 @@\n-1.17.6\n+1.17.7\ndiff --git a/src/libmongoc/src/mongoc/mongoc-apm.c b/src/libmongoc/src/mongoc/mongoc-apm.c\nindex 4d42ac7..f7a3011 100644\n--- a/src/libmongoc/src/mongoc/mongoc-apm.c\n+++ b/src/libmongoc/src/mongoc/mongoc-apm.c\n@@ -44,6 +44,33 @@\n #include \"mongoc-util-private.h\"\n \n \n+/* Redact command monitoring payloads for authentication-related commands. */\n+static bool\n+_mongoc_apm_is_sensitive_command (const char *command_name, const bson_t *doc)\n+{\n+   bson_iter_t iter;\n+\n+   if (!command_name) {\n+      return false;\n+   }\n+\n+   if (!strcmp (command_name, \"authenticate\") || !strcmp (command_name, \"saslStart\") ||\n+       !strcmp (command_name, \"saslContinue\") || !strcmp (command_name, \"getnonce\") ||\n+       !strcmp (command_name, \"createUser\") || !strcmp (command_name, \"updateUser\") ||\n+       !strcmp (command_name, \"copydbgetnonce\") || !strcmp (command_name, \"copydbsaslstart\") ||\n+       !strcmp (command_name, \"copydb\")) {\n+      return true;\n+   }\n+\n+   /* hello/isMaster may include speculative authentication payloads. */\n+   if (doc &&\n+       (!strcmp (command_name, \"hello\") || !strcmp (command_name, \"isMaster\")) &&\n+       bson_iter_init_find (&iter, doc, \"speculativeAuthenticate\")) {\n+      return true;\n+   }\n+\n+   return false;\n+}\n+\n void\n _mongoc_apm_command_started_init (mongoc_apm_command_started_t *event,\n                                   const bson_t *command,\n@@ -52,12 +79,19 @@ _mongoc_apm_command_started_init (mongoc_apm_command_started_t *event,\n                                   int64_t operation_id,\n                                   const mongoc_host_list_t *host)\n {\n+   const bson_t *command_for_event = command;\n+   bson_t redacted = BSON_INITIALIZER;\n+\n+   if (_mongoc_apm_is_sensitive_command (command_name, command)) {\n+      command_for_event = &redacted;\n+   }\n+\n    BSON_ASSERT (event);\n \n    memset (event, 0, sizeof (*event));\n    event->command_name = command_name;\n    event->database_name = database_name;\n-   event->command = command;\n+   event->command = command_for_event;\n    event->request_id = request_id;\n    event->operation_id = operation_id;\n    event->host = host;\n@@ -71,12 +105,19 @@ _mongoc_apm_command_succeeded_init (mongoc_apm_command_succeeded_t *event,\n                                     int64_t operation_id,\n                                     const mongoc_host_list_t *host)\n {\n+   const bson_t *reply_for_event = reply;\n+   bson_t redacted = BSON_INITIALIZER;\n+\n+   if (_mongoc_apm_is_sensitive_command (command_name, reply)) {\n+      reply_for_event = &redacted;\n+   }\n+\n    BSON_ASSERT (event);\n \n    memset (event, 0, sizeof (*event));\n    event->duration = duration;\n    event->command_name = command_name;\n-   event->reply = reply;\n+   event->reply = reply_for_event;\n    event->request_id = request_id;\n    event->operation_id = operation_id;\n    event->host = host;",
+      "generation_time_s": 41.688,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability by adding redaction of sensitive authentication-related commands in the APM (Application Performance Monitoring) command listener. It correctly identifies sensitive commands (authenticate, saslStart, saslContinue, getnonce, createUser, updateUser, copydbgetnonce, copydbsaslstart, copydb) and handles hello/isMaster with speculative authentication. However, there are issues: (1) The gold patch updates the libmongoc submodule reference which would include the complete upstream fix, while the candidate only modifies mongoc-apm.c directly - it may miss other changes in the submodule update. (2) The candidate doesn't handle the command_failed event path, only command_started and command_succeeded. (3) The redacted bson_t is stack-allocated and may have lifetime issues since the event struct stores a pointer to it, but the bson_t goes out of scope. (4) The starting version differs (1.17.6 vs 1.17.4), suggesting a different base. The approach is reasonable but the implementation has potential memory safety issues and incomplete coverage.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 440,
+      "completion_tokens": 2129,
+      "cost_usd": 0.030576,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-26864",
+      "cve_id": "CVE-2025-26864",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java b/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java\nindex 8f2a1c4..6b7d9a1 100644\n--- a/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java\n+++ b/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java\n@@ -103,12 +103,12 @@ public class OpenIdAuthorizer extends BasicAuthorizer {\n     final OpenIdUserInfo openIdUserInfo;\n     try {\n       openIdUserInfo = openIdProvider.getUserInfo(password);\n     } catch (Exception e) {\n-      LOGGER.warn(\"OpenId authentication failed. username={}, token={}\", username, password, e);\n+      LOGGER.warn(\"OpenId authentication failed for username={}\", username, e);\n       throw new AuthException(\n           TSStatusCode.WRONG_LOGIN_PASSWORD_ERROR,\n-          String.format(\"OpenId authentication failed. username=%s, token=%s\", username, password));\n+          String.format(\"OpenId authentication failed for username=%s\", username));\n     }\n \n     if (openIdUserInfo == null) {\n       return false;\n@@ -128,7 +128,7 @@ public class OpenIdAuthorizer extends BasicAuthorizer {\n       return false;\n     } catch (Exception e) {\n-      LOGGER.error(\"Failed to update local user {} by OpenId user info {}\", username, openIdUserInfo, e);\n+      LOGGER.error(\"Failed to update local user {} by OpenId user info\", username, e);\n       throw e;\n     }\n   }\ndiff --git a/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/entity/User.java b/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/entity/User.java\nindex 1a7f6e2..b053d4a 100644\n--- a/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/entity/User.java\n+++ b/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/entity/User.java\n@@ -33,6 +33,8 @@ import java.util.Set;\n \n public class User {\n \n+  private static final String SENSITIVE_MASK = \"******\";\n+\n   private String name;\n   private String password;\n   private Set<PathPrivilege> privilegeList;\n@@ -198,12 +200,12 @@ public class User {\n   @Override\n   public String toString() {\n     return \"User{\"\n         + \"name='\"\n         + name\n         + '\\''\n         + \", password='\"\n-        + password\n+        + (password == null ? null : SENSITIVE_MASK)\n         + '\\''\n         + \", privilegeList=\"\n         + privilegeList\n         + \", roleList=\"\n         + roleList\n@@ -212,7 +214,7 @@ public class User {\n         + isOpenIdUser\n         + \", openIdUserInfo=\"\n-        + openIdUserInfo\n+        + (openIdUserInfo == null ? null : SENSITIVE_MASK)\n         + '}';\n   }\n }\ndiff --git a/iotdb-core/datanode/src/test/java/org/apache/iotdb/db/auth/entity/UserTest.java b/iotdb-core/datanode/src/test/java/org/apache/iotdb/db/auth/entity/UserTest.java\nindex e54ac1a..7b13f20 100644\n--- a/iotdb-core/datanode/src/test/java/org/apache/iotdb/db/auth/entity/UserTest.java\n+++ b/iotdb-core/datanode/src/test/java/org/apache/iotdb/db/auth/entity/UserTest.java\n@@ -62,9 +62,9 @@ public class UserTest {\n     user.setOpenIdUserInfo(openIdUserInfo);\n \n     Assert.assertEquals(\n-        \"User{name='root', password='root', privilegeList=[], roleList=[], isOpenIdUser=true, openIdUserInfo=\"\n-            + openIdUserInfo\n-            + \"}\",\n+        \"User{name='root', password='******', privilegeList=[], roleList=[], isOpenIdUser=true, \"\n+            + \"openIdUserInfo=******}\",\n         user.toString());\n   }\n }",
+      "generation_time_s": 33.459,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability of sensitive information exposure in OpenIdAuthorizer.java and User.java, but it targets a different version/codebase than the gold patch. The gold patch fixes the `login` method in OpenIdAuthorizer (removing password from log messages at lines 148-162), while the candidate fixes an `authenticate` method with different code structure. The candidate masks the password in User.toString() rather than removing it entirely as the gold patch does. The candidate misses the IoTDBDataSourceFactory.java fix where URL, user, and password are logged. While the approach shows understanding of the vulnerability, it doesn't cover the same scope as the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 392,
+      "completion_tokens": 2146,
+      "cost_usd": 0.03073,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36264",
+      "cve_id": "CVE-2024-36264",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/.github/workflows/master.yml b/.github/workflows/master.yml\nindex 3b8f6b1..6f0db1a 100644\n--- a/.github/workflows/master.yml\n+++ b/.github/workflows/master.yml\n@@ -16,6 +16,10 @@ on:\n     branches:\n       - master\n \n+# Do not rely on the runtime default for auth secret in CI.\n+env:\n+  MAVEN_OPTS: \"-Dsubmarine.auth.default.secret=ci-test-only-secret\"\n+\n jobs:\n   build:\n     runs-on: ubuntu-latest\ndiff --git a/submarine-commons/commons-utils/src/main/java/org/apache/submarine/commons/utils/SubmarineConfVars.java b/submarine-commons/commons-utils/src/main/java/org/apache/submarine/commons/utils/SubmarineConfVars.java\nindex c2f0b3d..20f2a83 100644\n--- a/submarine-commons/commons-utils/src/main/java/org/apache/submarine/commons/utils/SubmarineConfVars.java\n+++ b/submarine-commons/commons-utils/src/main/java/org/apache/submarine/commons/utils/SubmarineConfVars.java\n@@ -18,6 +18,8 @@\n package org.apache.submarine.commons.utils;\n \n+import java.util.UUID;\n+\n public class SubmarineConfVars {\n   public enum ConfVars {\n@@ -52,7 +54,10 @@ public class SubmarineConfVars {\n     SUBMARINE_AUTH_ENABLE(\"submarine.auth.enable\", \"false\"),\n     SUBMARINE_AUTH_TYPE(\"submarine.auth.type\", \"jwt\"),\n     SUBMARINE_AUTH_DEFAULT_KEY(\"submarine.auth.default.key\", \"submarine\"),\n-    SUBMARINE_AUTH_DEFAULT_SECRET(\"submarine.auth.default.secret\", \"submarine\"),\n+    // Use a per-process random fallback instead of a hard-coded shared secret.\n+    // Production deployments should explicitly set submarine.auth.default.secret.\n+    SUBMARINE_AUTH_DEFAULT_SECRET(\n+        \"submarine.auth.default.secret\", UUID.randomUUID().toString()),\n     SUBMARINE_AUTH_TOKEN_MAX_AGE_MS(\"submarine.auth.token.max.age.ms\", \"3600000\"),\n     SUBMARINE_AUTH_TOKEN_MAX_INACTIVE_INTERVAL_MS(\n         \"submarine.auth.token.max.inactive.interval.ms\", \"1800000\"),",
+      "generation_time_s": 37.32,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability (hardcoded default secret) by replacing it with a random UUID per process, which prevents the use of a known/predictable secret. However, it differs from the gold patch in important ways: (1) it doesn't use an environment variable approach, meaning administrators cannot easily set a consistent secret across distributed deployments, (2) the random-per-process approach could break multi-instance deployments where tokens need to be validated across nodes, and (3) the CI workflow changes use MAVEN_OPTS system properties rather than the environment variable approach in the gold patch. While it mitigates the hardcoded credential issue, the approach may introduce operational problems.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 304,
+      "completion_tokens": 1979,
+      "cost_usd": 0.028238,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9654",
+      "cve_id": "CVE-2025-9654",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/server-simple.mjs b/server-simple.mjs\nindex 2d7c6f1..7c93b52 100644\n--- a/server-simple.mjs\n+++ b/server-simple.mjs\n@@ -1,5 +1,5 @@\n-import { exec } from \"node:child_process\";\n+import { spawn } from \"node:child_process\";\n import process from \"node:process\";\n \n // ... existing setup code ...\n@@ -42,17 +42,37 @@ function getArg(name, fallback = \"\") {\n   return value ?? fallback;\n }\n \n+function assertSafeIdentifier(value, fieldName) {\n+  // prevent local shell/argument injection via ssh destination components\n+  if (!/^[a-zA-Z0-9._-]+$/.test(value)) {\n+    throw new Error(`Invalid ${fieldName}`);\n+  }\n+}\n+\n async function runSshCommand({ host, user, port, command }) {\n-  const sshTarget = `${user}@${host}`;\n-  const cmd = `ssh -p ${port} ${sshTarget} \"${command}\"`;\n+  assertSafeIdentifier(host, \"host\");\n+  assertSafeIdentifier(user, \"user\");\n+  if (!/^\\d+$/.test(String(port))) {\n+    throw new Error(\"Invalid port\");\n+  }\n \n   return await new Promise((resolve, reject) => {\n-    exec(cmd, (error, stdout, stderr) => {\n-      if (error) {\n-        reject(new Error(stderr || error.message));\n-        return;\n-      }\n-      resolve(stdout);\n+    const sshTarget = `${user}@${host}`;\n+    const child = spawn(\n+      \"ssh\",\n+      [\"-p\", String(port), sshTarget, command],\n+      { shell: false }\n+    );\n+\n+    let stdout = \"\";\n+    let stderr = \"\";\n+\n+    child.stdout.on(\"data\", (chunk) => {\n+      stdout += chunk.toString();\n+    });\n+    child.stderr.on(\"data\", (chunk) => {\n+      stderr += chunk.toString();\n+    });\n+    child.on(\"error\", reject);\n+    child.on(\"close\", (code) => {\n+      if (code !== 0) return reject(new Error(stderr || `ssh exited with code ${code}`));\n+      resolve(stdout);\n     });\n   });\n }",
+      "generation_time_s": 15.722,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch addresses the core command injection vulnerability in runSshCommand by replacing exec with spawn (shell: false), which is conceptually correct. However, it only fixes the remote command execution path and completely misses the uploadFile and downloadFile functions (scp commands) that the gold patch also fixes. Additionally, the candidate patch appears to be modifying a different version/structure of the file than what the gold patch targets - the gold patch modifies server-simple.mjs with SSHClient class methods (runRemoteCommand, uploadFile, downloadFile), while the candidate only addresses a standalone runSshCommand function. The incomplete coverage of affected code paths (missing scp fixes) means the vulnerability is only partially addressed.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 291,
+      "completion_tokens": 933,
+      "cost_usd": 0.01357125,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-47948",
+      "cve_id": "CVE-2025-47948",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/builtins.ts b/src/builtins.ts\nindex 5d8c2f1..d3b4d9a 100644\n--- a/src/builtins.ts\n+++ b/src/builtins.ts\n@@ -1,5 +1,13 @@\n import { Context } from 'koishi'\n \n+function sanitizeEcho(content: string) {\n+  // Do not allow users to inject privileged QQ platform tags (e.g. <qqbot-at-everyone />)\n+  // through the bot's echo command.\n+  return content.replace(/<\\s*qqbot-[^>]*>/gi, (tag) =>\n+    tag.replace(/</g, '&lt;').replace(/>/g, '&gt;'),\n+  )\n+}\n+\n export function apply(ctx: Context) {\n   // ...other built-in commands\n \n@@ -18,7 +26,7 @@ export function apply(ctx: Context) {\n   ctx\n     .command('echo <message:text>', 'repeat message')\n-    .action((_, message) => message)\n+    .action((_, message) => (message ? sanitizeEcho(message) : message))\n \n   // ...other built-in commands\n }",
+      "generation_time_s": 19.186,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to sanitize the echo input by escaping qqbot-specific tags, which addresses the concept of the vulnerability. However, it modifies the wrong codebase - the candidate patch targets a Koishi-style framework with `Context` imports and `ctx.command()` syntax, while the actual vulnerable code is in cocotais-bot which uses `CocotaisBotPlugin` with `plugin.command.register()`. The patch would not apply to the actual affected file. Additionally, the regex-based sanitization approach only covers `qqbot-*` tags and could potentially be bypassed with creative encoding, whereas the gold patch simply removes the entire echo command to eliminate the attack surface completely.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 553,
+      "completion_tokens": 924,
+      "cost_usd": 0.01390375,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22798",
+      "cve_id": "CVE-2026-22798",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/src/hermes/commands/cli.py b/src/hermes/commands/cli.py\nindex 3a92f42..6f1a8c1 100644\n--- a/src/hermes/commands/cli.py\n+++ b/src/hermes/commands/cli.py\n@@ -18,6 +18,23 @@ from hermes.utils.logging import get_logger\n \n logger = get_logger(__name__)\n \n+\n+def _masked_arbitrary_options(options):\n+    \"\"\"Return a log-safe representation of ``-O`` options.\n+\n+    Values passed through ``-O`` may contain secrets (e.g. auth tokens), so\n+    only keep keys and mask all values before logging.\n+    \"\"\"\n+    if isinstance(options, dict):\n+        return {key: \"***\" for key in options}\n+\n+    masked = []\n+    for item in options:\n+        if isinstance(item, (tuple, list)) and len(item) == 2:\n+            masked.append((item[0], \"***\"))\n+        else:\n+            masked.append(item)\n+    return masked\n+\n \n @click.group()\n @click.option(\n@@ -63,7 +80,9 @@ def cli(ctx, config, option):\n     ctx.ensure_object(dict)\n     ctx.obj[\"config\"] = config\n     ctx.obj[\"option\"] = option\n-    logger.debug(\"CLI called with config=%s, option=%s\", config, option)\n+    logger.debug(\n+        \"CLI called with config=%s, option=%s\", config, _masked_arbitrary_options(option)\n+    )\n \n \n @cli.command()",
+      "generation_time_s": 17.197,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the root cause of the vulnerability by masking the values of arbitrary options (`-O`) before logging them. While the implementation differs significantly from the gold patch (which restructured the main function with error handling and removed the problematic logging line entirely), the candidate patch directly targets the sensitive data exposure issue by replacing values with '***' in log output. The approach is valid - it masks all values passed via `-O` options, preventing secrets like auth tokens from appearing in plain text in logs. The candidate correctly identifies and modifies the affected file (src/hermes/commands/cli.py) and the specific logging call that exposed sensitive data.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 530,
+      "completion_tokens": 887,
+      "cost_usd": 0.0133455,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-14546",
+      "cve_id": "CVE-2025-14546",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/fastapi_sso/sso/base.py b/fastapi_sso/sso/base.py\nindex 5c7a7c1..a91d4f8 100644\n--- a/fastapi_sso/sso/base.py\n+++ b/fastapi_sso/sso/base.py\n@@ -1,5 +1,6 @@\n \"\"\"Contains the base methods and class for all SSO providers.\"\"\"\n \n+import secrets\n import warnings\n from abc import ABC, abstractmethod\n from typing import Any, Dict, Generic, Optional, TypeVar\n@@ -45,6 +46,9 @@ class SSOBase(ABC, Generic[OpenIDT]):\n         self._pkce_code_verifier: Optional[str] = None\n         self._pkce_code_challenge: Optional[str] = None\n         self._pkce_code_challenge_method: Optional[str] = None\n+        self._state: Optional[str] = None\n+        self._state_cookie_name = \"fastapi_sso_state\"\n+\n \n     def get_login_url(\n         self,\n@@ -64,6 +68,7 @@ class SSOBase(ABC, Generic[OpenIDT]):\n         \"\"\"\n         if state is None:\n             state = secrets.token_urlsafe(24)\n+        self._state = state\n \n         request_uri = self.oauth_client.prepare_request_uri(\n             await self.authorization_endpoint,\n@@ -95,7 +100,19 @@ class SSOBase(ABC, Generic[OpenIDT]):\n         :return: Login redirect response.\n         \"\"\"\n         login_uri = await self.get_login_url(redirect_uri=redirect_uri, params=params, state=state)\n-        return RedirectResponse(login_uri)\n+        response = RedirectResponse(login_uri)\n+        if self._state is not None:\n+            response.set_cookie(\n+                key=self._state_cookie_name,\n+                value=self._state,\n+                httponly=True,\n+                samesite=\"lax\",\n+                secure=not self.allow_insecure_http,\n+            )\n+        return response\n \n     async def verify_and_process(\n         self,\n@@ -115,6 +132,16 @@ class SSOBase(ABC, Generic[OpenIDT]):\n         code = request.query_params.get(\"code\")\n         if code is None:\n             raise SSOLoginError(400, \"'code' parameter was not found in callback request\")\n+        returned_state = request.query_params.get(\"state\")\n+        expected_state = request.cookies.get(self._state_cookie_name) or self._state\n+        if (\n+            expected_state is None\n+            or returned_state is None\n+            or not secrets.compare_digest(returned_state, expected_state)\n+        ):\n+            raise SSOLoginError(400, \"Invalid OAuth state\")\n+        # One-time use to prevent replay within the same client instance\n+        self._state = None\n \n         current_path = str(request.url).split(\"?\")[0]\n         redirect_uri = redirect_uri or current_path",
+      "generation_time_s": 61.584,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability by persisting the state in a cookie during login redirect and validating it during the callback. It uses secure cookie settings (httponly, samesite, secure) and constant-time comparison via secrets.compare_digest, which are improvements over the gold patch. However, it differs from the gold patch in that it always requires state validation (no `requires_state` conditional), which could break backward compatibility for users who don't use state. It also auto-generates state when none is provided, changing existing behavior. Despite these differences, it effectively mitigates the CSRF vulnerability described in the CVE.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 299,
+      "completion_tokens": 3367,
+      "cost_usd": 0.04766125,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-28121",
+      "cve_id": "CVE-2024-28121",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "diff --git a/lib/stimulus_reflex/reflex_factory.rb b/lib/stimulus_reflex/reflex_factory.rb\nindex 1d3af2a..c9304d1 100644\n--- a/lib/stimulus_reflex/reflex_factory.rb\n+++ b/lib/stimulus_reflex/reflex_factory.rb\n@@ -1,6 +1,16 @@\n module StimulusReflex\n   class ReflexFactory\n+    class << self\n+      def reflex_method?(reflex_class, method_name)\n+        ancestors = reflex_class.ancestors.take_while { |ancestor| ancestor != StimulusReflex::Reflex }\n+        ancestors.any? { |ancestor| ancestor.public_instance_methods(false).include?(method_name.to_sym) }\n+      end\n+    end\n+\n     def call\n+      unless self.class.reflex_method?(reflex.class, method_name)\n+        raise NoMethodError, \"undefined reflex method `#{method_name}' for #{reflex.class}\"\n+      end\n+\n       method = reflex.method method_name\n       required_params = method.parameters.select { |(kind, _)| kind == :req }\n       optional_params = method.parameters.select { |(kind, _)| kind == :opt }\ndiff --git a/test/reflex_factory_test.rb b/test/reflex_factory_test.rb\nindex b2740dc..2a0e60a 100644\n--- a/test/reflex_factory_test.rb\n+++ b/test/reflex_factory_test.rb\n@@ -1,4 +1,20 @@\n require \"test_helper\"\n \n class ReflexFactoryTest < ActiveSupport::TestCase\n+  test \".reflex_method? allows methods defined on the reflex class\" do\n+    assert StimulusReflex::ReflexFactory.reflex_method?(FactoryChildReflex, \"child_method\")\n+  end\n+\n+  test \".reflex_method? allows methods defined on ancestors before StimulusReflex::Reflex\" do\n+    assert StimulusReflex::ReflexFactory.reflex_method?(FactoryChildReflex, \"parent_method\")\n+  end\n+\n+  test \".reflex_method? rejects inherited public methods not explicitly defined by reflexes\" do\n+    refute StimulusReflex::ReflexFactory.reflex_method?(FactoryChildReflex, \"instance_variable_set\")\n+    refute StimulusReflex::ReflexFactory.reflex_method?(FactoryChildReflex, \"public_send\")\n+  end\n+\n+  test \".reflex_method? rejects methods defined on StimulusReflex::Reflex\" do\n+    refute StimulusReflex::ReflexFactory.reflex_method?(FactoryChildReflex, \"render_collection\")\n+  end\n end\ndiff --git a/test/test_helper.rb b/test/test_helper.rb\nindex d9f1301..f6af968 100644\n--- a/test/test_helper.rb\n+++ b/test/test_helper.rb\n@@ -1,3 +1,15 @@\n require \"simplecov\"\n SimpleCov.start\n \n+class FactoryParentReflex < StimulusReflex::Reflex\n+  def parent_method\n+  end\n+end\n+\n+class FactoryChildReflex < FactoryParentReflex\n+  def child_method\n+  end\n+end\n+\n+# existing test helper content...\n+",
+      "generation_time_s": 54.097,
+      "patch_analysis": {
+        "judge_score": 0.65,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability by checking that the method being called is defined on the reflex class or its ancestors (up to but not including StimulusReflex::Reflex), which prevents calling inherited methods like `instance_variable_set`, `public_send`, etc. However, there are important differences from the gold patch: (1) The candidate modifies the `call` method in ReflexFactory but the existing code structure suggests `reflex` and `method_name` are already available as local variables/methods - the patch may not integrate correctly with the actual codebase since it references `reflex` and `method_name` without showing how they're defined. (2) The gold patch performs verification before instantiating the reflex (`verify_method_name!` is called before `reflex_class.new`), while the candidate appears to check after the reflex is already instantiated (`reflex.class`), which means the reflex object is created even for invalid method calls. (3) The candidate doesn't handle the `default_reflex` special case that the gold patch explicitly allows. (4) The candidate also doesn't handle private methods explicitly through `public_instance_methods(false)` check - though it does use this correctly. The approach is sound but the integration with the existing codebase appears incomplete and potentially broken.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.65,
+      "passed": true,
+      "prompt_tokens": 1282,
+      "completion_tokens": 2830,
+      "cost_usd": 0.0418635,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-47529",
+      "cve_id": "CVE-2024-47529",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "diff --git a/openc3-cosmos-cmd-tlm-api/app/controllers/auth_controller.rb b/openc3-cosmos-cmd-tlm-api/app/controllers/auth_controller.rb\nindex 3a0f2b1..7d4c6b8 100644\n--- a/openc3-cosmos-cmd-tlm-api/app/controllers/auth_controller.rb\n+++ b/openc3-cosmos-cmd-tlm-api/app/controllers/auth_controller.rb\n@@ -41,13 +41,13 @@ class AuthController < ApplicationController\n     user = User.authenticate(params[:username], params[:password])\n     raise AuthError, 'Invalid username or password' unless user\n \n-    auth = AuthModel.login(user, params[:password], request.remote_ip)\n+    auth = AuthModel.login(user, request.remote_ip)\n     render json: auth, status: :ok\n   end\n \n   def token\n     user = authorize_request\n-    auth = AuthModel.login(user, nil, request.remote_ip)\n+    auth = AuthModel.login(user, request.remote_ip)\n     render json: auth, status: :ok\n   end\n \ndiff --git a/openc3-cosmos-cmd-tlm-api/app/controllers/users_controller.rb b/openc3-cosmos-cmd-tlm-api/app/controllers/users_controller.rb\nindex c1b6a9e..ef11e9a 100644\n--- a/openc3-cosmos-cmd-tlm-api/app/controllers/users_controller.rb\n+++ b/openc3-cosmos-cmd-tlm-api/app/controllers/users_controller.rb\n@@ -56,7 +56,8 @@ class UsersController < ApplicationController\n     authorize_admin\n     user = User.create!(user_params)\n-    render json: user.as_json, status: :created\n+    user_json = user.as_json.except('password', 'password_digest')\n+    render json: user_json, status: :created\n   end\n \n   def update\n@@ -66,7 +67,8 @@ class UsersController < ApplicationController\n     authorize_admin_or_self(user)\n     user.update!(user_params)\n-    render json: user.as_json, status: :ok\n+    user_json = user.as_json.except('password', 'password_digest')\n+    render json: user_json, status: :ok\n   end\n \n   private\ndiff --git a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\nindex 8fdb7df..d42a9be 100644\n--- a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n+++ b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n@@ -72,11 +72,12 @@ export default {\n   data() {\n     return {\n       username: '',\n-      password: localStorage.getItem('password') || '',\n+      password: '',\n       remember: localStorage.getItem('remember') === 'true',\n     }\n   },\n   mounted() {\n+    localStorage.removeItem('password') // remove legacy insecure storage\n     if (this.remember) {\n       this.username = localStorage.getItem('username') || ''\n     }\n@@ -118,10 +119,9 @@ export default {\n         this.$store.commit('auth/setToken', response.data.token)\n \n         if (this.remember) {\n-          localStorage.setItem('password', this.password)\n           localStorage.setItem('username', this.username)\n           localStorage.setItem('remember', 'true')\n         } else {\n-          localStorage.removeItem('password')\n+          localStorage.removeItem('password')\n           localStorage.removeItem('username')\n           localStorage.setItem('remember', 'false')\n         }\ndiff --git a/openc3-cosmos-script-runner-api/app/controllers/scripts_controller.rb b/openc3-cosmos-script-runner-api/app/controllers/scripts_controller.rb\nindex 2e31db6..7f8d2b1 100644\n--- a/openc3-cosmos-script-runner-api/app/controllers/scripts_controller.rb\n+++ b/openc3-cosmos-script-runner-api/app/controllers/scripts_controller.rb\n@@ -103,7 +103,7 @@ class ScriptsController < ApplicationController\n   private\n \n   def script_params\n-    params.permit(:name, :contents, :password, :scope, :environment)\n+    params.permit(:name, :contents, :scope, :environment)\n   end\n end\ndiff --git a/openc3/lib/openc3/models/auth_model.rb b/openc3/lib/openc3/models/auth_model.rb\nindex b42a012..f1c9b75 100644\n--- a/openc3/lib/openc3/models/auth_model.rb\n+++ b/openc3/lib/openc3/models/auth_model.rb\n@@ -19,7 +19,7 @@ module OpenC3\n   class AuthModel\n     AUTH_TTL = 86400\n \n-    def self.login(user, password = nil, remote_ip = nil)\n+    def self.login(user, remote_ip = nil)\n       token = JsonWebToken.encode(\n         {\n           user_id: user.id,\n@@ -34,7 +34,6 @@ module OpenC3\n       auth = {\n         user_id: user.id,\n         username: user.username,\n-        password: password,\n         token: token,\n         permissions: user.permissions\n       }\n@@ -42,7 +41,7 @@ module OpenC3\n       Redis.current.setex(\"auth:#{token}\", AUTH_TTL, auth.to_json)\n       auth\n     end\n-\n+    \n     def self.logout(token)\n       Redis.current.del(\"auth:#{token}\")\n     end",
+      "generation_time_s": 38.296,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch addresses the core concept of not storing passwords in plaintext (removing password from localStorage and from auth responses), but it targets a completely different codebase structure than what the gold patch addresses. The gold patch works with OpenC3 Open Source edition's specific auth flow (token-based with AuthModel.verify, session generation via SecureRandom, etc.), while the candidate patch appears to target a different version or edition with JWT-based authentication, User model, etc. The candidate doesn't implement the session token mechanism, doesn't modify the correct Login.vue flow (the gold patch's Login.vue is structurally different), and doesn't address the scripts_controller.rb forward_slash sanitization changes. While the intent is correct, the implementation doesn't match the actual vulnerable codebase.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 327,
+      "completion_tokens": 2164,
+      "cost_usd": 0.03086825,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22696",
+      "cve_id": "CVE-2026-22696",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rust",
+      "model_patch": "diff --git a/Cargo.toml b/Cargo.toml\nindex 6f2d8f1..34e8d3a 100644\n--- a/Cargo.toml\n+++ b/Cargo.toml\n@@ -1,6 +1,6 @@\n [package]\n name = \"dcap-qvl\"\n-version = \"0.3.8\"\n+version = \"0.3.9\"\n edition = \"2021\"\n license = \"Apache-2.0\"\n \ndiff --git a/cli/Cargo.toml b/cli/Cargo.toml\nindex 114a8cc..6945203 100644\n--- a/cli/Cargo.toml\n+++ b/cli/Cargo.toml\n@@ -9,7 +9,7 @@ anyhow = \"1\"\n clap = { version = \"4\", features = [\"derive\"] }\n serde_json = \"1\"\n \n-dcap-qvl = { path = \"..\", version = \"0.3.8\" }\n+dcap-qvl = { path = \"..\", version = \"0.3.9\" }\n \n [features]\n default = []\ndiff --git a/Cargo.lock b/Cargo.lock\nindex 86df9d1..2b482ee 100644\n--- a/Cargo.lock\n+++ b/Cargo.lock\n@@ -412,7 +412,7 @@ dependencies = [\n \n [[package]]\n name = \"dcap-qvl\"\n-version = \"0.3.8\"\n+version = \"0.3.9\"\n dependencies = [\n  \"base64\",\n  \"hex\",",
+      "generation_time_s": 32.192,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch only bumps version numbers in Cargo.toml and Cargo.lock files, identical in intent to the gold patch. However, neither the gold patch nor the candidate patch shown here includes the actual code changes that implement the missing cryptographic verification for QE Identity signatures and the enforcement of MRSIGNER, ISVPRODID, and ISVSVN checks against the QE Report. The vulnerability description clearly states that the fix requires implementing missing signature verification and policy enforcement. Since the candidate patch contains no functional code changes to address the root cause (just version bumps), it does not fix the vulnerability. The gold patch also only shows version bumps, suggesting the actual code fix may be in files not shown, but the candidate equally fails to include those critical changes.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 518,
+      "completion_tokens": 1800,
+      "cost_usd": 0.0261065,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-31475",
+      "cve_id": "CVE-2025-31475",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/tarteaucitron.js b/tarteaucitron.js\nindex 3c2f4ab..8e71d9f 100644\n--- a/tarteaucitron.js\n+++ b/tarteaucitron.js\n@@ -1128,9 +1128,13 @@ var tarteaucitron = {\n         },\n \n         addOrUpdate: function (destination, source) {\n+            var blockedKeys = {\n+                \"__proto__\": true,\n+                \"constructor\": true,\n+                \"prototype\": true\n+            };\n             for (var property in source) {\n-                if (source.hasOwnProperty(property)) {\n-\n+                if (Object.prototype.hasOwnProperty.call(source, property) && !blockedKeys[property]) {\n                     if (source[property] !== null && typeof source[property] === \"object\") {\n                         destination[property] = destination[property] || {};\n                         tarteaucitron.customText.addOrUpdate(destination[property], source[property]);",
+      "generation_time_s": 15.311,
+      "patch_analysis": {
+        "judge_score": 0.8,
+        "judge_reasoning": "The candidate patch addresses the same prototype pollution vulnerability in the `addOrUpdate` function by blocking dangerous keys (`__proto__`, `constructor`, `prototype`) and using `Object.prototype.hasOwnProperty.call()` for safe property checking. It actually blocks an additional key (`prototype`) compared to the gold patch, providing slightly broader protection. The implementation differs in structure (blocklist object vs. continue statement) but achieves the same security goal. The patch appears to be in a different location in the file (line 1128 vs 2404), which may indicate a different version of the codebase, but the function being patched (`addOrUpdate`) addresses the same vulnerability. The core fix - preventing prototype pollution through key validation - is correctly implemented.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.8,
+      "passed": true,
+      "prompt_tokens": 355,
+      "completion_tokens": 748,
+      "cost_usd": 0.01109325,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-22150",
+      "cve_id": "CVE-2025-22150",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/lib/web/fetch/body.js b/lib/web/fetch/body.js\nindex 8b06b82..2d3e6f1 100644\n--- a/lib/web/fetch/body.js\n+++ b/lib/web/fetch/body.js\n@@ -1,5 +1,6 @@\n 'use strict'\n \n+const { randomInt } = require('node:crypto')\n const { ReadableStreamFrom, readableStreamClose, createDeferredPromise, fullyReadBody, extractMimeType, serializeAMimeType } = require('./util')\n const { FormData } = require('./formdata')\n const { DOMException, structuredClone } = require('./global')\n@@ -110,7 +111,7 @@ function extractBody (object, keepalive = false) {\n     // Set action to this step: run the multipart/form-data\n     // encoding algorithm, with object\u2019s entry list and UTF-8.\n     // - This ensures that the body is immutable and can't be changed afterwords\n-    const boundary = `----formdata-undici-0${`${Math.floor(Math.random() * 1e11)}`.padStart(11, '0')}`\n+    const boundary = `----formdata-undici-0${`${randomInt(1e11)}`.padStart(11, '0')}`\n     const prefix = `--${boundary}\\r\\nContent-Disposition: form-data`\n \n     /*! formdata-polyfill. MIT License. Jimmy W\u00e4rting <https://jimmy.warting.se/opensource> */",
+      "generation_time_s": 19.596,
+      "patch_analysis": {
+        "judge_score": 0.9,
+        "judge_reasoning": "The candidate patch correctly replaces Math.random() with crypto.randomInt(), which addresses the root cause of the vulnerability (predictable random number generation). The only minor difference from the gold patch is that the candidate doesn't include a fallback to Math.random() when crypto is unavailable (the gold patch uses a try/catch). However, in modern Node.js environments where undici runs, crypto is always available, so this is a negligible concern. The fix effectively mitigates the CVE by using a cryptographically secure random number generator.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.9,
+      "passed": true,
+      "prompt_tokens": 398,
+      "completion_tokens": 918,
+      "cost_usd": 0.0135485,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-31453",
+      "cve_id": "CVE-2024-31453",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/lib/endpoints.js b/lib/endpoints.js\nindex 2e4f6ab..7d9f3d1 100644\n--- a/lib/endpoints.js\n+++ b/lib/endpoints.js\n@@ -241,6 +241,14 @@ module.exports = function endpoints (app, { store, tusServer }) {\n     const metadata = parseUploadMetadata(req.get('Upload-Metadata'))\n     const sid = metadata.sid\n \n+    // Do not trust `sid` alone: it is exposed in public download links.\n+    // Only the session that created the transfer may request new upload paths.\n+    // This prevents arbitrary users from adding files to an existing transfer.\n+    if (!req.session || req.session.sid !== sid) {\n+      return res.sendStatus(403)\n+    }\n+\n     if (!sid) {\n       return res.sendStatus(400)\n     }",
+      "generation_time_s": 46.824,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to fix the vulnerability by checking session ownership of the SID, but this approach has several issues: 1) The codebase may not use express sessions or store `sid` in sessions, making `req.session.sid` potentially always undefined and breaking legitimate uploads. 2) The gold patch takes a different, more robust approach by checking whether an upload has already been completed (via `store.info(fid)` and `isPartial` check), preventing files from being added to completed transfers. 3) The candidate only checks POST requests (where metadata is parsed) but doesn't address PATCH requests which are also part of the attack vector. 4) The session-based approach doesn't align with how PsiTransfer works - it's designed for anonymous file sharing where the upload link itself serves as authorization. The candidate shows understanding of the issue but the fix mechanism is likely incorrect for this codebase.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 825,
+      "completion_tokens": 2396,
+      "cost_usd": 0.03498775,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-48218",
+      "cve_id": "CVE-2023-48218",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/server/middlewares/helpers/protect-route.js b/server/middlewares/helpers/protect-route.js\nindex 7f6f8b1..9a3f2e4 100644\n--- a/server/middlewares/helpers/protect-route.js\n+++ b/server/middlewares/helpers/protect-route.js\n@@ -22,10 +22,10 @@ const getRequestedPopulate = (populate = {}) => {\n   return Object.keys(populate);\n };\n \n-const hasPopulateAccess = (requestedPopulate = [], allowedPopulate = []) => {\n-  return requestedPopulate.some((field) => allowedPopulate.includes(field));\n-};\n+const hasPopulateAccess = (requestedPopulate = [], allowedPopulate = []) =>\n+  // Access must be granted for every requested field, not just one of them.\n+  requestedPopulate.every((field) => allowedPopulate.includes(field));\n \n module.exports = ({ permissions = {} } = {}) => {\n   return async (ctx, next) => {\n@@ -35,7 +35,7 @@ module.exports = ({ permissions = {} } = {}) => {\n \n     if (requestedPopulate.length) {\n       const allowedPopulate = permissions.populate || [];\n-      if (!hasPopulateAccess(requestedPopulate, allowedPopulate)) {\n+      if (!hasPopulateAccess(requestedPopulate, allowedPopulate)) {\n         return ctx.unauthorized(\"You are not allowed to populate this field\");\n       }\n     }",
+      "generation_time_s": 43.927,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch modifies a different file/logic than what the gold patch addresses. The gold patch fixes `server/middlewares/helpers/protect-route.js` by modifying the `protectPopulate` function to properly handle field-level security (ensuring 'id' is always included in fields, and fixing how `populate`/`on` properties are assigned). The candidate patch changes `some` to `every` in a `hasPopulateAccess` function, which addresses a different aspect (access check logic) and doesn't exist in the same code structure as the gold patch. The candidate doesn't address the core field-level bypass issues fixed in the gold patch, such as the missing 'id' field defaults and the `savePopulate.populate || savePopulate.on` fix.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 266,
+      "completion_tokens": 2161,
+      "cost_usd": 0.0307195,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-38691",
+      "cve_id": "CVE-2023-38691",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/provisioning/api.ts b/src/provisioning/api.ts\nindex 5d7f3a1..8b2d4f6 100644\n--- a/src/provisioning/api.ts\n+++ b/src/provisioning/api.ts\n@@ -271,6 +271,21 @@ export class ProvisioningApi {\n             throw new ApiError(\"Could not get a user ID from OpenID\", ErrCode.ForbiddenUser);\n         }\n \n+        // Ensure the homeserver that issued the OpenID response is also the server\n+        // in the claimed MXID. Without this check, a malicious homeserver could\n+        // return a foreign MXID in `sub` and impersonate that user.\n+        const colonIdx = response.sub.indexOf(\":\");\n+        if (colonIdx <= 1) {\n+            throw new ApiError(\"OpenID `sub` is not a valid MXID\", ErrCode.ForbiddenUser);\n+        }\n+        const claimedServerName = response.sub.substring(colonIdx + 1);\n+        if (claimedServerName !== serverName) {\n+            throw new ApiError(\n+                \"OpenID `sub` server name did not match the issuing homeserver\",\n+                ErrCode.ForbiddenUser,\n+            );\n+        }\n+\n         return response.sub;\n     }",
+      "generation_time_s": 31.371,
+      "patch_analysis": {
+        "judge_score": 0.8,
+        "judge_reasoning": "The candidate patch addresses the same root cause as the gold patch - it validates that the server name in the `sub` MXID matches the homeserver that issued the OpenID response. While the implementation location differs (the candidate places the check in a different method, likely `verifyOpenIdToken` or similar, while the gold patch places it directly in the provisioning API handler), the logic is equivalent: extract the server name from the MXID after the colon, compare it to the expected server name, and reject mismatches. The candidate's approach of checking `colonIdx <= 1` is slightly different from the gold's regex approach but functionally similar for valid MXIDs (which start with '@'). The candidate may actually be better positioned if the verification method is called from multiple places, though it uses `ErrCode.ForbiddenUser` instead of `ErrCode.BadOpenID`.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.8,
+      "passed": true,
+      "prompt_tokens": 314,
+      "completion_tokens": 1682,
+      "cost_usd": 0.0240975,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-39263",
+      "cve_id": "CVE-2022-39263",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/adapter-upstash-redis/src/index.ts b/packages/adapter-upstash-redis/src/index.ts\nindex 7b8c1f2..3a5b9c4 100644\n--- a/packages/adapter-upstash-redis/src/index.ts\n+++ b/packages/adapter-upstash-redis/src/index.ts\n@@ -214,13 +214,18 @@ export function UpstashRedisAdapter(\n       return verificationToken ?? null\n     },\n \n-    async useVerificationToken({ identifier }) {\n+    async useVerificationToken({ identifier, token }) {\n       const verificationToken =\n         await client.get<VerificationToken>(verificationTokenKey(identifier))\n \n       if (!verificationToken) return null\n \n+      // Ensure both identifier and token match before consuming the token.\n+      if (verificationToken.token !== token) {\n+        return null\n+      }\n+\n       await client.del(verificationTokenKey(identifier))\n       return verificationToken\n     },\n   }\n }",
+      "generation_time_s": 13.099,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the vulnerability by adding a token comparison check in `useVerificationToken`, which prevents an attacker from using just the identifier to verify. However, it doesn't fix the underlying storage key issue. The gold patch changes the Redis key to include both identifier and token (identifier:token), which means each verification token gets its own key. The candidate's approach still stores tokens keyed only by identifier, meaning if multiple verification tokens are created for the same email, only the latest one is stored (overwriting previous ones). While the candidate does mitigate the core authentication bypass vulnerability (an attacker can't sign in with just an email), it doesn't match the gold patch's approach of using composite keys, which is important for correctness when multiple tokens exist for the same identifier. The fix is partial but does address the main security concern.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 711,
+      "completion_tokens": 762,
+      "cost_usd": 0.01191225,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-13466",
+      "cve_id": "CVE-2025-13466",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/lib/types/urlencoded.js b/lib/types/urlencoded.js\nindex 9f2b7d1..3c4b6aa 100644\n--- a/lib/types/urlencoded.js\n+++ b/lib/types/urlencoded.js\n@@ -140,9 +140,19 @@ function createQueryParser (options, extended) {\n   }\n \n   return function queryparse (body, encoding) {\n+    var paramCount\n+\n+    if (isFinite(parameterLimit)) {\n+      paramCount = parameterCount(body, parameterLimit)\n+\n+      if (paramCount === undefined) {\n+        debug('too many parameters')\n+        throw createError(413, 'too many parameters', { type: 'parameters.too.many' })\n+      }\n+    }\n+\n     var arrayLimit = extended\n-      ? Math.max(100, paramCount(body, parameterLimit))\n+      ? Math.max(100, paramCount || 0)\n       : 0\n \n     debug('parse ' + (extended ? 'extended ' : '') + 'urlencoding')\n@@ -156,7 +166,8 @@ function createQueryParser (options, extended) {\n       charsetSentinel: charsetSentinel,\n       interpretNumericEntities: interpretNumericEntities,\n       charset: encoding,\n-      parameterLimit: parameterLimit\n+      parameterLimit: parameterLimit,\n+      throwOnLimitExceeded: true\n     })\n   }\n }\n@@ -166,6 +177,25 @@ function normalizeOptions (options) {\n   return opts\n }\n \n+function parameterCount (body, limit) {\n+  var count = 0\n+  var index = 0\n+\n+  if (body.length === 0) {\n+    return 0\n+  }\n+\n+  while ((index = body.indexOf('&', index)) !== -1) {\n+    count++\n+    index++\n+\n+    if (count >= limit) {\n+      return undefined\n+    }\n+  }\n+\n+  return count + 1\n+}\n+\n /**\n  * Get the simple type checker.\n  *",
+      "generation_time_s": 61.527,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability by replacing the `body.split('&')` approach with an iterative `indexOf`-based parameter counting function that exits early when the limit is exceeded, avoiding the CPU/memory cost of splitting large strings. The counting logic is slightly different (counting '&' separators then adding 1, vs the gold patch counting from 1 and incrementing) but produces equivalent results. The candidate also adds additional changes to the query parser function and includes a `throwOnLimitExceeded` option, which are extra modifications beyond the gold patch but don't introduce new vulnerabilities. The fundamental fix - avoiding `split('&')` and using early-exit iteration - correctly addresses the DoS vulnerability.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 290,
+      "completion_tokens": 3203,
+      "cost_usd": 0.0453495,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-45390",
+      "cve_id": "CVE-2024-45390",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/index.ts b/src/index.ts\nindex 9f2f2b1..3b2a8ee 100644\n--- a/src/index.ts\n+++ b/src/index.ts\n@@ -45,7 +45,11 @@ export interface Template<T extends object = object> {\n   (data: T): string;\n }\n \n-export function template<T extends object = object>(input: string, name = \"template\"): Template<T> {\n+export function template<T extends object = object>(input: string, name = \"template\"): Template<T> {\n+  // Keep the argument for backwards compatibility, but do not interpolate it\n+  // into generated source. Using untrusted names here can lead to code\n+  // injection via `new Function(...)`.\n+  void name;\n   const code = compile(input);\n \n   // eslint-disable-next-line no-new-func\n@@ -53,7 +57,7 @@ export function template<T extends object = object>(input: string, name = \"temp\n     \"escape\",\n     \"error\",\n     \"return (\" +\n-      `function ${name}(data) {` +\n+      \"function (data) {\" +\n       \"var $output = '';\" +\n       code +\n       \"return $output;\" +",
+      "generation_time_s": 33.786,
+      "patch_analysis": {
+        "judge_score": 0.85,
+        "judge_reasoning": "The candidate patch addresses the root cause of the vulnerability by removing the interpolation of the `name` parameter into the `new Function(...)` call, replacing `function ${name}(data)` with `function (data)`. This prevents code injection through the template display name. While the candidate keeps the `name` parameter in the function signature (unlike the gold patch which removes it entirely), this doesn't introduce a vulnerability since the parameter is explicitly unused (`void name`). The implementation differs from the gold patch because it appears to be working with a different version of the codebase (different compile function structure), but the core fix - preventing untrusted input from being interpolated into generated code - is correctly applied.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.85,
+      "passed": true,
+      "prompt_tokens": 352,
+      "completion_tokens": 1612,
+      "cost_usd": 0.023184,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6921",
+      "cve_id": "CVE-2025-6921",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/src/transformers/models/marian/tokenization_marian.py b/src/transformers/models/marian/tokenization_marian.py\nindex 5c8d7a1..9f6a2f4 100644\n--- a/src/transformers/models/marian/tokenization_marian.py\n+++ b/src/transformers/models/marian/tokenization_marian.py\n@@ -45,11 +45,21 @@ VOCAB_FILES_NAMES = {\n }\n \n \n+_LANGUAGE_CODE_PREFIX = \">>\"\n+_LANGUAGE_CODE_SUFFIX = \"<<\"\n+# Language tags are short (e.g. >>en<<, >>fr<<). Keep a hard cap to avoid\n+# pathological inputs consuming excessive resources.\n+_MAX_LANGUAGE_CODE_LENGTH = 32\n+\n+\n def remove_language_code(text: str):\n-    match = re.match(\">>.+<<\", text)\n-    code: list = [match.group(0)] if match else []\n-    return code, text[len(code[0]) :] if len(code) > 0 else text\n+    if not text.startswith(_LANGUAGE_CODE_PREFIX):\n+        return [], text\n+\n+    end = text.find(_LANGUAGE_CODE_SUFFIX, len(_LANGUAGE_CODE_PREFIX))\n+    if end == -1 or end == len(_LANGUAGE_CODE_PREFIX) or end - len(_LANGUAGE_CODE_PREFIX) > _MAX_LANGUAGE_CODE_LENGTH:\n+        return [], text\n \n+    code = text[: end + len(_LANGUAGE_CODE_SUFFIX)]\n+    return [code], text[len(code) :]\n \n class MarianTokenizer(PreTrainedTokenizer):\n     r\"\"\"",
+      "generation_time_s": 58.565,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the core vulnerability by replacing the regex-based language code matching with string operations (startswith, find), eliminating the ReDoS risk. However, it only fixes the module-level `remove_language_code` function but doesn't address the class-level `language_code_re` pattern and the class method `remove_language_code` that the gold patch also fixes. The candidate also adds an extra constraint (_MAX_LANGUAGE_CODE_LENGTH) not in the gold patch, and doesn't remove the `import regex as re` statement. Despite these differences, the fundamental vulnerability (ReDoS via regex) is mitigated in the function that was identified as vulnerable.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 333,
+      "completion_tokens": 3110,
+      "cost_usd": 0.04412275,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-53012",
+      "cve_id": "CVE-2025-53012",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/source/MaterialXFormat/XmlIo.cpp b/source/MaterialXFormat/XmlIo.cpp\nindex 8f3b2a1..c5a0e9d 100644\n--- a/source/MaterialXFormat/XmlIo.cpp\n+++ b/source/MaterialXFormat/XmlIo.cpp\n@@ -31,6 +31,36 @@ namespace MaterialX\n namespace\n {\n \n+// Maximum supported depth for nested XInclude imports.\n+// This prevents unbounded recursion and stack exhaustion when parsing\n+// maliciously deep import chains.\n+const size_t MAX_XINCLUDE_DEPTH = 256;\n+\n+thread_local size_t xincludeDepth = 0;\n+\n+class ScopedXIncludeDepth\n+{\n+  public:\n+    explicit ScopedXIncludeDepth(const FilePath& filename) :\n+        _active(false)\n+    {\n+        if (xincludeDepth >= MAX_XINCLUDE_DEPTH)\n+        {\n+            throw ExceptionParseError(\n+                \"Maximum XInclude depth of \" + std::to_string(MAX_XINCLUDE_DEPTH) +\n+                \" exceeded while reading file: \" + filename.asString());\n+        }\n+        ++xincludeDepth;\n+        _active = true;\n+    }\n+\n+    ~ScopedXIncludeDepth()\n+    {\n+        if (_active)\n+        {\n+            --xincludeDepth;\n+        }\n+    }\n+  private:\n+    bool _active;\n+};\n+\n const string XINCLUDE_TAG = \"xi:include\";\n const string XINCLUDE_HREF_ATTRIBUTE = \"href\";\n \n@@ -742,6 +772,9 @@ void readFromXmlFile(DocumentPtr doc, const FilePath& filename, const FileSearc\n                      const XmlReadOptions* readOptions)\n {\n+    // Guard recursive import depth across nested xi:include chains.\n+    ScopedXIncludeDepth includeDepthGuard(filename);\n+\n     FilePath resolvedFilename = filename;\n     if (!resolvedFilename.exists())\n     {\ndiff --git a/CHANGELOG.md b/CHANGELOG.md\nindex 3f04c5b..69d3267 100644\n--- a/CHANGELOG.md\n+++ b/CHANGELOG.md\n@@ -8,6 +8,7 @@\n \n ## [Unreleased]\n \n+- Security: Added a maximum nested XInclude import depth when reading MaterialX files to prevent stack exhaustion from deeply nested import chains.\n \n ## [1.39.4] - 2025-02-xx",
+      "generation_time_s": 37.094,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the root cause of CVE-2025-53012 by adding a maximum XInclude depth limit (256) in the readFromXmlFile function, which prevents stack exhaustion from deeply nested import chains. While the gold patch only modifies CHANGELOG.md (suggesting the actual code fix was in referenced PRs #2232 and #2233), the candidate patch implements a reasonable depth-limiting mechanism using a thread-local counter with RAII-style scoping. The approach is sound - it uses a ScopedXIncludeDepth guard that increments/decrements a thread-local depth counter and throws an ExceptionParseError when the limit is exceeded. The placement in readFromXmlFile is appropriate since that's the entry point for reading XML files including XIncludes. Minor concerns: the thread_local variable persists state across calls which could theoretically cause issues if an exception is caught and the counter isn't properly reset, but the RAII pattern handles this correctly.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 2135,
+      "completion_tokens": 2020,
+      "cost_usd": 0.03201625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-27529",
+      "cve_id": "CVE-2024-27529",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "swift",
+      "model_patch": "diff --git a/source/m3_module.c b/source/m3_module.c\nindex 7b2d6a1..f0b5d7c 100644\n--- a/source/m3_module.c\n+++ b/source/m3_module.c\n@@ -1038,10 +1038,11 @@ M3Result  ParseSection_Custom  (IM3Module io_module, bytes_t i_bytes, cbytes_t\n {\n     M3Result result = m3Err_none;\n \n-    ccstr_t sectionName;\n+    ccstr_t sectionName = NULL;\n \n     _ (Read_utf8 (& sectionName, & i_bytes, i_end));\n \n+    // sectionName is temporary here; release it before returning\n     if (strcmp (sectionName, \"name\") == 0)\n     {\n         _ (ParseNameSection (io_module, i_bytes, i_end));\n@@ -1054,6 +1055,12 @@ M3Result  ParseSection_Custom  (IM3Module io_module, bytes_t i_bytes, cbytes_t\n     }\n \n _catch:\n+    /*\n+     * Read_utf8 allocates memory for non-empty strings.\n+     * Custom section names are not stored in the module, so free them here.\n+     */\n+    if (sectionName and sectionName[0])\n+        m3Free ((void*) sectionName);\n     return result;\n }",
+      "generation_time_s": 89.926,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch addresses a different memory leak (custom section name strings from Read_utf8) than the one identified in the CVE. The gold patch fixes the memory leak by calling FreeImportInfo(&i_module->memoryImport) in m3_FreeModule, which ensures that imported memory module/field name strings are freed when the module is destroyed. The candidate patch does not address this root cause at all and would not fix the vulnerability described (memory leak related to imported memory declarations).",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 246,
+      "completion_tokens": 3995,
+      "cost_usd": 0.0563605,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36361",
+      "cve_id": "CVE-2024-36361",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/pug-code-gen/index.js b/packages/pug-code-gen/index.js\nindex 2f4a6d1..f2b0a7c 100644\n--- a/packages/pug-code-gen/index.js\n+++ b/packages/pug-code-gen/index.js\n@@ -15,6 +15,14 @@ var addWith = require('with');\n var stringify = require('js-stringify');\n var constantinople = require('constantinople');\n \n+function isValidFunctionName(name) {\n+  return (\n+    typeof name === 'string' &&\n+    /^[$A-Z_][0-9A-Z_$]*$/i.test(name)\n+  );\n+}\n+\n+\n function Compiler(node, options) {\n   this.options = options = options || {};\n   this.node = node;\n@@ -22,6 +30,11 @@ function Compiler(node, options) {\n   this.pp = options.pretty || false;\n   if (this.pp && typeof this.pp !== 'string') this.pp = '  ';\n   if (this.pp && !/^\\s+$/.test(this.pp)) throw new Error('The pretty parameter should either be a boolean or whitespace only string');\n+  if (options.name != null && !isValidFunctionName(options.name)) {\n+    throw new Error(\n+      'The \"name\" option must be a valid JavaScript identifier.'\n+    );\n+  }\n \n   if (options.templateName && !isIdentifier(options.templateName)) {\n     throw new Error('The templateName parameter must be a valid JavaScript identifier if specified.');",
+      "generation_time_s": 22.177,
+      "patch_analysis": {
+        "judge_score": 0.45,
+        "judge_reasoning": "The candidate patch adds validation for the `name` option using a valid identifier check, which addresses part of the vulnerability. However, it references `isIdentifier` function that doesn't exist in the codebase (it was added by the gold patch but the candidate defines `isValidFunctionName` instead), which would cause a runtime error. Additionally, the candidate patch misses the validation for `doctype` (preventing '<' and '>' injection) and `globals` array validation that the gold patch includes. The incomplete coverage and the reference to an undefined function make this patch insufficient.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.45,
+      "passed": false,
+      "prompt_tokens": 270,
+      "completion_tokens": 1130,
+      "cost_usd": 0.0162925,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-43843",
+      "cve_id": "CVE-2021-43843",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/mrkdwn/escape.ts b/src/mrkdwn/escape.ts\nindex 7f3f8f1..e9c1f6a 100644\n--- a/src/mrkdwn/escape.ts\n+++ b/src/mrkdwn/escape.ts\n@@ -1,9 +1,21 @@\n-const RE_ESCAPE_BLOCKQUOTE = /(^|[\\r\\n])((?:[^\\S\\r\\n]|&nbsp;)*)((?:\\\\)*)>/g\n+const RE_LINE_BREAK = /\\r?\\n/\n+\n+const escapeLeadingBlockQuote = (line: string): string => {\n+  let i = 0\n+  while (i < line.length && (line[i] === ' ' || line[i] === '\\t')) {\n+    i += 1\n+  }\n+\n+  return line[i] === '>' ? `${line.slice(0, i)}\\\\${line.slice(i)}` : line\n+}\n \n export const escape = (text: string): string =>\n   text\n     .replace(/&/g, '&amp;')\n     .replace(/</g, '&lt;')\n     .replace(/>/g, '&gt;')\n-    .replace(RE_ESCAPE_BLOCKQUOTE, '$1$2$3\\\\>')\n+    // Escape leading \">\" in each line without using a backtracking-heavy regexp.\n+    // This prevents ReDoS when blockquote content contains many multibyte chars.\n+    .split(RE_LINE_BREAK)\n+    .map(escapeLeadingBlockQuote)\n+    .join('\\n')",
+      "generation_time_s": 54.135,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch modifies a completely different file structure and logic than what the gold patch addresses. The gold patch fixes ReDoS in `src/mrkdwn/escape.ts` by changing specific regex patterns (`preventEscapeRegex` and the `blockquote` escapeReplacer) to avoid catastrophic backtracking with patterns like `<.*?>` and `((?:<.*?>)*)`. The candidate patch instead rewrites what appears to be a different escape function entirely, replacing regex-based blockquote escaping with a character-by-character approach. It doesn't address the `preventEscapeRegex` pattern or the `escapeReplacers.blockquote` function that the gold patch fixes, suggesting it's modifying the wrong code or a different version of the file entirely.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 528,
+      "completion_tokens": 2963,
+      "cost_usd": 0.042406,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-67750",
+      "cve_id": "CVE-2025-67750",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/core/src/main/rules/APIVersion.ts b/packages/core/src/main/rules/APIVersion.ts\nindex 3c2f6c1..8e9c1ab 100644\n--- a/packages/core/src/main/rules/APIVersion.ts\n+++ b/packages/core/src/main/rules/APIVersion.ts\n@@ -1,5 +1,35 @@\n import { Rule } from \"../Rule\";\n \n+type ApiVersionOperator = \">\" | \">=\" | \"<\" | \"<=\" | \"==\" | \"=\";\n+\n+function parseApiVersionExpression(\n+  expression: string\n+): { operator: ApiVersionOperator; value: number } | null {\n+  const match = /^\\s*(>=|<=|>|<|==|=)\\s*([0-9]+(?:\\.[0-9]+)?)\\s*$/.exec(expression);\n+  if (!match) {\n+    return null;\n+  }\n+\n+  const value = Number(match[2]);\n+  if (!Number.isFinite(value)) {\n+    return null;\n+  }\n+\n+  return { operator: match[1] as ApiVersionOperator, value };\n+}\n+\n+function satisfiesApiVersionExpression(\n+  currentVersion: number,\n+  operator: ApiVersionOperator,\n+  requiredVersion: number\n+): boolean {\n+  switch (operator) {\n+    case \">\": return currentVersion > requiredVersion;\n+    case \">=\": return currentVersion >= requiredVersion;\n+    case \"<\": return currentVersion < requiredVersion;\n+    case \"<=\": return currentVersion <= requiredVersion;\n+    case \"=\":\n+    case \"==\": return currentVersion === requiredVersion;\n+  }\n+}\n+\n export class APIVersion extends Rule {\n   public readonly name = \"APIVersion\";\n   public readonly label = \"API Version\";\n@@ -14,20 +44,29 @@ export class APIVersion extends Rule {\n     const expression = this.config?.expression\n       ? String(this.config.expression)\n       : `>=${this.config?.threshold}`;\n-    const apiVersion = Number(\n+    const apiVersion = Number(\n       flow.apiVersion ?? flow.xmlData?.apiVersion\n     );\n \n-    if (!expression || Number.isNaN(apiVersion)) {\n+    if (!expression || Number.isNaN(apiVersion)) {\n       return [];\n     }\n \n-    // NOTE: expression is expected to be something like \">=58\"\n-    // eslint-disable-next-line no-new-func\n-    const evaluate = new Function(\"version\", `return version ${expression};`) as (version: number) => boolean;\n-    const compliant = evaluate(apiVersion);\n+    // Expression is intentionally limited to a single numeric comparison\n+    // to avoid executing untrusted code.\n+    const parsed = parseApiVersionExpression(expression);\n+    if (!parsed) {\n+      return [];\n+    }\n+\n+    const compliant = satisfiesApiVersionExpression(\n+      apiVersion,\n+      parsed.operator,\n+      parsed.value\n+    );\n \n     if (compliant) {\n       return [];\n     }\n+\n     return [\n       {\n         name: String(apiVersion),",
+      "generation_time_s": 24.549,
+      "patch_analysis": {
+        "judge_score": 0.9,
+        "judge_reasoning": "The candidate patch correctly addresses the root cause of CVE-2025-67750 by removing the unsafe `new Function()` call and replacing it with a safe expression parser that validates operators and performs numeric comparisons without evaluating untrusted JavaScript. The implementation uses a regex to parse the expression into an operator and numeric value, validates the parsed result, and uses a switch statement for safe comparison. While the implementation differs from the gold patch (different code structure, slightly different operator set with '=' and '==' instead of '===' and '!=='), it effectively mitigates the code injection vulnerability. The only minor concern is that when parsing fails it returns an empty array (no violation) rather than reporting an error, but this doesn't affect the security fix.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.9,
+      "passed": true,
+      "prompt_tokens": 858,
+      "completion_tokens": 1315,
+      "cost_usd": 0.0199115,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-21537",
+      "cve_id": "CVE-2024-21537",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/index.js b/src/index.js\nindex 7a8f3c1..b9d2a44 100644\n--- a/src/index.js\n+++ b/src/index.js\n@@ -1,5 +1,6 @@\n const fs = require('fs');\n const path = require('path');\n+const { pathToFileURL } = require('url');\n \n // ...\n \n@@ -20,9 +21,11 @@ const loadJs = async filepath => {\n   return result.default || result;\n };\n \n-const dynamicImport = id => {\n-  return eval(`import(${JSON.stringify(id)})`);\n-};\n+const dynamicImport = id =>\n+  import(\n+    path.isAbsolute(id) ? pathToFileURL(id).href : id\n+  );\n+\n \n const defaultLoaders = Object.freeze({\n   '.js': loadJs,",
+      "generation_time_s": 18.88,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the root cause of CVE-2024-21537 by replacing the insecure `eval(`import(${JSON.stringify(id)})`)` with a direct `import()` call, which eliminates the arbitrary code execution vulnerability via eval. It also properly handles absolute paths using `pathToFileURL`. While the patch differs significantly from the gold patch in structure (the gold patch appears to be from a different version of the codebase), the core security fix - removing eval from dynamicImport - is correctly implemented. The candidate patch effectively mitigates the vulnerability.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 253,
+      "completion_tokens": 1059,
+      "cost_usd": 0.01526875,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-7793",
+      "cve_id": "CVE-2020-7793",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/ua-parser.js b/src/ua-parser.js\nindex 3b4a5f1..a2e7c19 100644\n--- a/src/ua-parser.js\n+++ b/src/ua-parser.js\n@@ -33,6 +33,7 @@\n         STR_TYPE    = 'string',\n         UNKNOWN     = '?',\n         FUNC_TYPE   = 'function',\n+        UA_MAX_LENGTH = 500,\n         // major regexes\n         regexes     = {\n             browser : [[\n@@ -1189,6 +1190,12 @@\n             }\n         },\n \n+        sanitizeUA = function (ua) {\n+            if (typeof ua === STR_TYPE && ua.length > UA_MAX_LENGTH) {\n+                return ua.slice(0, UA_MAX_LENGTH);\n+            }\n+            return ua;\n+        },\n+\n         mapper = {\n             rgx : function (ua, arrays) {\n                 var i = 0, j, k, p, q, matches, match;\n@@ -1262,7 +1269,7 @@\n         },\n \n         UAParser = function (uastring, extensions) {\n-            var ua = uastring || ((window && window.navigator && window.navigator.userAgent) ? window.navigator.userAgent : EMPTY);\n+            var ua = sanitizeUA(uastring || ((window && window.navigator && window.navigator.userAgent) ? window.navigator.userAgent : EMPTY));\n             if (typeof extensions === OBJ_TYPE) {\n                 regexes = util.extend(regexes, extensions);\n             }\n@@ -1309,7 +1316,7 @@\n             };\n \n             this.setUA = function (uastring) {\n-                ua = uastring;\n+                ua = sanitizeUA(uastring);\n                 return this;\n             };",
+      "generation_time_s": 33.419,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch attempts to mitigate ReDoS by truncating user agent strings to 500 characters, but this doesn't address the root cause. The gold patch fixes the vulnerability by modifying specific regex patterns to prevent catastrophic backtracking (e.g., changing `.+?` to `\\s.*`, adding quantifier bounds like `{3,6}` and `{1,9}`, replacing greedy quantifiers). A 500-character limit is a weak mitigation that doesn't prevent ReDoS on shorter crafted inputs and doesn't fix the underlying vulnerable regex patterns.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 238,
+      "completion_tokens": 1624,
+      "cost_usd": 0.0231525,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6545",
+      "cve_id": "CVE-2025-6545",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/lib/sync.js b/lib/sync.js\nindex 7c9c2f1..c2a6d8e 100644\n--- a/lib/sync.js\n+++ b/lib/sync.js\n@@ -16,6 +16,17 @@ var sizes = {\n \trmd160: 20\n }\n \n+function normalizeDigest (digest) {\n+\tif (typeof digest !== 'string') return digest\n+\treturn digest.toLowerCase().replace(/-/g, '')\n+}\n+\n+function getDigestLength (digest) {\n+\tvar hLen = sizes[digest]\n+\tif (!hLen) throw new TypeError('Invalid digest: ' + digest)\n+\treturn hLen\n+}\n+\n function pbkdf2 (password, salt, iterations, keylen, digest) {\n \tcheckParameters(iterations, keylen)\n \n@@ -25,9 +36,9 @@ function pbkdf2 (password, salt, iterations, keylen, digest) {\n \tif (!Buffer.isBuffer(salt)) salt = Buffer.from(salt, defaultEncoding)\n \n-\tdigest = digest || 'sha1'\n+\tdigest = normalizeDigest(digest || 'sha1')\n \n-\tvar hLen = sizes[digest]\n+\tvar hLen = getDigestLength(digest)\n \tvar l = Math.ceil(keylen / hLen)\n \n \tvar DK = Buffer.allocUnsafe(keylen)",
+      "generation_time_s": 25.712,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch addresses the normalization issue (converting algorithm names like 'SHA1', 'sha-256' to their canonical forms) and adds validation to throw an error for unsupported algorithms instead of silently returning zero-filled buffers. However, it only partially fixes the vulnerability. The gold patch goes further by replacing `create-hmac` with a custom HMAC implementation using `create-hash` and `computePad`, which suggests the root cause involves `create-hmac` also silently failing on non-normalized algorithm names. The candidate patch normalizes the digest name but still passes it to `create-hmac` (in the unchanged parts of the code), which may still fail silently for the same reason. The candidate correctly handles the validation/error case for truly unsupported algorithms (sha3-256, blake2b512, etc.) by throwing, but the normalization approach alone may not fully fix the HMAC computation issue depending on how create-hmac handles these names internally.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 2910,
+      "completion_tokens": 1508,
+      "cost_usd": 0.0262045,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-1283",
+      "cve_id": "CVE-2023-1283",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/qwik/src/core/container/serializers.ts b/packages/qwik/src/core/container/serializers.ts\nindex 8f3d2f1..0a4b9f7 100644\n--- a/packages/qwik/src/core/container/serializers.ts\n+++ b/packages/qwik/src/core/container/serializers.ts\n@@ -18,6 +18,17 @@ import {\n   isObject,\n } from '../util/types';\n \n+/**\n+ * Function payloads must never be deserialized from serialized input.\n+ *\n+ * Prior behavior used dynamic code execution (`new Function(...)`), which\n+ * allows arbitrary code execution when attacker-controlled input is processed.\n+ * Keep serialization behavior intact, but hard-block deserialization.\n+ */\n+const deserializeFunction = (_value: string): never => {\n+  throw new Error('Deserializing functions from serialized state is not supported.');\n+};\n+\n export const serializers: Serializer<any>[] = [\n   {\n     prefix: '\\u0000',\n@@ -86,9 +97,7 @@ export const serializers: Serializer<any>[] = [\n     prefix: '\\u0006',\n     test: (v) => typeof v === 'function',\n     serialize: (obj) => obj.toString(),\n-    deserialize: (data) => {\n-      return new Function(`return (${data})`)();\n-    },\n+    deserialize: deserializeFunction,\n   },\n   {\n     prefix: '\\u0007',",
+      "generation_time_s": 25.21,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the root cause of the vulnerability by preventing deserialization of functions via `new Function()`, which was the code injection vector. Instead of removing the PureFunctionSerializer entirely like the gold patch, it replaces the dangerous `new Function()` deserialization with a function that throws an error. While the approach differs from the gold patch (which completely removes the serializer entry), the candidate effectively blocks the attack vector. The file structure appears different (possibly a different version of the codebase), but the core fix - preventing arbitrary code execution through function deserialization - is correctly implemented.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 249,
+      "completion_tokens": 1350,
+      "cost_usd": 0.01933575,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-55173",
+      "cve_id": "CVE-2025-55173",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/next/src/server/image-optimizer.ts b/packages/next/src/server/image-optimizer.ts\nindex 4f3f8c1..d97df9a 100644\n--- a/packages/next/src/server/image-optimizer.ts\n+++ b/packages/next/src/server/image-optimizer.ts\n@@ -120,21 +120,35 @@ function getSupportedMimeType(options: string | undefined, accepts: string[]): s\n   return ''\n }\n \n+const IMAGE_MIME_TYPE_RE = /^image\\/[a-z0-9.+-]+$/i\n+\n+function isValidImageMimeType(contentType: string | null | undefined): boolean {\n+  return !!contentType && IMAGE_MIME_TYPE_RE.test(contentType)\n+}\n+\n function getFileNameWithExtension(url: string, contentType: string | null): string {\n-  const urlObj = new URL(url)\n-  const fileName = urlObj.pathname.split('/').pop()\n-  if (!fileName) {\n-    return `image.${getExtension(contentType) || 'jpg'}`\n+  // Do not trust attacker-controlled remote URL paths for download filenames.\n+  // Keep a stable filename and only derive extension from validated content type.\n+  const ext = getExtension(contentType)\n+  return ext ? `image.${ext}` : 'image'\n+}\n+\n+function ensureValidUpstreamImageType(\n+  contentType: string | null,\n+  href: string\n+): string {\n+  if (!isValidImageMimeType(contentType)) {\n+    throw new ImageError(\n+      400,\n+      `\"url\" parameter is valid but upstream response is not a valid image for ${href}`\n+    )\n   }\n-  const [name, ext] = fileName.split('.', 2)\n-  return `${name}.${ext || getExtension(contentType) || 'jpg'}`\n+  return contentType\n }\n \n export async function imageOptimizer(\n   imageUpstream: ImageUpstream,\n   paramsResult: Pick<ImageParamsResult, 'href' | 'width' | 'quality' | 'mimeType'>,\n   nextConfig: { images: ImageConfigComplete },\n-  isDev?: boolean\n+  isDev?: boolean,\n ): Promise<{\n   buffer: Buffer\n   contentType: string\n@@ -286,7 +300,10 @@ export async function imageOptimizer(\n \n   const upstreamType =\n     detectContentType(upstreamBuffer) ||\n-    imageUpstream.contentType?.toLowerCase().trim()\n+    imageUpstream.contentType?.toLowerCase().trim() ||\n+    null\n+\n+  const validatedUpstreamType = ensureValidUpstreamImageType(upstreamType, href)\n \n   if (\n     upstreamType.startsWith('image/svg') &&\n@@ -303,7 +320,7 @@ export async function imageOptimizer(\n       400,\n       `\"url\" parameter is valid but image type is not allowed`\n     )\n-",
+      "generation_time_s": 78.099,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to address the vulnerability through filename sanitization and content type validation, but it misses the core fix from the gold patch: removing the forwarding of request headers (including cookies) when fetching internal images in `fetchInternalImage`. The gold patch removes `headers: _req.headers` from the `createRequestResponseMocks` call, which prevents sensitive headers like cookies from being forwarded to internal image endpoints. The candidate patch doesn't modify `fetchInternalImage` at all, leaving the header forwarding vulnerability intact. While the candidate adds some useful hardening (filename sanitization, content type validation), it doesn't address the root cause identified in the CVE.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 342,
+      "completion_tokens": 4096,
+      "cost_usd": 0.0579425,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-49595",
+      "cve_id": "CVE-2025-49595",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/cli/src/controllers/binary-data.controller.ts b/packages/cli/src/controllers/binary-data.controller.ts\nindex 7d3f0c1..6b8f0e4 100644\n--- a/packages/cli/src/controllers/binary-data.controller.ts\n+++ b/packages/cli/src/controllers/binary-data.controller.ts\n@@ -1,5 +1,7 @@\n import type { Response } from 'express';\n \n+const VALID_FILESYSTEM_URI_RE = /^filesystem(?:-v2)?:\\/\\/.+/;\n+\n // ...other imports\n \n export class BinaryDataController {\n@@ -22,6 +24,16 @@ export class BinaryDataController {\n \t\t@Query('id') id: string,\n \t\t@Res() res: Response,\n \t) {\n+\t\tif (\n+\t\t\ttypeof id === 'string' &&\n+\t\t\t(id.startsWith('filesystem://') || id.startsWith('filesystem-v2://')) &&\n+\t\t\t!VALID_FILESYSTEM_URI_RE.test(id)\n+\t\t) {\n+\t\t\t// Prevent malformed empty filesystem URIs (e.g. \"filesystem://\" / \"filesystem-v2://\")\n+\t\t\t// from reaching downstream storage handling.\n+\t\t\treturn res.status(400).send('Invalid binary data ID');\n+\t\t}\n+\n \t\tconst stream = await this.binaryDataService.getAsStream(id);\n \n \t\t// ...existing response handling",
+      "generation_time_s": 37.695,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch only partially addresses the vulnerability. It checks for empty filesystem URIs with `://` prefix but misses cases like `filesystem:` and `filesystem:/` (without double slashes). The gold patch validates the path after the colon separator for empty, `/`, and `//` values, covering more malformed patterns. Additionally, the candidate patch only appears to modify one endpoint handler rather than the shared `validateBinaryDataId` method that both `get` and `getSigned` use, potentially leaving the `getSigned` endpoint unprotected. The regex approach also wouldn't catch `filesystem:` without slashes, which is explicitly tested in the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 436,
+      "completion_tokens": 2067,
+      "cost_usd": 0.029701,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-4727",
+      "cve_id": "CVE-2025-4727",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/ddp-server/livedata_server.js b/packages/ddp-server/livedata_server.js\nindex 8f2d9b1..5a9f2e1 100644\n--- a/packages/ddp-server/livedata_server.js\n+++ b/packages/ddp-server/livedata_server.js\n@@ -20,6 +20,9 @@ import { DDPCommon } from 'meteor/ddp-common';\n import { RateLimiter } from 'meteor/rate-limit';\n import { SessionCollectionView } from './session_collection_view';\n \n+// Keep forwarded-for bounded to avoid expensive regex processing on attacker-controlled input.\n+const MAX_X_FORWARDED_FOR_LENGTH = 1024;\n+\n const hasOwn = Object.prototype.hasOwnProperty;\n \n export class Session {\n@@ -154,12 +157,20 @@ export class Session {\n       };\n     }\n \n+    const httpHeaders = Object.assign({}, self.socket.headers);\n+    const forwardedFor = httpHeaders['x-forwarded-for'];\n+    if (typeof forwardedFor === 'string' &&\n+        forwardedFor.length > MAX_X_FORWARDED_FOR_LENGTH) {\n+      // Ignore oversized forwarded-for values instead of passing them through.\n+      delete httpHeaders['x-forwarded-for'];\n+    }\n+\n     self.connectionHandle = {\n       id: self.id,\n       close: function () { self.close(); },\n       onClose: function (fn) { self.inQueue('close', fn); },\n       clientAddress: self._clientAddress(),\n-      httpHeaders: Object.assign({}, self.socket.headers),\n+      httpHeaders,\n       setUserId(userId) {\n         return self._setUserId(userId);\n       },\ndiff --git a/packages/ddp-server/package.js b/packages/ddp-server/package.js\nindex 5c9d5bf..be26ab1 100644\n--- a/packages/ddp-server/package.js\n+++ b/packages/ddp-server/package.js\n@@ -2,7 +2,7 @@ Package.describe({\n   summary: \"Meteor's latency-compensated distributed data framework - server\",\n   version: '3.2.1',\n+  version: '3.2.2',\n   documentation: null\n });\n \ndiff --git a/v3-docs/docs/generators/changelog/versions/3.2.1.md b/v3-docs/docs/generators/changelog/versions/3.2.1.md\nindex 1d40f01..2f7b6d5 100644\n--- a/v3-docs/docs/generators/changelog/versions/3.2.1.md\n+++ b/v3-docs/docs/generators/changelog/versions/3.2.1.md\n@@ -1,3 +1,7 @@\n+## Security\n+\n+- Fixed in 3.2.2: bounded `x-forwarded-for` processing in `ddp-server` to prevent resource exhaustion from oversized values (CVE-2025-4727).\n+\n ## Highlights\n \n - Bug fixes and stability improvements.",
+      "generation_time_s": 48.898,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to mitigate the vulnerability by limiting the length of the x-forwarded-for header to 1024 characters, but it does not address the root cause: the inefficient regular expression `/\\s*,\\s*/` used in the `split()` call within `_clientAddress()`. The gold patch fixes this by replacing the regex split with a simple `split(',')` followed by explicit `.map(ip => ip.trim())`, and also tightens the validation logic. The candidate's length-based approach could still allow ReDoS on strings under 1024 characters and doesn't fix the actual vulnerable code path.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 375,
+      "completion_tokens": 2461,
+      "cost_usd": 0.03511025,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-50710",
+      "cve_id": "CVE-2023-50710",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/router/trie-router/node.ts b/src/router/trie-router/node.ts\nindex 2d5d8a1..a4c9c65 100644\n--- a/src/router/trie-router/node.ts\n+++ b/src/router/trie-router/node.ts\n@@ -214,7 +214,13 @@ export class Node<T> {\n       }\n     }\n \n-    return handlerSets\n+    // NOTE:\n+    // `params` can be reused while traversing the trie. Returning the same\n+    // object instance allows later matches (including concurrent requests) to\n+    // overwrite previously returned param values.\n+    for (let i = 0, len = handlerSets.length; i < len; i++) {\n+      handlerSets[i][1] = { ...handlerSets[i][1] }\n+    }\n+    return handlerSets\n   }\n }\ndiff --git a/deno_dist/router/trie-router/node.ts b/deno_dist/router/trie-router/node.ts\nindex 4b3a2b7..9e03f1e 100644\n--- a/deno_dist/router/trie-router/node.ts\n+++ b/deno_dist/router/trie-router/node.ts\n@@ -186,7 +186,13 @@ export class Node {\n         }\n       }\n     }\n+    // NOTE:\n+    // `params` can be reused while traversing the trie. Returning the same\n+    // object instance allows later matches (including concurrent requests) to\n+    // overwrite previously returned param values.\n+    for (let i = 0, len = handlerSets.length; i < len; i++) {\n+      handlerSets[i][1] = { ...handlerSets[i][1] };\n+    }\n     return handlerSets;\n   }\n }\ndiff --git a/src/router/trie-router/node.test.ts b/src/router/trie-router/node.test.ts\nindex 4e98321..dbf2538 100644\n--- a/src/router/trie-router/node.test.ts\n+++ b/src/router/trie-router/node.test.ts\n@@ -142,4 +142,19 @@ describe('TrieRouter - Node', () => {\n     expect(r1[0][1]).toEqual({ id: '1' })\n     expect(r2[0][1]).toEqual({ id: '2' })\n   })\n+\n+  it('should not overwrite params from a previous match result', () => {\n+    const node = new Node<string>()\n+    node.insert('GET', '/modules/:id/versions/:version', 'ok')\n+\n+    const first = node.search('GET', '/modules/first/versions/first')\n+    const second = node.search('GET', '/modules/second/versions/second')\n+\n+    expect(first[0][1]).toEqual({\n+      id: 'first',\n+      version: 'first',\n+    })\n+    expect(second[0][1]).toEqual({\n+      id: 'second',\n+      version: 'second',\n+    })\n+  })\n })",
+      "generation_time_s": 70.065,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch takes a different approach than the gold patch but addresses the same root cause - shared/mutable params objects being overwritten by subsequent requests. Instead of restructuring the HandlerSet type to create fresh params objects during search traversal, the candidate creates shallow copies of the params objects at the return point of the search method. This effectively ensures each caller gets their own independent copy of the params, preventing concurrent requests from overwriting each other's values. The approach is valid and covers both the main source file and the deno distribution file. The test case also validates the fix. While the gold patch is more architecturally clean by removing params from the shared HandlerSet type entirely, the candidate's approach of copying at the boundary is functionally equivalent for fixing the vulnerability.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 790,
+      "completion_tokens": 3640,
+      "cost_usd": 0.0523425,
+      "judge_cost_usd": 0.0
+    }
+  ]
+}

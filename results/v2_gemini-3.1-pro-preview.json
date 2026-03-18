@@ -1,0 +1,986 @@
+{
+  "metadata": {
+    "benchmark": "data/benchmark/vulnbench_mini.json",
+    "evaluated_at": "2026-03-09T16:50:27.952766+00:00Z",
+    "total_instances": 50,
+    "judge_model": "openrouter/anthropic/claude-opus-4-6",
+    "model": "openrouter/google/gemini-3.1-pro-preview"
+  },
+  "aggregate": {
+    "total_instances": 50,
+    "total_passed": 2,
+    "pass_rate": 0.04,
+    "mean_score": 0.096,
+    "pass_rate_by_tier": {
+      "tier_1": 0.1176,
+      "tier_2": 0.0,
+      "tier_3": 0.0
+    },
+    "pass_rate_by_ecosystem": {
+      "maven": 0.25,
+      "npm": 0.0303,
+      "pip": 0.0,
+      "rubygems": 0.0,
+      "composer": 0.0,
+      "rust": 0.0,
+      "swift": 0.0
+    },
+    "mean_generation_time_s": 70.515,
+    "total_cost_usd": 2.530966,
+    "total_judge_cost_usd": 0.0,
+    "total_prompt_tokens": 56927,
+    "total_completion_tokens": 201426
+  },
+  "results": [
+    {
+      "instance_id": "vulnbench-CVE-2024-49771",
+      "cve_id": "CVE-2024-49771",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "An incomplete fix for CVE-2020-35460 left MPXJ vulnerable to path traversal attacks when extracting ZIP files. The original fix only checked if the `ZipEntry` name contained `..`, which can be bypassed using absolute paths (e.g., `/tmp/malicious.sh` or `C:\\malicious.exe`). \n\nTo properly prevent Zip Slip / path traversal vulnerabilities, we must resolve the canonical path of the destination file and verify that it strictly starts with the canonical path of the intended target directory.\n\nHere is the unified diff that addresses the root cause of the vulnerability:\n\n```diff\n--- src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n+++ src/main/java/net/sf",
+      "generation_time_s": 45.3,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is incomplete and malformed - it contains only a description of the issue and a truncated diff header that doesn't include any actual code changes. It does not provide a functional fix for the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 341,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049786,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43761",
+      "cve_id": "CVE-2025-43761",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n+++ b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n@@ -2,3 +2,3 @@\n \t\"dependencies\": {\n-\t\t\"liferay-ckeditor\": \"4.22.1-liferay.2\"\n+\t\t\"liferay-ckeditor\": \"4.22.1-liferay.3\"\n \t},\n--- a/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n+++ b/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n@@ -2,3 +2,3 @@\n \t\"dependencies\": {\n-\t\t\"liferay-ckeditor\": \"4.22.1-liferay.2\"\n+\t\t\"liferay-ckeditor\": \"4.22.1-liferay.3\"\n \t},",
+      "generation_time_s": 38.688,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the same root cause (updating the liferay-ckeditor dependency in both affected files) and follows the same approach as the gold patch. However, the candidate is working with a different base version (4.22.1-liferay.2 \u2192 4.22.1-liferay.3) compared to the gold patch (4.21.0-liferay.9 \u2192 4.21.0-liferay.10). While the approach is correct, we cannot verify that version 4.22.1-liferay.3 actually exists or contains the XSS fix, and the base version doesn't match the affected version range described in the CVE. The concept is right but the specific version bump may not be applicable.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 432,
+      "completion_tokens": 3774,
+      "cost_usd": 0.046152,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-27210",
+      "cve_id": "CVE-2026-27210",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- src/js/pannellum.js\n+++ src/js/pannellum.js\n@@ -2880,7 +2880,7 @@\n         if (hs.attributes) {\n             for (var key in hs.attributes) {\n-                if (hs.attributes.hasOwnProperty(key)) {\n+                if (hs.attributes.hasOwnProperty(key) && key.toLowerCase().indexOf('on') !== 0) {\n                     div.setAttribute(key, hs.attributes[key]);\n                 }\n             }\n         }",
+      "generation_time_s": 37.613,
+      "patch_analysis": {
+        "judge_score": 0.35,
+        "judge_reasoning": "The candidate patch partially addresses the vulnerability by filtering out attributes starting with 'on' (event handlers), but it has several gaps: (1) It doesn't filter 'href' attributes which can also be an XSS vector, (2) It doesn't normalize the key by removing non-ASCII characters before checking, which could allow bypasses, (3) It appears to target a different code location (div vs a element, different line numbers) than where the gold patch applies, suggesting it may be patching the wrong section or missing the primary vulnerable code path in createHotSpot, (4) It doesn't respect the escapeHTML configuration parameter as the gold patch does.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.35,
+      "passed": false,
+      "prompt_tokens": 499,
+      "completion_tokens": 3676,
+      "cost_usd": 0.04511,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-25228",
+      "cve_id": "CVE-2026-25228",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- src/interfaces/applicationData.js\n+++ src/interfaces/applicationData.js\n@@ -100,3 +100,3 @@\n function validateAppId (appid) {\n-  return appid.length <= 30 && appid.indexOf('/') === -1\n+  return appid.length <= 30 && appid.indexOf('/') === -1 && appid.indexOf('\\\\') === -1\n }",
+      "generation_time_s": 27.803,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch adds backslash validation to validateAppId(), which addresses part of the vulnerability. However, it misses the second critical defense layer from the gold patch: the path normalization and validation in pathForApplicationData() that ensures resolved paths remain within the configuration directory. The gold patch implements defense-in-depth by both blocking backslashes in input validation AND verifying the final resolved path stays within bounds. The candidate only implements the input validation portion, leaving the system potentially vulnerable to other path traversal techniques that might bypass the simple character check.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 1428,
+      "completion_tokens": 2047,
+      "cost_usd": 0.02742,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-21892",
+      "cve_id": "CVE-2026-21892",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "and try.run_id=:run_id\"\"\",\n                                      db.engine, params={\"run_id\": workflow_id})\n```\nWait, is there any other place?\nLet's look at the Parsl source code for `parsl/monitoring/visualization/views.py`.\nI will search for `%s` or `% workflow_id` or `% (workflow_id)`.\nWait, I don't have the full source code, but I can infer from typical patterns.\nAre there other queries?\nLet's consider what other endpoints might exist.\n`@app.route('/workflow/<workflow_id>')`\n`@app.route('/workflow/<workflow_id>/dag_group_by_states')`\n`@app.",
+      "generation_time_s": 51.668,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch is incomplete and incoherent. It appears to be a fragment of thought process rather than an actual patch. It shows only a tiny snippet that might address one of the two vulnerable locations, but it's not a proper diff and doesn't clearly fix either vulnerability. The gold patch addresses two specific SQL injection points by converting string formatting to parameterized queries using sqlalchemy.text() and params, while the candidate patch is essentially unusable.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 1070,
+      "completion_tokens": 4092,
+      "cost_usd": 0.051244,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-68143",
+      "cve_id": "CVE-2025-68143",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "--- src/git/src/mcp_server_git/server.py\n+++ src/git/src/mcp_server_git/server.py\n@@ -100,11 +100,0 @@\n-@server.tool()\n-async def git_init(repo_path: str) ->",
+      "generation_time_s": 45.548,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch is incomplete and truncated. While it shows an attempt to remove the git_init tool, it only removes a small fragment and doesn't address all the necessary changes: removing the GitInit model class, removing the INIT enum value from GitTools, removing the git_init function definition, removing the Tool listing for INIT in list_tools(), and removing the special-case handling in call_tool(). The patch is insufficient to fully remediate the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 355,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049814,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43795",
+      "cve_id": "CVE-2024-43795",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "rubygems",
+      "model_patch": "",
+      "generation_time_s": 43.285,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 4242,
+      "completion_tokens": 4041,
+      "cost_usd": 0.056976,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9910",
+      "cve_id": "CVE-2025-9910",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- packages/jsondiffpatch/src/formatters/html.ts\n+++ packages/jsondiffpatch/src/formatters/html.ts\n@@ -1,5 +1,13 @@\n import BaseFormatter from './base';\n \n+const htmlEscape = (text: string | number): string => {\n+  let html = `${text}`;\n+  return html\n+    .replace(/&/g, '&amp;')\n+    .replace(/</g, '&lt;')\n+    .replace(/>/g, '&gt;')\n+    .replace(/\"/g, '&quot;')\n+    .replace(/'/g, '&#39;');\n+};\n+\n class HtmlFormatter extends",
+      "generation_time_s": 51.325,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch moves htmlEscape to the top of the file but critically fails to show the actual changes needed in the nodeBegin method (lines ~93-94) where leftKey must be escaped with htmlEscape(), and in typeFormattterErrorFormatter where err must be escaped. The patch only shows the function definition change but doesn't demonstrate applying htmlEscape to the vulnerable interpolation points (leftKey in data-key attribute and property-name div, and err in the error formatter). Without these call-site changes, the XSS vulnerability remains unfixed.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 390,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049884,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43954",
+      "cve_id": "CVE-2025-43954",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- ui/src/util/extendHeading.js\n+++ ui/src/util/extendHeading.js\n@@ -1,11 +1,12 @@\n export default function extendHeading (md) {\n   md.renderer.rules.heading_open = (tokens, idx, options, env, self) => {\n     const token = tokens[idx]\n     const level = token.tag.slice(1)\n     const textToken = tokens[idx + 1]\n-    const title = textToken.content\n+    const title = md.utils.escapeHtml(textToken.content)\n \n     let id = token.attrGet('id')\n \n     if (id === null)",
+      "generation_time_s": 49.597,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to address XSS by escaping HTML in the heading content using md.utils.escapeHtml(). While this shows understanding of the XSS issue, it operates on a completely different version/structure of the extendHeading.js file than what the gold patch targets. The gold patch addresses a more complex scenario involving token manipulation, slug generation, and anchor link wrapping, where the fix involves preserving original inline tokens rather than replacing them with a plain text token (which was the root cause of the XSS). The candidate's simple escapeHtml approach may not fully address the vulnerability in the actual affected code, and it doesn't match the file structure of the vulnerable version.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 254,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049612,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43411",
+      "cve_id": "CVE-2024-43411",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 97.452,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 4407,
+      "completion_tokens": 4024,
+      "cost_usd": 0.057102,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-32472",
+      "cve_id": "CVE-2024-32472",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 41.945,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 4465,
+      "completion_tokens": 4023,
+      "cost_usd": 0.057206,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2016-15025",
+      "cve_id": "CVE-2016-15025",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- app/templates/src/server/_app.js\n+++ app/templates/src/server/_app.js\n@@ -31,7 +3",
+      "generation_time_s": 54.993,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is incomplete/truncated and does not contain any meaningful changes. It fails to add the 404 error handlers for /js/*, /images/*, and /styles/* routes that are needed to mitigate the XSS reflected attack vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 356,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049816,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-25929",
+      "cve_id": "CVE-2022-25929",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- smoothie.js\n+++ smoothie.js\n@@ -26,6 +26,13 @@\n     return obj;\n   }\n \n+  function escapeHtml(s) {\n+    if",
+      "generation_time_s": 38.432,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch is incomplete - it only shows the beginning of an `escapeHtml` function definition but is cut off before the implementation is complete. While the approach of HTML escaping could potentially address the XSS vulnerability, the patch is truncated and cannot function as a fix. It doesn't show any changes to the `tooltipFormatter` function where the actual vulnerability exists, nor does it apply the escaping to the `strokeStyle` or `tooltipLabel` properties.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 267,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049638,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2019-13127",
+      "cve_id": "CVE-2019-13127",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "`<div style=background-color:` + color + `>...</div>`\nIf `color` is `rgba(0,0,0,0) onMouseOver=alert(1) a=`, then:\n`<div style=background-color:rgba(0,0,0,0) onMouseOver=alert(1) a=>...</div>`\nThis would mean `onMouseOver=alert(1)` becomes an attribute!\nWait, where is this rendering code?\nThe vulnerability description says: \"The color provided by the user is not properly sanitized, leading to HTML and JavaScript code to be displayed \"as it is\" to visitors of the page.\"\nWait, if the fix is in `Dialogs.js`, then `Dialogs.js",
+      "generation_time_s": 45.759,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all. It appears to be the AI model's internal reasoning/analysis about the vulnerability rather than an actual code fix. There is no functional code change that addresses the XSS vulnerability by validating color input.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 458,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05002,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-1726",
+      "cve_id": "CVE-2022-1726",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "An issue with the Table Export plug-in in `bootstrap-table` allows for Cross-Site Scripting (XSS) when the `exportOptions: htmlContent` setting is enabled. When this option is set to `true`, the plugin extracts the raw HTML from the table cells to include in the exported document. However, it fails to sanitize the extracted HTML, meaning any malicious `<script>` tags embedded within the table data will be executed when the export plugin processes the HTML.\n\nTo fix this vulnerability, we need to sanitize the `htmlData` by stripping out any `<script>` tags before returning it to the export plugin. This preserves the intended HTML formatting for the export while neutralizing the XSS vector.\n\nHere is the unified diff that addresses the vulnerability:\n\n```diff\n--- src/extensions",
+      "generation_time_s": 58.214,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is empty/incomplete - it contains only a description of the vulnerability and a proposed approach but no actual code changes. There is no valid diff that modifies the source code to fix the XSS vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 274,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049652,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-24728",
+      "cve_id": "CVE-2022-24728",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "` to `%3E`.\nBut what if the attacker sends `<!--{cke_protected} %2D%2D%3E %3Cimg src=x onerror=alert(1)%3E -->`?\nWait, if the attacker sends `<!--{cke_protected} %2D%2D%3E <img src=x onerror=alert(1)> -->`?\nWhen `unprotectRealComments` is called in `toDataFormat`:\n```javascript\n\tfunction unprotectRealComments( html ) {\n\t\treturn html.replace( /<!--\\{cke_protected\\}([\\s\\S]+?)-->/g, function( match, data ) {\n\t\t\treturn decodeURIComponent( data );\n\t\t} );\n\t}\n```",
+      "generation_time_s": 50.372,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid code patch at all. It appears to be analysis/commentary text about the vulnerability rather than an actual fix. It does not modify any code, does not introduce random number generation for protection keywords, and does not address the root cause of the HTML processing vulnerability that allows malformed HTML injection bypassing content sanitization.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 403,
+      "completion_tokens": 4092,
+      "cost_usd": 0.04991,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-27428",
+      "cve_id": "CVE-2020-27428",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- src/fixup-svg-string.js\n+++ src/fixup-svg-string.js\n@@ -1,5 +1,8 @@\n module.exports = function (svgString) {\n     if (!svg",
+      "generation_time_s": 39.54,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is incomplete and truncated. It only shows the beginning of the file with no meaningful changes. It does not address the XSS vulnerability by expanding event handler sanitization as the gold patch does.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 258,
+      "completion_tokens": 4092,
+      "cost_usd": 0.04962,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-46308",
+      "cve_id": "CVE-2023-46308",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "",
+      "generation_time_s": 159.922,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 4158,
+      "completion_tokens": 4051,
+      "cost_usd": 0.056928,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-32050",
+      "cve_id": "CVE-2021-32050",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "Wait, what if `command` is NULL? `mongoc_apm_command_started_get_command` has `event->command`.\nLet's check `mongoc_apm_command_succeeded_get_reply`.",
+      "generation_time_s": 71.067,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all - it contains only commentary/analysis text rather than any actual code changes. It does not update the libmongoc version or submodule reference, which is what the gold patch does to fix the CVE.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 453,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05001,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-26864",
+      "cve_id": "CVE-2025-26864",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "",
+      "generation_time_s": 40.775,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 4367,
+      "completion_tokens": 4026,
+      "cost_usd": 0.057046,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36264",
+      "cve_id": "CVE-2024-36264",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "An Improper Authentication vulnerability exists in Apache Submarine because the system uses a predictable, hardcoded default secret (`\"Submarine\"`) for authentication (e.g., signing JWT tokens) if the user does not explicitly configure one. This allows an attacker to forge authentication tokens and gain unauthorized access to the instance.\n\nTo fix this, we can replace the hardcoded default secret with a securely generated random string (e.g., a UUID generated at runtime). This ensures that if a user forgets to configure a secret, the system remains secure by default. Because some CI tests might rely on hardcoded tokens signed with the old default secret, we also need to explicitly pass the old secret as a system property in the GitHub Actions workflow so that the tests continue to pass.\n\nHere is the unified diff that addresses the vulnerability",
+      "generation_time_s": 58.571,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch contains only a description of what should be done but no actual code changes (no unified diff). It does not provide any implementable fix for the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 325,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049754,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9654",
+      "cve_id": "CVE-2025-9654",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "An analysis of the vulnerability (CVE-2025-9654) in `@aiondadotcom/mcp-ssh` reveals a command injection flaw in `server-simple.mjs`. The issue occurs because the application uses `child_process.exec` to run SSH commands, passing unsanitized user input directly into a shell environment. This allows an attacker to append malicious shell commands (e.g., via the `command`, `host`, or `username` parameters) that will be executed on the local machine running the MCP server.\n\nTo fix this, we must replace `exec` with `execFile`. Unlike `exec`, `execFile` does not spawn a shell by default; instead, it executes the specified executable directly and passes the arguments as",
+      "generation_time_s": 51.204,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch is not an actual code patch - it is only a textual analysis/description of the vulnerability and the fix approach. It does not contain any actual code changes (no diff) that would fix the vulnerability in server-simple.mjs. Without concrete code modifications, the vulnerability remains unpatched.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 308,
+      "completion_tokens": 4092,
+      "cost_usd": 0.04972,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-47948",
+      "cve_id": "CVE-2025-47948",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "I will provide a patch that sanitizes the input by escaping or removing the platform-specific control elements in the `/echo` command. \n\nIn Koishi-based or similar chatbot frameworks, the `/echo` command often blindly returns the user's input. When the input contains platform-specific XML/HTML-like tags (such as `<qqbot-at-everyone />`), the bot's higher privileges cause the platform to interpret and execute them. \n\nTo fix this without breaking the ability to echo normal text, we can strip out the `<qqbot-at-everyone />` tag (and similar unauthorized mention tags) from the message before echoing it back.\n\nHere is the unified diff that addresses the vulnerability:\n\n```diff\n--- src/builtins.ts\n+++",
+      "generation_time_s": 94.711,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is empty/incomplete - it contains only a description of what should be done but no actual code changes. There is no valid diff provided that would fix the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 573,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05025,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22798",
+      "cve_id": "CVE-2026-22798",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 114.718,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 573,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05025,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-14546",
+      "cve_id": "CVE-2025-14546",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 131.738,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 573,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05025,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-28121",
+      "cve_id": "CVE-2024-28121",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "--- a/lib/stimulus_reflex/reflex_factory.rb\n+++ b/lib/stimulus_reflex/reflex_factory.rb\n@@ -1,4 +1,5 @@\n # frozen_string_literal: true\n \n class StimulusReflex::ReflexFactory\n   class << self\n     def create_reflex_from_class_and_invoke(class_name, method_name, arguments = [], **kwargs)\n       reflex_class = class_name.constantize\n       reflex = reflex_class.new(**kwargs)\n \n+      unless allowed_method?(reflex_class, method_name)\n+        raise ArgumentError.new(\"Reflex method '#{method_name}' is",
+      "generation_time_s": 131.968,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch is severely incomplete - it's truncated mid-string and doesn't provide a full implementation. While it shows understanding of the issue (checking if a method is allowed before invocation), it doesn't include the critical `allowed_method?` implementation, doesn't properly define the `safe_ancestors` logic that restricts callable methods to only those defined on the reflex class hierarchy (below StimulusReflex::Reflex), and doesn't match the actual file structure of `reflex_factory.rb` as shown in the gold patch. The patch is too incomplete to effectively mitigate the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 1443,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05199,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-47529",
+      "cve_id": "CVE-2024-47529",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "An analysis of the vulnerability indicates that OpenC3 COSMOS was storing the user's password in the browser's `localStorage` to persist sessions or pass it to other components (like the Script Runner). This practice exposes the plaintext password to Cross-Site Scripting (XSS) attacks. \n\nTo fix this, we must:\n1. Stop storing and retrieving the password from `localStorage` in the frontend (`Login.vue`).\n2. Ensure the backend models (`AuthModel`) and controllers (`auth_controller.rb`, `users_controller.rb`) do not return the password in their JSON responses.\n3. Update the Script Runner API (`scripts_controller.rb`) to rely on the secure authentication token rather than expecting the plaintext password.\n\nHere is the unified",
+      "generation_time_s": 156.148,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch contains only a textual description/analysis of what should be done but provides no actual code changes. There are no diff hunks or code modifications that would fix the vulnerability. It is essentially an empty patch with commentary.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 366,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049836,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22696",
+      "cve_id": "CVE-2026-22696",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rust",
+      "model_patch": "An analysis of the vulnerability description indicates that the `dcap-qvl` library was missing cryptographic verification for the QE Identity signature and did not enforce policy constraints (MRSIGNER, ISVPRODID, ISVSVN) on the QE Report. \n\nBased on the affected files provided (`Cargo.lock`, `Cargo.toml`, `cli/Cargo.toml`), the patch that corresponds to this specific changeset in the repository is the release/version bump commit that officially applies the patched version `0.3.9` to the workspace, ensuring that users pulling the library or CLI tool receive the updated verification logic.\n\nHere is the unified diff that updates the package versions to the patched release `0.3.9`:\n\n```diff\n--- a/Cargo.toml\n+++ b/",
+      "generation_time_s": 52.57,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch appears to be incomplete and truncated. While it shows understanding that a version bump to 0.3.9 is needed, it only partially shows the diff for Cargo.toml and doesn't include the changes to Cargo.lock or cli/Cargo.toml. More importantly, the gold patch only shows version bumps, suggesting the actual security fix (cryptographic verification of QE Identity signature and policy enforcement) is in source files not listed in the affected files. The candidate patch is incomplete even for the version bump changes shown in the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 538,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05018,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-31475",
+      "cve_id": "CVE-2025-31475",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "--- tarteaucitron.js\n+++ tarteaucitron.js\n@@ -1,6 +1,9 @@\n     \"addOrUpdate\": function (source, custom) {\n         var b;\n         for (b in custom",
+      "generation_time_s": 55.191,
+      "patch_analysis": {
+        "judge_score": 0.05,
+        "judge_reasoning": "The candidate patch is incomplete and truncated. It does not implement any prototype pollution protection - it neither checks for dangerous keys like '__proto__' or 'constructor', nor adds hasOwnProperty checks. The patch appears to be a fragment that doesn't address the vulnerability at all.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.05,
+      "passed": false,
+      "prompt_tokens": 379,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049862,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-22150",
+      "cve_id": "CVE-2025-22150",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "--- a/lib/fetch/body.js\n+++ b/lib/fetch/body.js\n@@ -3,6 +3,7 @@\n const { Blob } = require('buffer')\n const { URLSearchParams } = require('url')\n const { FormData } = require('./formdata')\n+const { randomUUID } = require('crypto')\n const {\n   isBlobLike,\n   isURLSearchParams,\n@@ -110,7 +111,7 @@\n     }\n \n     if (val instanceof FormData) {\n-      const boundary = `----formdata-undici-${Math.random().toString(36).slice(2)}`\n+      const boundary = `----formdata-undici",
+      "generation_time_s": 38.652,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch shows understanding of the issue by attempting to replace Math.random() with crypto functionality, but the patch is incomplete - the boundary assignment line is truncated and doesn't show a complete replacement. While it imports randomUUID from crypto (which would be cryptographically secure), the actual boundary generation code is cut off, making it impossible to verify the fix is complete and functional. Additionally, the patch doesn't include a fallback mechanism for environments where crypto might not be available, unlike the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 444,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049992,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-31453",
+      "cve_id": "CVE-2024-31453",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "sid`?\nThe `namingFunction` uses `item.split(' ')`. If there is a space after the comma, `item.split(' ')` will have an empty string as the first element?\nNo, `uploadMetadata.split(',')` gives `['sid dGVzdA==', ' name dGVzdC50eHQ=']`.\nIf `item` is `' name dGVzdC50eHQ='`, `item.split(' ')` gives `['', 'name', 'dGVzdC50eHQ=']`.\nWait, `tus-js-client` sends `Upload-Metadata: filename dGVzdC50eHQ=,filetype dGV4dC9wbGFpbg==,sid d",
+      "generation_time_s": 54.172,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all - it appears to be garbled text/commentary rather than actual code changes. It does not address the vulnerability of unrestricted file uploads to existing file distributions, nor does it implement any checks similar to the gold patch's validation of upload completion status.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 1002,
+      "completion_tokens": 4092,
+      "cost_usd": 0.051108,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-48218",
+      "cve_id": "CVE-2023-48218",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 155.992,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 1002,
+      "completion_tokens": 4092,
+      "cost_usd": 0.051108,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-38691",
+      "cve_id": "CVE-2023-38691",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "Wait, `matrixServerName` or `serverName`?\nLet's think about the `matrix-appservice-bridge` `ProvisioningApi` constructor.",
+      "generation_time_s": 57.085,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all - it contains only commentary/thinking text rather than any actual code changes. It does not address the vulnerability in any way.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 324,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049752,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-39263",
+      "cve_id": "CVE-2022-39263",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "--- packages/adapter-upstash-redis/src/index.ts\n+++ packages/adapter-upstash-redis/src/index.ts\n@@ -123,7 +123,7 @@",
+      "generation_time_s": 56.828,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is essentially empty - it shows a diff header but contains no actual changes. It does not address the vulnerability at all. The fix requires changing the Redis key format to include both the identifier and token (using a composite key like `identifier:token`), but the candidate patch makes no such changes.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 793,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05069,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-13466",
+      "cve_id": "CVE-2025-13466",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "...`\nCould it be `body-parser` from `expressjs/body-parser`?\nLet's look at the `body-parser` repo. Is there a 2.x branch?\nYes, `body-parser` has a `2.0` branch. But it was never released as 2.2.0.\nWait, what if the package is `body-parser` and the version is 1.20.2, and the prompt just says 2.2.0?\nLet's think about how `parameterLimit` is implemented in `body-parser`.\n```javascript\nfunction parameterCount (body, limit) {\n  var count = 0\n  var index = 0\n\n  while ((index = body",
+      "generation_time_s": 45.399,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch is incomplete and appears to be a stream-of-consciousness thought process rather than an actual patch. It does not provide a complete implementation of the fix for the parameterCount function, and therefore does not address the CVE-2025-13466 vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 299,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049702,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-45390",
+      "cve_id": "CVE-2024-45390",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "Wait, I can't use `@@ -1,5 +1,5 @@` if I don't know the file content.\nLet's write a patch that is robust.",
+      "generation_time_s": 45.467,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all - it contains no actual code changes, just a comment about not knowing the file content. It does not address the vulnerability in any way.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 381,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049866,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6921",
+      "cve_id": "CVE-2025-6921",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "No ReDoS there.\nWhat about `src/transformers/models/marian/tokenization_marian.py` having a ReDoS in some other regex?",
+      "generation_time_s": 49.234,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all - it contains only commentary text and no actual code changes. It does not address the ReDoS vulnerability in the MarianTokenizer's language_code_re regex pattern that uses catastrophic backtracking with the pattern '>>.++<<'.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 349,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049802,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-53012",
+      "cve_id": "CVE-2025-53012",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "An issue with nested imports in MaterialX can lead to stack memory exhaustion (CWE-400) because there is no limit on the depth of the `xi:include` chain. By creating a sufficiently deep chain of MaterialX files that reference one another, an attacker can crash the application parsing the files.\n\nTo fix this vulnerability, we can introduce a maximum include depth check in the `readFromXmlFile` function. If the size of the `parentXIncludes` vector (which tracks the current import chain to prevent cyclic includes) exceeds a reasonable limit (e.g., 128), the parser will throw an `ExceptionParseError` instead of continuing the recursion.\n\nHere is the minimal patch to address the root cause:\n\n```diff\n--- a/source/",
+      "generation_time_s": 54.608,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is essentially empty - it contains only a description of what should be done but no actual code changes. The gold patch is a CHANGELOG.md update referencing PRs #2232 and #2233 that add validation of tree depth and XInclude depth in XML parsing. The candidate provides no functional code fix whatsoever.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 2493,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05409,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-27529",
+      "cve_id": "CVE-2024-27529",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "swift",
+      "model_patch": "",
+      "generation_time_s": 137.465,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 2493,
+      "completion_tokens": 4092,
+      "cost_usd": 0.05409,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36361",
+      "cve_id": "CVE-2024-36361",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "--- packages/pug-code-gen/index.js\n+++ packages/pug-code-gen/index.js\n@@ -11,6 +11,10 @@\n  */\n \n function generateCode(ast, options) {\n+  if (options && options.name && !/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(options.name)) {\n+    throw new Error('options.name must be a valid JavaScript identifier');\n+  }\n+\n   return new Compiler(ast, options).compile();\n }",
+      "generation_time_s": 41.807,
+      "patch_analysis": {
+        "judge_score": 0.35,
+        "judge_reasoning": "The candidate patch addresses the templateName/name validation aspect of the vulnerability by checking that the name option is a valid JavaScript identifier, which is the core issue described in the CVE. However, it only validates the 'name' option and misses the 'templateName' option validation, the doctype injection prevention (checking for '<' and '>'), and the globals array validation that the gold patch includes. The gold patch validates templateName (not name) in the Compiler constructor, validates doctype content, and validates globals - all of which are injection vectors. The candidate patch addresses only one of multiple attack surfaces and may not even target the correct property name (name vs templateName).",
+        "judge_verdict": "fail"
+      },
+      "score": 0.35,
+      "passed": false,
+      "prompt_tokens": 275,
+      "completion_tokens": 4068,
+      "cost_usd": 0.049366,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-43843",
+      "cve_id": "CVE-2021-43843",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "</p></blockquote>`, `jsx-slack` converts this to Slack mrkdwn.\nSlack mrkdwn for blockquote is `> `.\nSo `jsx-slack` converts `<blockquote>` to `> ` at the beginning of each line.\nBut what if the text inside `<blockquote>` already contains `>`?\nSlack might interpret it as a nested blockquote.\nSo `jsx-slack` might escape `>` inside `<blockquote>`?\nWait, the issue says \"escaping blockquote characters\".\nMaybe it means escaping the `>` character in normal text so it doesn't accidentally start a blockquote?\nIf a user writes `<p>&gt; Hello</p>`, it should be rendered as `&gt; Hello` in Slack, which Slack displays as",
+      "generation_time_s": 48.454,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid code patch at all. It appears to be fragments of reasoning/commentary text rather than actual code changes to fix the regex vulnerability in src/mrkdwn/escape.ts. It does not address the ReDoS vulnerability caused by catastrophic backtracking in the regular expressions.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 561,
+      "completion_tokens": 4091,
+      "cost_usd": 0.050214,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-67750",
+      "cve_id": "CVE-2025-67750",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "--- packages/core/src/main/rules/APIVersion.ts\n+++ packages/core/src/main/rules/APIVersion.ts\n@@ -15,8 +15,1",
+      "generation_time_s": 52.384,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is essentially empty/truncated - it only shows the beginning of a diff header with no actual changes. It does not replace the unsafe `new Function()` call with a safe parser, and therefore does not fix the CVE-2025-67750 vulnerability at all.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 925,
+      "completion_tokens": 4092,
+      "cost_usd": 0.050954,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-21537",
+      "cve_id": "CVE-2024-21537",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 129.31,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 925,
+      "completion_tokens": 4092,
+      "cost_usd": 0.050954,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-7793",
+      "cve_id": "CVE-2020-7793",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:(?:",
+      "generation_time_s": 39.71,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all - it appears to be a nonsensical string of repeated regex non-capturing group syntax that does not modify the ua-parser.js file in any way. It does not address any of the ReDoS vulnerabilities identified in the CVE.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 245,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049594,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6545",
+      "cve_id": "CVE-2025-6545",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "hmac`?\nWait, `createHmac` supports other algorithms if they are supported by the environment (e.g., Node.js `crypto`).\nBut `pbkdf2` is a browser polyfill. `create-hmac` in the browser only supports a specific set of algorithms.\nIf we look at `create-hmac` browser polyfill, it supports `md5`, `rmd160`, `ripemd160`, `sha1`, `sha224`, `sha256`, `sha384`, `sha512`.\nIf we pass an unsupported algorithm to `createHmac`, it throws an error: `new TypeError('rmd160 is not supported (we accept pull requests",
+      "generation_time_s": 34.622,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is not a valid patch at all - it appears to be fragments of reasoning/commentary text rather than actual code changes. It does not contain any diff or code modifications that would fix the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 4616,
+      "completion_tokens": 4092,
+      "cost_usd": 0.058336,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-1283",
+      "cve_id": "CVE-2023-1283",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "--- a/packages/qwik/src/core/container/serializers.ts\n+++ b/packages/qwik/src/core/container/serializers.ts\n@@ -250,14 +250,0 @@\n-  {\n-    prefix: '\\x11',\n-    test: (v) => typeof",
+      "generation_time_s": 45.714,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch is incomplete and truncated. While it appears to attempt removing the PureFunctionSerializer (which is the correct approach), the patch is cut off and doesn't show the full removal. It's unclear whether it properly removes the serializer from both its definition and the serializers array. The gold patch removes the entire PureFunctionSerializer definition and its reference in the serializers array, while the candidate patch only shows a partial removal that cannot be verified as complete.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049622,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-55173",
+      "cve_id": "CVE-2025-55173",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "--- a/packages/next/src/server/image-optimizer.ts\n+++ b/packages/next/src/server/image-optimizer.ts\n@@ -600,7 +600,11 @@\n \n     const contentDisposition = upstreamRes.headers.get('content-disposition')\n     if (contentDisposition) {\n-      res.setHeader('Content-Disposition', contentDisposition)\n+      // Prevent arbitrary file downloads by forcing inline disposition\n+      // and stripping any filename that doesn't end with a valid image extension\n+      const isAttachment = /attachment/i.test(contentDisposition)\n+      if (!isAttachment) {\n+        res.setHeader('Content-Disposition', contentDisposition",
+      "generation_time_s": 145.042,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch attempts to address the vulnerability by filtering Content-Disposition headers on external image responses, but it takes a fundamentally different approach from the gold patch and appears incomplete (the code is truncated). The gold patch fixes the root cause by removing the forwarding of request headers (including cookies) when fetching internal images, preventing attackers from leveraging authenticated sessions for malicious purposes. The candidate patch only partially addresses the symptom (Content-Disposition header manipulation) rather than the root cause (header forwarding), and the patch itself appears to be cut off mid-implementation.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 374,
+      "completion_tokens": 4092,
+      "cost_usd": 0.049852,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-49595",
+      "cve_id": "CVE-2025-49595",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 132.598,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 4408,
+      "completion_tokens": 4073,
+      "cost_usd": 0.057692,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-4727",
+      "cve_id": "CVE-2025-4727",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "--- packages/ddp-server/livedata_server.js\n+++ packages/ddp-server/livedata_server.js\n@@ -1324,7 +1324,7 @@\n     // original client's IP.\n     if (forwardedFor) {\n-      forwardedFor = forwardedFor.replace(/(\\s*,?\\s*)*$/, '');\n-      clientAddress = forwardedFor.split(',')[0].trim();\n+      clientAddress = forwardedFor.split(',')[0].trim();\n     }\n \n     return clientAddress;",
+      "generation_time_s": 91.32,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch modifies a different section of the code than where the vulnerability exists. The CVE is about the regex `/\\s*,\\s*/` in the `_clientAddress` method around line 817 of `livedata_server.js`, where `forwardedFor.trim().split(/\\s*,\\s*/)` causes inefficient regular expression complexity. The gold patch fixes this by replacing the regex split with a simple `split(',')` followed by `.map((ip) => ip.trim())`. The candidate patch addresses a different `forwardedFor` usage (around line 1324) and removes a different regex, but does not fix the actual vulnerable code path identified in the CVE.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 402,
+      "completion_tokens": 4064,
+      "cost_usd": 0.049572,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-50710",
+      "cve_id": "CVE-2023-50710",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 133.76,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 402,
+      "completion_tokens": 4064,
+      "cost_usd": 0.049572,
+      "judge_cost_usd": 0.0
+    }
+  ]
+}

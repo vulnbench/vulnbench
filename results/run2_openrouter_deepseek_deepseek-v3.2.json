@@ -1,0 +1,986 @@
+{
+  "metadata": {
+    "benchmark": "data/benchmark/vulnbench_mini.json",
+    "evaluated_at": "2026-03-09T18:02:53.073163+00:00Z",
+    "total_instances": 50,
+    "judge_model": "openrouter/anthropic/claude-opus-4-6",
+    "model": "openrouter/deepseek/deepseek-v3.2"
+  },
+  "aggregate": {
+    "total_instances": 50,
+    "total_passed": 4,
+    "pass_rate": 0.08,
+    "mean_score": 0.102,
+    "pass_rate_by_tier": {
+      "tier_1": 0.2353,
+      "tier_2": 0.0,
+      "tier_3": 0.0
+    },
+    "pass_rate_by_ecosystem": {
+      "maven": 0.0,
+      "npm": 0.0606,
+      "pip": 0.3333,
+      "rubygems": 0.0,
+      "composer": 0.0,
+      "rust": 0.0,
+      "swift": 0.0
+    },
+    "mean_generation_time_s": 10.885,
+    "total_cost_usd": 0.029226,
+    "total_judge_cost_usd": 0.0,
+    "total_prompt_tokens": 20789,
+    "total_completion_tokens": 53114
+  },
+  "results": [
+    {
+      "instance_id": "vulnbench-CVE-2024-49771",
+      "cve_id": "CVE-2024-49771",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "--- a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n+++ b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n@@ -1,5 +1,6 @@\n package net.sf.mpxj.common;\n \n+import java.io.File;\n import java.io.IOException;\n import java.io.InputStream;\n import java.util.Enumeration;\n@@ -49,7 +50,7 @@ public final class InputStreamHelper\n          {\n             ZipEntry entry = (ZipEntry) entries.nextElement();\n             String name = entry.getName();\n-            if (name.contains(\"..\"))\n+            if (isUnsafePath(name))\n             {\n                continue;\n             }\n@@ -77,4 +78,30 @@ public final class InputStreamHelper\n       }\n       return result;\n    }\n+\n+   /**\n+    * Check if a path is unsafe (contains path traversal attempts).\n+    * \n+    * @param path path to check\n+    * @return true if the path is unsafe\n+    */\n+   private static boolean isUnsafePath(String path)\n+   {\n+      if (path == null || path.isEmpty())\n+      {\n+         return false;\n+      }\n+      \n+      // Check for path traversal sequences\n+      if (path.contains(\"..\"))\n+      {\n+         return true;\n+      }\n+      \n+      // Normalize the path and check if it tries to escape the current directory\n+      File file = new File(path);\n+      String normalized = file.getPath();\n+      \n+      return normalized.startsWith(\"/\") || normalized.startsWith(\"\\\\\") || normalized.contains(\":\");\n+   }\n }",
+      "generation_time_s": 20.96,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch modifies a different method than the gold patch and uses a blocklist approach (checking for '..', absolute paths, etc.) rather than the gold patch's canonical path comparison approach. The gold patch fixes the vulnerability in `processZipStream` method by using `file.getCanonicalFile().toPath().startsWith(dir.getCanonicalFile().toPath())` which is a robust canonicalization-based check. The candidate patch doesn't modify `processZipStream` at all, leaving the incomplete CVE-2020-35460 fix in place. The blocklist approach in the candidate is also less robust as it may miss edge cases with path encoding or OS-specific path separators.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 322,
+      "completion_tokens": 666,
+      "cost_usd": 0.000353018,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43761",
+      "cve_id": "CVE-2025-43761",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n+++ b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n@@ -1,5 +1,5 @@\n {\n \t\"dependencies\": {\n-\t\t\"ckeditor4\": \"4.24.0-liferay.1\"\n+\t\t\"ckeditor4\": \"4.24.0-liferay.2\"\n \t}\n }\n--- a/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n+++ b/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n@@ -1,5 +1,5 @@\n {\n \t\"dependencies\": {\n-\t\t\"ckeditor4\": \"4.24.0-liferay.1\"\n+\t\t\"ckeditor4\": \"4.24.0-liferay.2\"\n \t}\n }",
+      "generation_time_s": 16.965,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to address the vulnerability by bumping a CKEditor dependency version, which shows understanding of the issue. However, it targets the wrong package name ('ckeditor4' instead of 'liferay-ckeditor') and the wrong version numbers ('4.24.0-liferay.1' to '4.24.0-liferay.2' instead of '4.21.0-liferay.9' to '4.21.0-liferay.10'). The package.json structure also doesn't match the actual files, suggesting the candidate is working with incorrect file contents. Since it doesn't update the correct dependency, the vulnerable code from liferay-ckeditor 4.21.0-liferay.9 would remain.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 397,
+      "completion_tokens": 534,
+      "cost_usd": 0.000320393,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-27210",
+      "cve_id": "CVE-2026-27210",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/src/js/pannellum.js\n+++ b/src/js/pannellum.js\n@@ -1,4 +1,5 @@\n /*! Pannellum - 360\u00b0 Panorama Viewer */\n+/* globals DOMPurify */\n \n (function (global, factory) {\n     if (typeof define === 'function' && define.amd) {\n@@ -20,6 +21,18 @@\n     var viewerVersion = '2.5.6';\n     var isWebGLSupported = false;\n \n+    // Safe list of allowed hotspot attributes\n+    var ALLOWED_HOTSPOT_ATTRIBUTES = [\n+        'class',\n+        'title',\n+        'alt',\n+        'tabindex',\n+        'role',\n+        'aria-label',\n+        'aria-hidden',\n+        'data-*'  // Allow all data-* attributes\n+    ];\n+\n     // Check for WebGL support\n     try {\n         var canvas = document.createElement('canvas');\n@@ -2005,6 +2018,28 @@\n             }\n         }\n \n+        /**\n+         * Sanitize hotspot attributes to prevent XSS\n+         * @private\n+         * @param {Object} attributes - Original attributes object\n+         * @returns {Object} Sanitized attributes object\n+         */\n+        function sanitizeHotspotAttributes(attributes) {\n+            if (!attributes || typeof attributes !== 'object') {\n+                return {};\n+            }\n+            \n+            var sanitized = {};\n+            for (var key in attributes) {\n+                // Allow data-* attributes and specific safe attributes\n+                if (key.startsWith('data-') || ALLOWED_HOTSPOT_ATTRIBUTES.includes(key)) {\n+                    sanitized[key] = attributes[key];\n+                }\n+            }\n+            \n+            return sanitized;\n+        }\n+\n         /**\n          * Create a new hot spot\n          * @private\n@@ -2035,6 +2070,9 @@\n                 div.style.cursor = 'pointer';\n             }\n \n+            // Sanitize attributes before applying\n+            var sanitizedAttrs = sanitizeHotspotAttributes(hotSpot.attributes);\n+\n             // Set attributes\n             if (hotSpot.attributes) {\n                 for (var attr in hotSpot.attributes) {\n@@ -2042,7 +2080,10 @@\n                         continue;\n                     }\n                     var val = hotSpot.attributes[attr];\n-                    div.setAttribute(attr, val);\n+                    // Only set sanitized attributes\n+                    if (sanitizedAttrs[attr] !== undefined) {\n+                        div.setAttribute(attr, val);\n+                    }\n                 }\n             }\n \n@@ -2168,6 +2209,9 @@\n                 div.style.cursor = 'pointer';\n             }\n \n+            // Sanitize attributes before applying\n+            var sanitizedAttrs = sanitizeHotspotAttributes(hotSpot.attributes);\n+\n             // Set attributes\n             if (hotSpot.attributes) {\n                 for (var attr in hotSpot.attributes) {\n@@ -2175,7 +2219,10 @@\n                         continue;\n                     }\n                     var val = hotSpot.attributes[attr];\n-                    div.setAttribute(attr, val);\n+                    // Only set sanitized attributes\n+                    if (sanitizedAttrs[attr] !== undefined) {\n+                        div.setAttribute(attr, val);\n+                    }\n                 }\n             }\n \n@@ -2248,6 +2295,9 @@\n                 div.style.cursor = 'pointer';\n             }\n \n+            // Sanitize attributes before applying\n+            var sanitizedAttrs = sanitizeHotspotAttributes(hotSpot.attributes);\n+\n             // Set attributes\n             if (hotSpot.attributes) {\n                 for (var attr in hotSpot.attributes) {\n@@ -2255,7 +2305,10 @@\n                         continue;\n                     }\n                     var val = hotSpot.attributes[attr];\n-                    div.setAttribute(attr, val);\n+                    // Only set sanitized attributes\n+                    if (sanitizedAttrs[attr] !== undefined) {\n+                        div.setAttribute(attr, val);\n+                    }\n                 }\n             }",
+      "generation_time_s": 36.061,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch uses an allowlist approach to filter hotspot attributes, which addresses the XSS vulnerability by blocking event handler attributes (on*) and href. However, it applies to different code locations than the gold patch - the gold patch modifies the `createHotSpot` function where attributes are set on an anchor element (`a`), while the candidate patch modifies what appear to be different/additional locations setting attributes on `div` elements. The candidate doesn't appear to patch the same `createHotSpot` function at line 1734 that the gold patch targets. Additionally, the allowlist has a 'data-*' string entry but the check uses `ALLOWED_HOTSPOT_ATTRIBUTES.includes(key)` which won't match actual data-* attributes (the string literal 'data-*' won't equal 'data-foo'), though the separate `key.startsWith('data-')` check handles this. The fundamental issue is that the candidate doesn't patch the correct location identified in the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 493,
+      "completion_tokens": 1226,
+      "cost_usd": 0.00059406,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-25228",
+      "cve_id": "CVE-2026-25228",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/src/interfaces/applicationData.js\n+++ b/src/interfaces/applicationData.js\n@@ -1,5 +1,6 @@\n const debug = require('debug')('signalk-server:interfaces:applicationData')\n const fs = require('fs')\n+const path = require('path')\n \n module.exports = function (app) {\n   const express = app.express\n@@ -39,9 +40,22 @@ module.exports = function (app) {\n   }\n \n   function validateAppId(appid) {\n-    if (appid.includes('/') || appid.length >= 30) {\n+    // Block both forward and backward slashes to prevent path traversal\n+    if (appid.includes('/') || appid.includes('\\\\') || appid.length >= 30) {\n       return false\n     }\n     return true\n   }\n+\n+  function validatePathWithinBase(basePath, userPath) {\n+    // Resolve and normalize the full path\n+    const resolvedPath = path.normalize(path.join(basePath, userPath))\n+    const normalizedBase = path.normalize(basePath)\n+    \n+    // Ensure the resolved path stays within the base directory\n+    if (!resolvedPath.startsWith(normalizedBase)) {\n+      throw new Error('Invalid path: attempted directory traversal')\n+    }\n+    return resolvedPath\n+  }\n }",
+      "generation_time_s": 44.19,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch correctly adds backslash validation to `validateAppId()`, which addresses part of the vulnerability. It also defines a `validatePathWithinBase()` helper function. However, the helper function is never actually called anywhere in the code - it's just defined but not integrated into `pathForApplicationData()` or any other path-construction function. The gold patch both adds the backslash check AND integrates the path validation into `pathForApplicationData()`. Without actually using the path validation function, the defense-in-depth measure against path traversal is incomplete. Additionally, the candidate patch's `validateAppId` uses a different pattern (returning boolean) than the original code (returning appid or null), which could break existing functionality depending on how `validateAppId` is called elsewhere.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 1304,
+      "completion_tokens": 1511,
+      "cost_usd": 0.00091322,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-21892",
+      "cve_id": "CVE-2026-21892",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "--- a/parsl/monitoring/visualization/views.py\n+++ b/parsl/monitoring/visualization/views.py\n@@ -1,3 +1,4 @@\n+import sqlalchemy as sa\n from flask import Blueprint, render_template, request, jsonify, abort\n import pandas as pd\n import plotly\n@@ -43,7 +44,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -88,7 +89,7 @@\n                                      WHERE task.task_id = try.task_id AND task.run_id='%s' and try.run_id='%s'\"\"\"\n                                      % (workflow_id, workflow_id), db.engine)\n     \"\"\"\n-    df_task_tries = pd.read_sql_query(\"\"\"SELECT try.try_id, try.task_id, try.try_time_running, try.try_time_returned,\n+    query = \"\"\"SELECT try.try_id, try.task_id, try.try_time_running, try.try_time_returned,\n                                          try.try_worker_id, status.task_status_name, try.try_seq_num,\n                                          task.task_func_name, task.task_time_submitted, task.task_time_returned,\n                                          task.task_mem_peak, task.task_fail_count, task.task_fail_cost,\n@@ -103,7 +104,8 @@\n                                          WHERE status.task_id = task.task_id and status.run_id = task.run_id\n                                         )\n                                      WHERE task.task_id = try.task_id AND task.run_id=:run_id and try.run_id=:run_id\"\"\"\n-                                     % (workflow_id, workflow_id), db.engine)\n+    df_task_tries = pd.read_sql_query(query, db.engine, \n+                                      params={\"run_id\": workflow_id})\n \n     # Group by task_id and try_seq_num\n     df_task_tries_grouped = df_task_tries.groupby(['task_id', 'try_seq_num'])\n@@ -142,7 +144,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -183,7 +185,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -224,7 +226,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -265,7 +267,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -306,7 +308,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -347,7 +349,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -388,7 +390,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -429,7 +431,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -470,7 +472,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -511,7 +513,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -552,7 +554,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -593,7 +595,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -634,7 +636,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -675,7 +677,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -716,7 +718,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -757,7 +759,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -798,7 +800,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -839,7 +841,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -880,7 +882,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -921,7 +923,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -962,7 +964,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1003,7 +1005,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1044,7 +1046,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1085,7 +1087,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1126,7 +1128,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1167,7 +1169,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1208,7 +1210,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1249,7 +1251,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1290,7 +1292,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1331,7 +1333,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1372,7 +1374,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1413,7 +1415,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1454,7 +1456,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1495,7 +1497,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1536,7 +1538,7 @@\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      ) WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+                                      ) WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})\n \n     df = pd.read_sql_query(query, db.engine)\n \n@@ -1577,7 +1579",
+      "generation_time_s": 111.62,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the same root cause as the gold patch by replacing unsafe string formatting (%s) with parameterized queries using :run_id placeholders. It covers more instances than the gold patch (which only fixes 2 locations), fixing many additional SQL injection points throughout the file. However, there's a concern about how the parameters are passed - the candidate appears to pass params as a dict directly in the SQL string construction (e.g., `\"\"\" ... WHERE task.run_id=:run_id\"\"\", {\"run_id\": workflow_id})`) rather than through pd.read_sql_query's params argument. This pattern may not work correctly without wrapping in sqlalchemy.text(), though the candidate does import sqlalchemy. Despite this implementation concern, the fundamental approach of parameterization is correct and addresses the SQL injection vulnerability.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 987,
+      "completion_tokens": 4096,
+      "cost_usd": 0.0018131,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-68143",
+      "cve_id": "CVE-2025-68143",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "--- a/src/git/src/mcp_server_git/server.py\n+++ b/src/git/src/mcp_server_git/server.py\n@@ -1,4 +1,4 @@\n-import asyncio\n+import asyncio\n import json\n import os\n import subprocess\n@@ -6,7 +6,6 @@ import tempfile\n from contextlib import asynccontextmanager\n from pathlib import Path\n from typing import Any, AsyncGenerator, Dict, List, Optional\n-\n from mcp import ClientSession, StdioServerParameters\n from mcp.server import Server\n from mcp.server.models import Tool\n@@ -14,7 +13,6 @@ import mcp.server.stdio\n \n from . import git_operations\n \n-\n logger = logging.getLogger(__name__)\n \n \n@@ -25,7 +23,6 @@ class GitServer:\n         self,\n         repo_path: Optional[str] = None,\n         enable_git_init: bool = False,\n-        enable_git_init: bool = False,\n     ) -> None:\n         self.repo_path = Path(repo_path) if repo_path else None\n         self.enable_git_init = enable_git_init\n@@ -33,7 +30,6 @@ class GitServer:\n     async def initialize(self) -> List[Tool]:\n         \"\"\"Initialize the server and return available tools.\"\"\"\n         tools = [\n-            self._create_git_init_tool(),\n             self._create_git_status_tool(),\n             self._create_git_log_tool(),\n             self._create_git_diff_tool(),\n@@ -44,31 +40,6 @@ class GitServer:\n \n         return tools\n \n-    def _create_git_init_tool(self) -> Tool:\n-        return Tool(\n-            name=\"git_init\",\n-            description=\"Initialize a new Git repository at the specified path\",\n-            inputSchema={\n-                \"type\": \"object\",\n-                \"properties\": {\n-                    \"path\": {\n-                        \"type\": \"string\",\n-                        \"description\": \"Path where to initialize the Git repository\",\n-                    }\n-                },\n-                \"required\": [\"path\"],\n-            },\n-        )\n-\n-    async def handle_git_init(self, arguments: Dict[str, Any]) -> str:\n-        \"\"\"Handle git_init tool request.\"\"\"\n-        if not self.enable_git_init:\n-            return \"Error: git_init is disabled for security reasons\"\n-\n-        path = Path(arguments[\"path\"])\n-        await git_operations.git_init(str(path))\n-        return f\"Initialized empty Git repository in {path}\"\n-\n     def _create_git_status_tool(self) -> Tool:\n         return Tool(\n             name=\"git_status\",\n@@ -156,9 +127,6 @@ class GitServer:\n         \"\"\"Handle tool execution requests.\"\"\"\n         tool_name = request.name\n \n-        if tool_name == \"git_init\":\n-            return await self.handle_git_init(request.arguments)\n-\n         if tool_name == \"git_status\":\n             return await self.handle_git_status(request.arguments)\n \n@@ -184,7 +152,6 @@ class GitServer:\n \n         raise ValueError(f\"Unknown tool: {tool_name}\")\n \n-\n async def run_server() -> None:\n     \"\"\"Run the Git server.\"\"\"\n     import argparse\n@@ -195,12 +162,6 @@ async def run_server() -> None:\n         help=\"Path to the Git repository (default: current directory)\",\n     )\n     parser.add_argument(\n-        \"--enable-git-init\",\n-        action=\"store_true\",\n-        help=\"Enable git_init tool (disabled by default for security)\",\n-        default=False,\n-    )\n-    parser.add_argument(\n         \"--verbose\", \"-v\", action=\"store_true\", help=\"Enable verbose logging\"\n     )\n \n@@ -208,7 +169,6 @@ async def run_server() -> None:\n \n     server = GitServer(\n         repo_path=args.repo_path,\n-        enable_git_init=args.enable_git_init,\n     )\n \n     async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):",
+      "generation_time_s": 37.264,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the same vulnerability (removing git_init functionality) but operates on a different version/structure of the codebase than the gold patch. The gold patch modifies server.py with GitTools enum, BaseModel classes, and specific function definitions, while the candidate patch modifies a class-based GitServer structure. The candidate correctly removes the git_init tool, its handler, its creation method, and the CLI flag, which addresses the root cause. However, it's unclear whether this patch applies to the actual affected file since the code structure differs significantly from the gold patch's target. The candidate also has issues like removing a duplicate 'enable_git_init' parameter line (suggesting the base code had a bug) and keeping 'enable_git_init' in the constructor despite removing its usage. The patch appears to target a different version of the codebase than what's actually affected.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 332,
+      "completion_tokens": 1122,
+      "cost_usd": 0.00207088,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43795",
+      "cve_id": "CVE-2024-43795",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "rubygems",
+      "model_patch": "--- a/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n+++ b/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n@@ -1,6 +1,15 @@\n // auth.js - Authentication utilities\n+\n+function escapeHtml(unsafe) {\n+  if (typeof unsafe !== 'string') return unsafe;\n+  return unsafe\n+    .replace(/&/g, \"&amp;\")\n+    .replace(/</g, \"&lt;\")\n+    .replace(/>/g, \"&gt;\")\n+    .replace(/\"/g, \"&quot;\")\n+    .replace(/'/g, \"&#039;\");\n+}\n \n function handleLogin() {\n   const username = document.getElementById('username').value;\n@@ -20,7 +29,7 @@ function handleLogin() {\n       if (response.redirect) {\n         window.location.href = response.redirect;\n       } else if (response.error) {\n-        document.getElementById('error-message').innerHTML = response.error;\n+        document.getElementById('error-message').textContent = response.error;\n         document.getElementById('error-message').style.display = 'block';\n       }\n     })\n@@ -36,7 +45,7 @@ function handleLogin() {\n // Handle URL parameters for pre-filling username\n document.addEventListener('DOMContentLoaded', function() {\n   const urlParams = new URLSearchParams(window.location.search);\n-  const username = urlParams.get('username');\n+  const username = escapeHtml(urlParams.get('username'));\n   if (username && document.getElementById('username')) {\n-    document.getElementById('username').value = username;\n+    document.getElementById('username').value = escapeHtml(username);\n   }\n--- a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n+++ b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n@@ -1,5 +1,13 @@\n <template>\n   <div class=\"login-container\">\n+    <script>\n+    function escapeHtml(unsafe) {\n+      if (typeof unsafe !== 'string') return unsafe;\n+      return unsafe\n+        .replace(/&/g, \"&amp;\")\n+        .replace(/</g, \"&lt;\")\n+        .replace(/>/g, \"&gt;\")\n+        .replace(/\"/g, \"&quot;\")\n+        .replace(/'/g, \"&#039;\");\n+    }\n+    </script>\n     <form @submit.prevent=\"handleSubmit\">\n       <div v-if=\"error\" class=\"error-message\">\n-        {{ error }}\n+        {{ $options.filters.escapeHtml(error) }}\n       </div>\n       <div class=\"form-group\">\n         <label for=\"username\">Username</label>\n         <input\n           id=\"username\"\n           type=\"text\"\n           v-model=\"username\"\n-          :value=\"initialUsername\"\n+          :value=\"$options.filters.escapeHtml(initialUsername)\"\n         />\n       </div>\n@@ -30,6 +47,11 @@\n   name: 'Login',\n   data() {\n     return {\n+      initialUsername: this.getInitialUsername(),\n+    };\n+  },\n+  data() {\n+    return {\n       username: '',\n       password: '',\n       error: null\n@@ -37,7 +59,9 @@\n   },\n   methods: {\n     getInitialUsername() {\n-      return this.$route.query.username || '';\n+      const username = this.$route.query.username || '';\n+      // Use the escapeHtml function to prevent XSS\n+      return escapeHtml(username);\n     },\n     async handleSubmit() {\n       try {\n@@ -55,6 +79,11 @@\n       }\n     }\n   },\n+  filters: {\n+    escapeHtml(value) {\n+      return escapeHtml(value);\n+    }\n+  },\n   mounted() {\n     this.username = this.getInitialUsername();\n   }",
+      "generation_time_s": 33.877,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch completely misses the actual vulnerability. The CVE is about a reflected XSS via the `redirect` parameter in the login flow - specifically, the `redirect` URL parameter could contain malicious JavaScript that gets executed when `window.location` is set to the decoded redirect value. The gold patch fixes this by (1) stripping the redirect URL to only its pathname and search components (removing any protocol/host that could enable javascript: URLs) and (2) validating that the redirect starts with a single '/' to ensure it's a relative path. The candidate patch instead adds HTML escaping functions and changes `innerHTML` to `textContent` in what appears to be a completely different version of the auth.js file, and adds broken/duplicate code to Login.vue without addressing the redirect parameter sanitization at all.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 306,
+      "completion_tokens": 1146,
+      "cost_usd": 0.00051504,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9910",
+      "cve_id": "CVE-2025-9910",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/packages/jsondiffpatch/src/formatters/html.ts\n+++ b/packages/jsondiffpatch/src/formatters/html.ts\n@@ -1,3 +1,14 @@\n+function escapeHtml(text: string): string {\n+  const map: Record<string, string> = {\n+    '&': '&amp;',\n+    '<': '&lt;',\n+    '>': '&gt;',\n+    '\"': '&quot;',\n+    \"'\": '&#x27;',\n+  };\n+  return text.replace(/[&<>\"']/g, (char) => map[char]);\n+}\n+\n export default class HtmlFormatter {\n   private currentPath: string[] = [];\n   private buffer = '';\n@@ -25,7 +36,7 @@ export default class HtmlFormatter {\n     if (node.value !== undefined) {\n       const value = node.value;\n       const formattedValue =\n-        typeof value === 'string' ? `\"${value}\"` : String(value);\n+        typeof value === 'string' ? `\"${escapeHtml(value)}\"` : escapeHtml(String(value));\n       this.buffer += `<span class=\"jsondiffpatch-value\">${formattedValue}</span>`;\n     }\n   }\n@@ -33,7 +44,7 @@ export default class HtmlFormatter {\n   public nodeBegin(\n     name: string,\n     context: { type: 'added' | 'removed' | 'unchanged' },\n-  ) {\n+  ): void {\n     const path = this.currentPath.concat(name);\n     const pathStr = path.join('/');\n     const type = context.type;\n@@ -42,7 +53,7 @@ export default class HtmlFormatter {\n     this.buffer += `<li class=\"jsondiffpatch-node jsondiffpatch-node-${type}\">`;\n     this.buffer += `<div class=\"jsondiffpatch-property-name\"`;\n     this.buffer += ` data-path=\"${pathStr}\">`;\n-    this.buffer += name;\n+    this.buffer += escapeHtml(name);\n     this.buffer += '</div>';\n     this.buffer += '<div class=\"jsondiffpatch-value-container\">';\n     this.currentPath = path;",
+      "generation_time_s": 24.118,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch attempts to address XSS by adding HTML escaping to node names and values, which shows understanding of the vulnerability. However, it appears to be patching a different version/structure of the file than what actually exists. The gold patch targets specific locations in the real `html.ts` file (the `nodeBegin` method escaping `leftKey` in both `data-key` attribute and property name div, the error formatter escaping, and updating the `htmlEscape` function signature). The candidate patch works against what appears to be a completely different class structure (no `BaseFormatter` inheritance, different method signatures, different buffer handling). While the concept is correct, the patch would likely not apply to the actual affected file and thus would not fix the vulnerability in practice.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 385,
+      "completion_tokens": 801,
+      "cost_usd": 0.000423965,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43954",
+      "cve_id": "CVE-2025-43954",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/ui/src/util/extendHeading.js\n+++ b/ui/src/util/extendHeading.js\n@@ -1,4 +1,5 @@\n import { slugify } from './slugify'\n+import { escapeHtml } from './escapeHtml'\n \n export default function (md, { toc = {}, anchor = {} } = {}) {\n   const originalHeadingOpen = md.renderer.rules.heading_open\n@@ -18,7 +19,9 @@ export default function (md, { toc = {}, anchor = {} } = {}) {\n     const title = tokens[idx + 1].content\n     const slug = slugify(title)\n     \n-    tokens[idx + 1].children.forEach(token => {\n+    // Escape header content to prevent XSS, especially when no-html is set\n+    const escapedTitle = escapeHtml(title)\n+    tokens[idx + 1].children = [{ type: 'text', content: escapedTitle }]\n     \n     if (toc && toc.render) {\n       toc.render({\n@@ -26,7 +29,6 @@ export default function (md, { toc = {}, anchor = {} } = {}) {\n         title,\n         slug\n       })\n-    })\n     \n     // Add anchor if enabled\n     if (anchor && anchor.render) {",
+      "generation_time_s": 20.168,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch attempts to address XSS by escaping HTML in header content, which shows understanding of the issue. However, it operates on a completely different code structure than the gold patch - it imports a non-existent 'escapeHtml' utility, uses a different module structure (with slugify imported differently), and introduces syntax errors by removing a closing parenthesis/brace without properly restructuring the code. The patch would likely break functionality and doesn't match the actual file structure being patched.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 245,
+      "completion_tokens": 646,
+      "cost_usd": 0.00030918,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43411",
+      "cve_id": "CVE-2024-43411",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/core/ckeditor_version-check.js\n+++ b/core/ckeditor_version-check.js\n@@ -1,5 +1,5 @@\n /*\n- * Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.\n+ * Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.\n  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license\n  */\n \n@@ -47,7 +47,7 @@\n \t\t\t\t// (https://dev.ckeditor.com/ticket/13125)\n \t\t\t\tCKEDITOR.scriptLoader.load( scriptUrl, function( success ) {\n \t\t\t\t\tif ( success ) {\n-\t\t\t\t\t\twindow[ callbackName ]( data );\n+\t\t\t\t\t\twindow[ callbackName ]( sanitizeVersionData( data ) );\n \t\t\t\t\t}\n \t\t\t\t} );\n \t\t\t} );\n@@ -55,4 +55,28 @@\n \t}\n } )();\n \n+/**\n+ * Sanitizes version check data to prevent XSS attacks.\n+ * @param {Object} data The raw data received from the version check server.\n+ * @returns {Object} Sanitized data safe for use.\n+ * @private\n+ */\n+function sanitizeVersionData( data ) {\n+\tvar sanitized = {};\n+\t\n+\t// Only copy expected properties and sanitize their values\n+\tif ( data && typeof data === 'object' ) {\n+\t\t// Expected properties from version check response\n+\t\tvar allowedProps = [ 'version', 'url', 'notice', 'security' ];\n+\t\t\n+\t\tfor ( var i = 0; i < allowedProps.length; i++ ) {\n+\t\t\tvar prop = allowedProps[ i ];\n+\t\t\tif ( data[ prop ] !== undefined ) {\n+\t\t\t\tsanitized[ prop ] = CKEDITOR.tools.htmlEncode( String( data[ prop ] ) );\n+\t\t\t}\n+\t\t}\n+\t}\n+\t\n+\treturn sanitized;\n+}\n+\n // %REMOVE_START%",
+      "generation_time_s": 24.571,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch attempts to sanitize data through HTML encoding, but it fundamentally misunderstands the vulnerability and the code structure. The gold patch addresses the issue by: (1) replacing `versionInfo.current.original` (which preserves raw input) with a reconstructed `name` property built from parsed integer values, preventing injection through version strings; (2) wrapping JSON.parse in a try-catch to handle malicious responses; (3) using sanitized/reconstructed version names in all notification messages. The candidate patch operates on a completely different code path (JSONP callback), applies HTML encoding to wrong properties, and doesn't address the actual vulnerable code paths where version strings are inserted into messages.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 460,
+      "completion_tokens": 776,
+      "cost_usd": 0.00041448,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-32472",
+      "cve_id": "CVE-2024-32472",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/src/element/embeddable.ts\n+++ b/src/element/embeddable.ts\n@@ -1,3 +1,4 @@\n+import { sanitizeHTML, sanitizeAttribute } from \"../utils/sanitize\";\n import { EMBEDDABLE_TYPES } from \"../constants\";\n \n export interface EmbeddableElement {\n@@ -45,7 +46,7 @@ export const createEmbeddableIframe = (\n   const iframe = document.createElement(\"iframe\");\n   \n   if (element.embedType === \"srcdoc\") {\n-    iframe.srcdoc = element.content;\n+    iframe.srcdoc = sanitizeHTML(element.content);\n   } else {\n     iframe.src = element.src;\n   }\n@@ -53,15 +54,18 @@ export const createEmbeddableIframe = (\n   iframe.setAttribute(\"frameborder\", \"0\");\n   iframe.setAttribute(\"allowfullscreen\", \"true\");\n   \n-  // Set sandbox attributes based on embed type\n+  // Set sandbox attributes with least privilege\n   const sandboxAttrs = [\"allow-scripts\", \"allow-popups\", \"allow-forms\"];\n   \n-  // Only add allow-same-origin for embeds that need it\n+  // Only add allow-same-origin for specific trusted embeds\n   const needsSameOrigin = [\n     \"gist.github.com\",\n     \"codepen.io\",\n+    \"jsfiddle.net\",\n+    \"codesandbox.io\",\n   ].some(domain => element.src.includes(domain));\n   \n   if (needsSameOrigin) {\n     sandboxAttrs.push(\"allow-same-origin\");\n   }\n@@ -69,11 +73,11 @@ export const createEmbeddableIframe = (\n   iframe.setAttribute(\"sandbox\", sandboxAttrs.join(\" \"));\n   \n   // Set additional attributes if provided\n   if (element.customAttributes) {\n     Object.entries(element.customAttributes).forEach(([key, value]) => {\n-      iframe.setAttribute(key, value);\n+      iframe.setAttribute(sanitizeAttribute(key), sanitizeAttribute(value));\n     });\n   }\n   \n   return iframe;\n@@ -89,11 +93,11 @@ export const parseEmbedLink = (url: string): EmbeddableElement | null => {\n   }\n   \n   // Validate and sanitize URL\n   try {\n-    const parsedUrl = new URL(url);\n-    if (!isValidEmbedDomain(parsedUrl.hostname)) {\n+    const sanitizedUrl = sanitizeAttribute(url);\n+    const parsedUrl = new URL(sanitizedUrl);\n+    \n+    if (!isValidEmbedDomain(sanitizeAttribute(parsedUrl.hostname))) {\n       return null;\n     }\n     \n@@ -101,9 +105,9 @@ export const parseEmbedLink = (url: string): EmbeddableElement | null => {\n       type: EMBEDDABLE_TYPES.embed,\n       src: parsedUrl.toString(),\n       embedType: \"url\",\n       content: \"\",\n-      customAttributes: {},\n+      customAttributes: { src: parsedUrl.toString() },\n     };\n   } catch {\n     return null;\n@@ -114,8 +118,9 @@ const isValidEmbedDomain = (hostname: string): boolean => {\n   const allowedDomains = [\n     \"gist.github.com\",\n     \"codepen.io\",\n     \"youtube.com\",\n     \"vimeo.com\",\n+    \"jsfiddle.net\",\n+    \"codesandbox.io\",\n   ];\n-  \n   return allowedDomains.some(domain => hostname.endsWith(domain));\n };",
+      "generation_time_s": 30.937,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch takes a fundamentally different approach by importing sanitize utilities and modifying functions that don't exist in the actual source file. The gold patch modifies `src/element/embeddable.ts` by: (1) creating an ALLOW_SAME_ORIGIN whitelist for domains that need same-origin sandbox permissions, (2) adding sandbox configuration to all embed link return values, and (3) refactoring validateHostname to matchHostname. The candidate patch appears to be written against a different version of the file with different function signatures (createEmbeddableIframe, parseEmbedLink) that don't match the actual codebase. It also imports from a non-existent `../utils/sanitize` module. While it shows some understanding of the XSS issue (sanitizing HTML, restricting allow-same-origin), it doesn't address the actual code paths in the real file.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 513,
+      "completion_tokens": 1047,
+      "cost_usd": 0.00053124,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2016-15025",
+      "cve_id": "CVE-2016-15025",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/app/templates/src/server/_app.js\n+++ b/app/templates/src/server/_app.js\n@@ -1,6 +1,7 @@\n var express = require('express'),\n     logger = require('morgan'),\n     bodyParser = require('body-parser'),\n+    escapeHtml = require('escape-html'),\n     app = express();\n \n // view engine setup\n@@ -31,7 +32,7 @@ app.use(function(req, res, next) {\n \n // error handlers\n app.use(function(req, res, next) {\n-    var err = new Error('Not Found: ' + req.url);\n+    var err = new Error('Not Found: ' + escapeHtml(req.url));\n     err.status = 404;\n     next(err);\n });",
+      "generation_time_s": 13.155,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the XSS vulnerability by escaping the user input (req.url) in the error handler using escape-html, which does mitigate the reflected XSS attack vector. However, it takes a fundamentally different approach than the gold patch and operates on a different version/structure of the file. The gold patch routes invalid asset requests (/js/*, /images/*, /styles/*) through a custom 404 handler to prevent XSS, while the candidate escapes HTML in the error message. The candidate's approach is reasonable for preventing XSS but introduces a new dependency (escape-html) and doesn't match the file structure expected by the gold patch, suggesting it may not apply correctly to the affected version.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 324,
+      "completion_tokens": 381,
+      "cost_usd": 0.00022902,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-25929",
+      "cve_id": "CVE-2022-25929",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/smoothie.js\n+++ b/smoothie.js\n@@ -1,4 +1,15 @@\n (function(exports) {\n+  // Helper function to escape HTML entities\n+  function escapeHtml(text) {\n+    if (typeof text !== 'string') {\n+      return text;\n+    }\n+    return text\n+      .replace(/&/g, '&amp;')\n+      .replace(/</g, '&lt;')\n+      .replace(/>/g, '&gt;')\n+      .replace(/\"/g, '&quot;');\n+  }\n \n   /**\n    * Initialises a new <code>TimeSeries</code> with optional data options.\n@@ -20,6 +31,7 @@\n     this.data = [];\n \n     this.options = options || {};\n+    this.options.tooltipLabel = escapeHtml(this.options.tooltipLabel);\n   };\n \n   /**\n@@ -32,6 +44,10 @@\n    *          the time for the data point\n    */\n   TimeSeries.prototype.add = function(time, value) {\n+    // Sanitize strokeStyle if it exists in options\n+    if (this.options.strokeStyle) {\n+      this.options.strokeStyle = escapeHtml(this.options.strokeStyle);\n+    }\n     this.data.push({ time: time, value: value });\n     if (this.data.length > this.options.maxDataLength) {\n       this.data.splice(0, this.data.length - this.options.maxDataLength);\n@@ -40,6 +56,7 @@\n \n   TimeSeries.prototype.dropOldData = function(oldestValidTime, maxDataSetLength) {\n     // We must always keep one data point as a reference for later values\n+    // This method doesn't use strokeStyle or tooltipLabel, so no changes needed\n     var removeCount = 0;\n     while (this.data.length - removeCount >= maxDataSetLength &&\n            this.data[removeCount + 1].time < oldestValidTime) {\n@@ -404,7 +421,7 @@\n         var label = series.options.tooltipLabel || series.options.label;\n         var value = series.options.engine === 'canvas' ?\n           series.atTime(time) : series.currentValue;\n-        html += '<li><span style=\"color:' + series.options.strokeStyle +\n+        html += '<li><span style=\"color:' + escapeHtml(series.options.strokeStyle) +\n           '\">' + label + '</span>: ' + value.toFixed(series.options.tooltipPrecision) + '</li>';\n       }\n     }\n@@ -412,7 +429,7 @@\n     if (html) {\n       html = '<ul>' + html + '</ul>';\n       if (this.options.tooltipLabel) {\n-        html = this.options.tooltipLabel + html;\n+        html = escapeHtml(this.options.tooltipLabel) + html;\n       }\n       this.el.style.display = 'block';\n       this.el.innerHTML = html;",
+      "generation_time_s": 33.584,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to fix the XSS vulnerability through HTML escaping rather than DOM-based construction, which is a valid approach in principle. However, it modifies the wrong code sections - the actual vulnerable `tooltipFormatter` function (around line 378-395 in the original) that constructs HTML with `strokeStyle` and `tooltipLabel` is not patched. Instead, the candidate patches code that doesn't exist in the original file (lines 404-429 appear to be from a different version or different part of the code). The escaping of `strokeStyle` in the `add()` method would break the actual CSS color functionality since it would be escaped every time data is added. The core vulnerable `tooltipFormatter` function remains unpatched.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 262,
+      "completion_tokens": 976,
+      "cost_usd": 0.001595,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2019-13127",
+      "cve_id": "CVE-2019-13127",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/javascript/examples/grapheditor/www/js/Dialogs.js\n+++ b/javascript/examples/grapheditor/www/js/Dialogs.js\n@@ -1,3 +1,17 @@\n+/**\n+ * Helper function to escape HTML attribute values\n+ * @param {string} str - The string to escape\n+ * @return {string} The escaped string\n+ */\n+function mxGraphEditorEscapeHtmlAttr(str) {\n+  if (str == null) return '';\n+  return String(str).replace(/[\"&'<>]/g, function (match) {\n+    return {'\"': '&quot;', '&': '&amp;', \"'\": '&#39;', \n+            '<': '&lt;', '>': '&gt;'}[match];\n+  });\n+}\n+\n+\n /**\n  * Constructs a new color dialog.\n  */\n@@ -116,7 +130,7 @@\n \t\t{\n \t\t\tvar color = colors[i];\n \t\t\tvar div = document.createElement('div');\n-\t\t\tdiv.style.backgroundColor = color;\n+\t\t\tdiv.style.backgroundColor = mxGraphEditorEscapeHtmlAttr(color);\n \t\t\tdiv.className = 'geColorItem';\n \t\t\tdiv.setAttribute('title', color);\n \t\t\t\n@@ -132,7 +146,7 @@\n \t\t\t\t{\n \t\t\t\t\tif (color != 'none')\n \t\t\t\t\t{\n-\t\t\t\t\t\tinput.value = color;\n+\t\t\t\t\t\tinput.value = mxGraphEditorEscapeHtmlAttr(color);\n \t\t\t\t\t}\n \t\t\t\t\t\n \t\t\t\t\thideDialog();\n@@ -169,7 +183,7 @@\n \t\t{\n \t\t\tvar color = colors[i];\n \t\t\tvar div = document.createElement('div');\n-\t\t\tdiv.style.backgroundColor = color;\n+\t\t\tdiv.style.backgroundColor = mxGraphEditorEscapeHtmlAttr(color);\n \t\t\tdiv.className = 'geColorItem';\n \t\t\tdiv.setAttribute('title', color);\n \t\t\t\n@@ -185,7 +199,7 @@\n \t\t\t\t{\n \t\t\t\t\tif (color != 'none')\n \t\t\t\t\t{\n-\t\t\t\t\t\tinput.value = color;\n+\t\t\t\t\t\tinput.value = mxGraphEditorEscapeHtmlAttr(color);\n \t\t\t\t\t}\n \t\t\t\t\t\n \t\t\t\t\thideDialog();",
+      "generation_time_s": 26.174,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch attempts to fix the XSS vulnerability by escaping HTML attributes in color values at various points, but it misses the critical fix location. The gold patch validates the user-supplied color input against a hex color regex pattern before applying it, which is the proper fix for the root cause - unsanitized user input in the 'apply' button handler. The candidate patch escapes predefined color palette values (which are already safe) but does not validate or sanitize the user-typed color input in the apply button callback, leaving the core vulnerability unpatched.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 437,
+      "completion_tokens": 851,
+      "cost_usd": 0.000437,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-1726",
+      "cve_id": "CVE-2022-1726",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/src/extensions/export/bootstrap-table-export.js\n+++ b/src/extensions/export/bootstrap-table-export.js\n@@ -1,4 +1,5 @@\n (function (global, factory) {\n+  /* eslint-disable no-undef */\n   if (typeof define === 'function' && define.amd) {\n     // AMD. Register as an anonymous module.\n     define(['jquery'], factory);\n@@ -246,7 +247,7 @@\n         html = '<table>'\n \n         if (doctype === 'xhtml') {\n-          html = '<?xml version=\"1.0\" encoding=\"' + charset + '\"?>' +\n+          html = '<?xml version=\"1.0\" encoding=\"' + escapeHtml(charset) + '\"?>' +\n             '<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" ' +\n             '\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">' +\n             '<html xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"' + lang + '\" xml:lang=\"' + lang + '\">' +\n@@ -260,7 +261,7 @@\n         }\n \n         if (header) {\n-          html += '<head><title>' + title + '</title>'\n+          html += '<head><title>' + escapeHtml(title) + '</title>'\n \n           if (exportOptions.exportHiddenColumns) {\n             columns = columns.concat(hiddenColumns)\n@@ -274,7 +275,7 @@\n               html += '<style>'\n \n               for (const key in exportStyling) {\n-                html += key + ' { ' + exportStyling[key] + ' }'\n+                html += escapeHtml(key) + ' { ' + escapeHtml(exportStyling[key]) + ' }'\n               }\n \n               html += '</style>'\n@@ -282,7 +283,7 @@\n           }\n \n           if (charset) {\n-            html += '<meta charset=\"' + charset + '\">'\n+            html += '<meta charset=\"' + escapeHtml(charset) + '\">'\n           }\n \n           html += '</head>'\n@@ -295,7 +296,7 @@\n           html += '<thead><tr>'\n \n           for (const column of columns) {\n-            html += '<th>' + column.title + '</th>'\n+            html += '<th>' + escapeHtml(column.title) + '</th>'\n           }\n \n           html += '</tr></thead>'\n@@ -309,7 +310,7 @@\n \n             for (const column of columns) {\n               const value = Utils.getItemField(item, column.field, that.options.escape)\n-              html += '<td>' + (value !== undefined ? value : '') + '</td>'\n+              html += '<td>' + (value !== undefined ? escapeHtml(value) : '') + '</td>'\n             }\n \n             html += '</tr>'\n@@ -324,6 +325,16 @@\n         return html\n       }\n \n+      function escapeHtml(text) {\n+        if (typeof text !== 'string') {\n+          return text\n+        }\n+        \n+        return text\n+          .replace(/&/g, '&amp;')\n+          .replace(/</g, '&lt;')\n+          .replace(/>/g, '&gt;')\n+      }\n+\n       function exportTable (type, options) {\n         if (that.options.pagination && !exportOptions.ignorePagination) {\n           const data = that.getData()",
+      "generation_time_s": 34.276,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch attempts to address XSS by adding HTML escaping in the export HTML generation, but it doesn't address the root cause identified in the gold patch. The gold patch removes the `escape: false` option that was being passed to `exportTable()` and removes the default `onCellHtmlData` callback that could pass through raw HTML. The candidate patch modifies a different part of the code (the HTML table generation function) and doesn't touch the critical `escape: false` setting or the default exportOptions. Additionally, the candidate patch appears to be modifying a built/compiled version of the file rather than the source file specified in the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 267,
+      "completion_tokens": 1145,
+      "cost_usd": 0.000529823,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-24728",
+      "cve_id": "CVE-2022-24728",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/core/htmldataprocessor.js\n+++ b/core/htmldataprocessor.js\n@@ -1,4 +1,4 @@\n-\ufeff/*\n+/*\n  * Copyright (c) 2003-2022, CKSource - Frederico Knabben. All rights reserved.\n  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license\n  */\n@@ -347,7 +347,7 @@\n \t\t\t\t// This is not a real element, may be a comment, script, etc.\n \t\t\t\t// Convert it to a custom tag, so it will be preserved in the output.\n \t\t\t\tif ( elementType == CKEDITOR.NODE_ELEMENT && name.indexOf( '!' ) === 0 ) {\n-\t\t\t\t\twriter.openTag( 'cke:' + name.substr( 1 ), attributes );\n+\t\t\t\t\twriter.openTag( 'cke:' + name.substr( 1 ).replace( /[<>]/g, '' ), attributes );\n \t\t\t\t\twriter.closeTag( 'cke:' + name.substr( 1 ) );\n \t\t\t\t\treturn;\n \t\t\t\t}\n@@ -361,6 +361,11 @@\n \t\t\t\t// Ignore <? ... > and <! ... >.\n \t\t\t\tif ( name[ 0 ] == '?' || name[ 0 ] == '!' )\n \t\t\t\t\treturn;\n+\n+\t\t\t\t// Sanitize element name to prevent XSS through malformed HTML\n+\t\t\t\tif ( /[<>]/.test( name ) ) {\n+\t\t\t\t\treturn;\n+\t\t\t\t}\n \t\t\t}\n \n \t\t\t// Open tag.\n@@ -387,6 +392,11 @@\n \t\t\t\t// This is a closing tag.\n \t\t\t\tvar name = parts[ 1 ].toLowerCase();\n \n+\t\t\t\t// Sanitize element name to prevent XSS through malformed HTML\n+\t\t\t\tif ( /[<>]/.test( name ) ) {\n+\t\t\t\t\treturn;\n+\t\t\t\t}\n+\n \t\t\t\t// Close tag.\n \t\t\t\twriter.closeTag( name );\n \n@@ -413,6 +423,12 @@\n \t\t\t\t// IE leaves them uppercase.\n \t\t\t\tvar attrName = attr[ 1 ].toLowerCase();\n \n+\t\t\t\t// Sanitize attribute names to prevent XSS through malformed HTML\n+\t\t\t\tif ( /[<>\"'`]/.test( attrName ) ) {\n+\t\t\t\t\t// Skip this attribute if it contains dangerous characters\n+\t\t\t\t\tcontinue;\n+\t\t\t\t}\n+\n \t\t\t\t// This is a workaround for attributes without value and with no '=' sign (https://dev.ckeditor.com/ticket/7888).\n \t\t\t\t// This kind of attributes are ignored by IE8.\n \t\t\t\tvar attrValue = attr[ 2 ] || attr[ 3 ] || attr[ 4 ] || '';\n@@ -425,6 +441,11 @@\n \t\t\t\t\tattrValue = attrValue.replace( /&#([0-9]{1,8});/g, replaceNumeric );\n \t\t\t\t}\n \n+\t\t\t\t// Sanitize attribute values to prevent XSS\n+\t\t\t\tif ( /javascript:/i.test( attrValue ) ) {\n+\t\t\t\t\tcontinue;\n+\t\t\t\t}\n+\n \t\t\t\tattrs[ attrName ] = attrValue;\n \t\t\t}",
+      "generation_time_s": 32.368,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Judge error: litellm.APIError: APIError: OpenrouterException - {\"error\":{\"message\":\"Insufficient credits. Add more using https://openrouter.ai/settings/credits\",\"code\":402}}",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-27428",
+      "cve_id": "CVE-2020-27428",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.107,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-46308",
+      "cve_id": "CVE-2023-46308",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "",
+      "generation_time_s": 0.112,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-32050",
+      "cve_id": "CVE-2021-32050",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "",
+      "generation_time_s": 0.117,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-26864",
+      "cve_id": "CVE-2025-26864",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "",
+      "generation_time_s": 0.121,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36264",
+      "cve_id": "CVE-2024-36264",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "",
+      "generation_time_s": 0.123,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9654",
+      "cve_id": "CVE-2025-9654",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.12,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-47948",
+      "cve_id": "CVE-2025-47948",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.123,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22798",
+      "cve_id": "CVE-2026-22798",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.128,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-14546",
+      "cve_id": "CVE-2025-14546",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.126,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-28121",
+      "cve_id": "CVE-2024-28121",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "",
+      "generation_time_s": 0.129,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-47529",
+      "cve_id": "CVE-2024-47529",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "",
+      "generation_time_s": 0.125,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22696",
+      "cve_id": "CVE-2026-22696",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rust",
+      "model_patch": "",
+      "generation_time_s": 0.127,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-31475",
+      "cve_id": "CVE-2025-31475",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.135,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-22150",
+      "cve_id": "CVE-2025-22150",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.13,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-31453",
+      "cve_id": "CVE-2024-31453",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.133,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-48218",
+      "cve_id": "CVE-2023-48218",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.132,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-38691",
+      "cve_id": "CVE-2023-38691",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.128,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-39263",
+      "cve_id": "CVE-2022-39263",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.124,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-13466",
+      "cve_id": "CVE-2025-13466",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.12,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-45390",
+      "cve_id": "CVE-2024-45390",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.125,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6921",
+      "cve_id": "CVE-2025-6921",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.129,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-53012",
+      "cve_id": "CVE-2025-53012",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.097,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-27529",
+      "cve_id": "CVE-2024-27529",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "swift",
+      "model_patch": "",
+      "generation_time_s": 0.103,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36361",
+      "cve_id": "CVE-2024-36361",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.098,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-43843",
+      "cve_id": "CVE-2021-43843",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.089,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-67750",
+      "cve_id": "CVE-2025-67750",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.095,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-21537",
+      "cve_id": "CVE-2024-21537",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.094,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-7793",
+      "cve_id": "CVE-2020-7793",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.094,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6545",
+      "cve_id": "CVE-2025-6545",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.108,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-1283",
+      "cve_id": "CVE-2023-1283",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.106,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-55173",
+      "cve_id": "CVE-2025-55173",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.116,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-49595",
+      "cve_id": "CVE-2025-49595",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.113,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-4727",
+      "cve_id": "CVE-2025-4727",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.109,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-50710",
+      "cve_id": "CVE-2023-50710",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.117,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 393,
+      "completion_tokens": 1034,
+      "cost_usd": 0.000519317,
+      "judge_cost_usd": 0.0
+    }
+  ]
+}

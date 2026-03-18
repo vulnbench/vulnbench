@@ -1,0 +1,66 @@
+{
+  "metadata": {
+    "benchmark": "data/benchmark/vulnbench_mini.json",
+    "evaluated_at": "2026-03-09T15:42:22.850698+00:00Z",
+    "total_instances": 2,
+    "judge_model": "openrouter/anthropic/claude-opus-4-6",
+    "model": "openrouter/anthropic/claude-haiku-4.5"
+  },
+  "aggregate": {
+    "total_instances": 2,
+    "total_passed": 0,
+    "pass_rate": 0.0,
+    "mean_score": 0.3,
+    "pass_rate_by_tier": {
+      "tier_1": 0.0
+    },
+    "pass_rate_by_ecosystem": {
+      "maven": 0.0
+    },
+    "mean_generation_time_s": 10.756,
+    "total_cost_usd": 0.00977,
+    "total_judge_cost_usd": 0.0,
+    "total_prompt_tokens": 805,
+    "total_completion_tokens": 1793
+  },
+  "results": [
+    {
+      "instance_id": "vulnbench-CVE-2024-49771",
+      "cve_id": "CVE-2024-49771",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "--- a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n+++ b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n@@ -1,6 +1,7 @@\n package net.sf.mpxj.common;\n \n import java.io.*;\n+import java.nio.file.Files;\n import java.nio.file.Path;\n import java.nio.file.Paths;\n import java.util.zip.ZipEntry;\n@@ -30,6 +31,28 @@ public class InputStreamHelper\n       return new FileInputStream(file);\n    }\n \n+   /**\n+    * Validates that a path is safe and does not escape the base directory.\n+    * \n+    * @param baseDir the base directory\n+    * @param targetPath the target path to validate\n+    * @return the validated path\n+    * @throws IOException if the path is invalid or escapes the base directory\n+    */\n+   private static Path validatePath(Path baseDir, String targetPath) throws IOException\n+   {\n+      // Reject absolute paths and null/empty paths\n+      if (targetPath == null || targetPath.isEmpty() || new File(targetPath).isAbsolute())\n+      {\n+         throw new IOException(\"Invalid path: \" + targetPath);\n+      }\n+      \n+      Path resolvedPath = baseDir.resolve(targetPath).normalize();\n+      if (!resolvedPath.startsWith(baseDir.normalize()))\n+      {\n+         throw new IOException(\"Path traversal detected: \" + targetPath);\n+      }\n+      return resolvedPath;\n+   }\n \n    /**\n     * Extracts a zip file to a temporary directory and returns an input stream\n@@ -50,7 +73,7 @@ public class InputStreamHelper\n       try\n       {\n          Path tempDir = Files.createTempDirectory(\"mpxj\");\n-         tempDir.toFile().deleteOnExit();\n+         tempDir.toFile().deleteOnExit();\n \n          ZipInputStream zis = new ZipInputStream(is);\n          ZipEntry entry;\n@@ -58,16 +81,17 @@ public class InputStreamHelper\n          while ((entry = zis.getNextEntry()) != null)\n          {\n             String entryName = entry.getName();\n-            \n-            // Reject absolute paths\n-            if (new File(entryName).isAbsolute())\n+\n+            // Validate the entry path to prevent traversal attacks\n+            Path entryPath = validatePath(tempDir, entryName);\n+            \n+            if (entry.isDirectory())\n             {\n-               throw new IOException(\"Absolute path in zip file: \" + entryName);\n+               Files.createDirectories(entryPath);\n             }\n-            \n-            // Reject paths with .. sequences\n-            if (entryName.contains(\"..\"))\n+            else\n             {\n-               throw new IOException(\"Path traversal in zip file: \" + entryName);\n+               Files.createDirectories(entryPath.getParent());\n+               Files.copy(zis, entryPath);\n             }\n \n             zis.closeEntry();",
+      "generation_time_s": 15.826,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch modifies a different method than the gold patch. The gold patch fixes the `processZipStream` method (around line 174) which uses `file.getCanonicalFile().toPath().startsWith(dir.getCanonicalFile().toPath())` for path validation. The candidate patch modifies what appears to be a different zip extraction method earlier in the file and uses `normalize()` instead of `getCanonicalFile()` for path resolution. The `normalize()` approach doesn't resolve symlinks, which could still allow path traversal via symlink attacks. More critically, the candidate patch doesn't modify the `processZipStream` method at all, leaving the original vulnerable code intact in that method.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 360,
+      "completion_tokens": 1136,
+      "cost_usd": 0.00604,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43761",
+      "cve_id": "CVE-2025-43761",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n+++ b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n@@ -1,6 +1,9 @@\n {\n   \"name\": \"frontend-editor-ckeditor-web\",\n   \"version\": \"0.0.0\",\n+  \"files\": [\n+    \"!ckeditor/samples/old/**\"\n+  ],\n   \"scripts\": {\n     \"build\": \"liferay-npm-scripts build\",\n     \"checkFormat\": \"liferay-npm-scripts check\",\n\n--- a/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n+++ b/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n@@ -1,6 +1,9 @@\n {\n   \"name\": \"frontend-js-dependencies-web\",\n   \"version\": \"0.0.0\",\n+  \"files\": [\n+    \"!ckeditor/samples/old/**\"\n+  ],\n   \"scripts\": {\n     \"build\": \"liferay-npm-scripts build\",\n     \"checkFormat\": \"liferay-npm-scripts check\",",
+      "generation_time_s": 5.686,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch attempts to exclude the vulnerable sample files using the `files` field in package.json, but this approach is incorrect. The `files` field in package.json doesn't support negation patterns as the sole entries (it needs positive patterns first), and the paths referenced (`ckeditor/samples/old/**`) may not align with the actual file structure in these packages. The gold patch fixes the vulnerability by upgrading the `liferay-ckeditor` dependency from version `4.21.0-liferay.9` to `4.21.0-liferay.10`, which presumably contains the actual fix (removing or sanitizing the vulnerable ajax.html file). The candidate's approach shows understanding of the issue but uses an ineffective mechanism to address it.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 445,
+      "completion_tokens": 657,
+      "cost_usd": 0.00373,
+      "judge_cost_usd": 0.0
+    }
+  ]
+}

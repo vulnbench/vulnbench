@@ -1,0 +1,986 @@
+{
+  "metadata": {
+    "benchmark": "data/benchmark/vulnbench_mini.json",
+    "evaluated_at": "2026-03-09T18:02:43.933539+00:00Z",
+    "total_instances": 50,
+    "judge_model": "openrouter/anthropic/claude-opus-4-6",
+    "model": "openrouter/qwen/qwen3.5-35b-a3b"
+  },
+  "aggregate": {
+    "total_instances": 50,
+    "total_passed": 4,
+    "pass_rate": 0.08,
+    "mean_score": 0.113,
+    "pass_rate_by_tier": {
+      "tier_1": 0.1765,
+      "tier_2": 0.0588,
+      "tier_3": 0.0
+    },
+    "pass_rate_by_ecosystem": {
+      "maven": 0.0,
+      "npm": 0.0606,
+      "pip": 0.3333,
+      "rubygems": 0.0,
+      "composer": 0.0,
+      "rust": 0.0,
+      "swift": 0.0
+    },
+    "mean_generation_time_s": 31.966,
+    "total_cost_usd": 0.300769,
+    "total_judge_cost_usd": 0.0,
+    "total_prompt_tokens": 25919,
+    "total_completion_tokens": 230707
+  },
+  "results": [
+    {
+      "instance_id": "vulnbench-CVE-2024-49771",
+      "cve_id": "CVE-2024-49771",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\nindex 1234567..abcdefg 100644\n--- a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n+++ b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n@@ -1,6 +1,7 @@\n package net.sf.mpxj.common;\n \n import java.io.File;\n+import java.io.IOException;\n import java.io.InputStream;\n import java.nio.file.Files;\n import java.nio.file.Path;\n@@ -15,6 +16,7 @@ import java.util.zip.ZipEntry;\n import java.util.zip.ZipFile;\n \n public class InputStreamHelper {\n+    private static final String PATH_SEPARATOR = File.separator;\n \n     /**\n      * Extracts a file from a ZIP archive to a specified destination directory.\n@@ -25,13 +27,20 @@ public class InputStreamHelper {\n      * @param zipFile The ZIP file to extract from\n      * @param zipEntry The entry to extract\n      * @param destDir The destination directory\n      * @throws IOException If an error occurs during extraction\n      */\n     public static void extractEntry(ZipFile zipFile, ZipEntry zipEntry, File destDir) throws IOException {\n         Path destPath = destDir.toPath().resolve(zipEntry.getName());\n+        \n+        // Canonicalize the destination path to prevent path traversal\n+        Path canonicalDestDir = destDir.getCanonicalFile().toPath();\n+        Path canonicalDestPath = destPath.toRealPath();\n+        \n+        // Verify the resolved path is within the destination directory\n+        if (!canonicalDestPath.startsWith(canonicalDestDir)) {\n+            throw new IOException(\"Invalid path: \" + zipEntry.getName());\n+        }\n+        \n         Files.createDirectories(destPath.getParent());\n         try (InputStream inputStream = zipFile.getInputStream(zipEntry)) {\n             Files.copy(inputStream, destPath, StandardCopyOption.REPLACE_EXISTING);\n         }\n     }\n-\n }",
+      "generation_time_s": 5.283,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch modifies a different method (extractEntry) than the one affected by the vulnerability. The gold patch fixes the processZipStream method in InputStreamHelper.java, which contains the incomplete path traversal check from CVE-2020-35460. The candidate patch doesn't address the vulnerable code path at all. Additionally, using toRealPath() requires the file to already exist, which would fail for new extractions, and the candidate appears to be working with a different version of the file structure entirely.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 347,
+      "completion_tokens": 796,
+      "cost_usd": 0.0010911875,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43761",
+      "cve_id": "CVE-2025-43761",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/ajax.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/ajax.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/ajax.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/index.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/index.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/index.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/replacebyclass.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/replacebyclass.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/replacebyclass.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/replacebycode.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/replacebycode.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/replacebycode.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/sample.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/sample.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/old/sample.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/samples.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/samples.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/samples.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbar.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbar.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbar.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/index.html b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/index.html\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/index.html\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-<!DOCTYPE html>\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/neo.css b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/neo.css\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/neo.css\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-/* neo theme */\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/codemirror.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/codemirror.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/codemirror.js\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-// CodeMirror v5.0\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/javascript.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/javascript.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/javascript.js\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-// CodeMirror JavaScript mode\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/neo.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/neo.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/neo.js\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-// CodeMirror Neo theme\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-// CodeMirror Show-Hint addon\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-/* Show-Hint addon styles */\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-// CodeMirror Show-Hint addon\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-/* Show-Hint addon styles */\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-// CodeMirror Show-Hint addon\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-/* Show-Hint addon styles */\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-// CodeMirror Show-Hint addon\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.css\n+++ /dev/null\n@@ -1,1 +0,0 @@\n-/* Show-Hint addon styles */\ndiff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor/samples/old/toolbarconfigurator/lib/codemirror/show-hint.js\ndeleted file mode 100644\nindex 0000000..e69de29\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/src/main/resources/META-INF/resources/frontend-editor-ckeditor-web/ckeditor",
+      "generation_time_s": 35.275,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch attempts to fix the XSS vulnerability by deleting the vulnerable sample HTML files directly from the source tree. While this approach could mitigate the specific XSS vector in ajax.html, the gold patch fixes the issue properly by upgrading the liferay-ckeditor dependency from 4.21.0-liferay.9 to 4.21.0-liferay.10 in both package.json files. The candidate patch doesn't update the dependency versions, meaning the vulnerable code could be reintroduced on the next build/install. Additionally, the candidate doesn't address the second affected file (frontend-js-dependencies-web/package.json). The approach of manually deleting generated/dependency files rather than updating the dependency is fragile and incomplete.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 406,
+      "completion_tokens": 4096,
+      "cost_usd": 0.005246875,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-27210",
+      "cve_id": "CVE-2026-27210",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/js/pannellum.js b/src/js/pannellum.js\nindex 1234567..abcdefg 100644\n--- a/src/js/pannellum.js\n+++ b/src/js/pannellum.js\n@@ -1,6 +1,30 @@\n // Pannellum - Open Source Web-based Panoramic Viewer\n // Copyright (c) 2014-2025 Pannellum Contributors\n \n+/**\n+ * Sanitize hot spot attributes to prevent XSS attacks\n+ * Filters out dangerous event handler attributes\n+ * @param {Object} attributes - Raw attributes from config\n+ * @returns {Object} Sanitized attributes\n+ */\n+function sanitizeHotSpotAttributes(attributes) {\n+    const sanitized = {};\n+    const dangerousPatterns = /^(on|data-)/i;\n+    \n+    for (const attr in attributes) {\n+        if (attributes.hasOwnProperty(attr)) {\n+            // Block event handler attributes (onclick, onmouseover, etc.)\n+            if (/^on/i.test(attr)) {\n+                continue;\n+            }\n+            // Block data attributes that could be used for XSS\n+            if (/^data-/i.test(attr)) {\n+                continue;\n+            }\n+            sanitized[attr] = attributes[attr];\n+        }\n+    }\n+    \n+    return sanitized;\n+}\n+\n /**\n  * Pannellum viewer class\n  * @param {Object} options - Configuration options\n@@ -2847,7 +2871,10 @@ Pannellum.prototype.createHotSpot = function(hotSpot, index) {\n         }\n         \n         // Apply attributes\n-        if (hotSpot.attributes) {\n-            for (const attr in hotSpot.attributes) {\n-                if (hotSpot.attributes.hasOwnProperty(attr)) {\n-                    hotSpotElement.setAttribute(attr, hotSpot.attributes[attr]);\n+        if (hotSpot.attributes) {\n+            const safeAttributes = sanitizeHotSpotAttributes(hotSpot.attributes);\n+            for (const attr in safeAttributes) {\n+                if (safeAttributes.hasOwnProperty(attr)) {\n+                    // Escape attribute values to prevent XSS\n+                    const escapedValue = this.escapeHTML(safeAttributes[attr]);\n+                    hotSpotElement.setAttribute(attr, escapedValue);\n                 }\n             }\n         }",
+      "generation_time_s": 7.329,
+      "patch_analysis": {
+        "judge_score": 0.35,
+        "judge_reasoning": "The candidate patch shows understanding of the issue by filtering out event handler attributes (starting with 'on'), but has several problems: (1) It unnecessarily blocks all data-* attributes which aren't dangerous, (2) It doesn't filter 'href' attributes which the gold patch explicitly blocks, (3) It doesn't normalize the attribute key (lowercase, strip non-ASCII) to prevent bypasses like 'OnClick' or using non-ASCII characters, (4) The patch targets different code structure/line numbers than the actual affected file, suggesting it may not apply correctly to the real codebase, (5) It doesn't respect the escapeHTML configuration flag - the gold patch only filters when escapeHTML is enabled. The lack of key normalization is a critical gap that could allow bypasses.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.35,
+      "passed": false,
+      "prompt_tokens": 517,
+      "completion_tokens": 895,
+      "cost_usd": 0.0012475125,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-25228",
+      "cve_id": "CVE-2026-25228",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/src/interfaces/applicationData.js\n+++ b/src/interfaces/applicationData.js\n@@ -X,6 +X,10 @@ function validateAppId(appid) {\n   if (appid.includes('/') || appid.length >= 30) {\n     return false;\n   }\n+  if (appid.includes('\\\\')) {\n+    return false;\n+  }\n+\n   return true;\n }\n \n@@ -X,6 +X,12 @@ function validateAppId(appid) {\n   const dataPath = path.join(configPath, 'applicationData', 'users', deviceId, appid);\n+  const normalizedPath = path.normalize(dataPath);\n+  const normalizedBase = path.normalize(path.join(configPath, 'applicationData', 'users', deviceId));\n+  if (!normalizedPath.startsWith(normalizedBase)) {\n+    throw new Error('Invalid path');\n+  }\n+\n   return dataPath;\n }",
+      "generation_time_s": 11.898,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch addresses both key aspects of the fix (blocking backslashes in validateAppId and adding path traversal validation), but it appears to be written against a different version of the code than what actually exists. The gold patch shows validateAppId returns `appid` or `null` (not `true`/`false`), and the path validation is in `pathForApplicationData()`, not in an unnamed function with `configPath`/`deviceId` variables. The candidate's code structure doesn't match the actual source file, so it likely wouldn't apply correctly. Additionally, the candidate's path containment check uses a narrower base directory (users/deviceId) rather than the configPath, and it only patches one path construction point while the gold patch covers `pathForApplicationData`. The conceptual approach is correct but the implementation doesn't match the actual codebase.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 1360,
+      "completion_tokens": 1029,
+      "cost_usd": 0.001369,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-21892",
+      "cve_id": "CVE-2026-21892",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/parsl/monitoring/visualization/views.py b/parsl/monitoring/visualization/views.py\nindex 1234567..abcdefg 100644\n--- a/parsl/monitoring/visualization/views.py\n+++ b/parsl/monitoring/visualization/views.py\n@@ -1,6 +1,7 @@\n import pandas as pd\n from flask import Blueprint, jsonify, request\n from sqlalchemy import text\n+from sqlalchemy import create_engine\n \n # ... (other imports)\n \n@@ -15,15 +16,18 @@ def dag_group_by_states(workflow_id):\n     \"\"\"\n     # Get the database engine from the application context\n     db = current_app.config['DB_ENGINE']\n     \n-    query = \"\"\"SELECT task.task_id, task.task_func_name, task.task_depends, status.task_status_name\n-               FROM task LEFT JOIN status\n-               ON task.task_id = status.task_id\n-               AND task.run_id = status.run_id\n-               AND status.timestamp = (SELECT MAX(status.timestamp)\n-                                       FROM status\n-                                       WHERE status.task_id = task.task_id and status.run_id = task.run_id\n-                                      )\n-               WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+    query = \"\"\"SELECT task.task_id, task.task_func_name, task.task_depends, status.task_status_name\n+               FROM task LEFT JOIN status\n+               ON task.task_id = status.task_id\n+               AND task.run_id = status.run_id\n+               AND status.timestamp = (SELECT MAX(status.timestamp)\n+                                       FROM status\n+                                       WHERE status.task_id = task.task_id and status.run_id = task.run_id\n+                                      )\n+               WHERE task.run_id=:workflow_id\"\"\"\n     \n-    df = pd.read_sql_query(query, db.engine)\n+    df = pd.read_sql_query(query, db.engine, params={'workflow_id': workflow_id})\n     \n     # ... (rest of the function)\n \n@@ -45,10 +49,11 @@ def get_task_details(workflow_id):\n     \"\"\"\n     db = current_app.config['DB_ENGINE']\n     \n-    df_task_tries = pd.read_sql_query(\"\"\"SELECT ...\n-                                     WHERE task.task_id = try.task_id AND task.run_id='%s' and try.run_id='%s'\"\"\"\n-                                     % (workflow_id, workflow_id), db.engine)\n+    df_task_tries = pd.read_sql_query(\"\"\"SELECT ...\n+                                     WHERE task.task_id = try.task_id AND task.run_id=:workflow_id and try.run_id=:workflow_id\"\"\",\n+                                     db.engine, params={'workflow_id': workflow_id})\n     \n     # ... (rest of the function)",
+      "generation_time_s": 10.514,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch demonstrates understanding of the fix (replacing string formatting with parameterized queries), but it doesn't correctly apply to the actual source file. The patch modifies function names and structure that don't match the real views.py file (e.g., 'dag_group_by_states' and 'get_task_details' instead of the actual function names 'workflow_dag_details' and 'workflow_resources'). It also doesn't use `sqlalchemy.text()` to wrap the query string, which is needed for named parameter binding in newer versions of SQLAlchemy/pandas. The patch appears to be a conceptual fix applied to a hallucinated version of the file rather than the actual code.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 1013,
+      "completion_tokens": 1283,
+      "cost_usd": 0.0018325125,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-68143",
+      "cve_id": "CVE-2025-68143",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "--- a/src/git/src/mcp_server_git/server.py\n+++ b/src/git/src/mcp_server_git/server.py\n@@ -1,6 +1,5 @@\n \"\"\"MCP Server for Git operations.\"\"\"\n \n import os\n import subprocess\n@@ -15,20 +14,6 @@\n \n-@tool\n-def git_init(repo_path: str) -> str:\n-    \"\"\"Initialize a new git repository at the specified path.\"\"\"\n-    # This tool was removed due to security concerns - it allowed arbitrary\n-    # filesystem paths to be used for git initialization without validation\n-    # Users should use existing repositories only\n-    raise NotImplementedError(\"git_init has been removed. The server operates on existing repositories only.\")\n-\n-\n @tool\n def git_status(repo_path: str) -> str:\n     \"\"\"Get the status of a git repository.\"\"\"\n@@ -100,7 +85,6 @@\n \n TOOLS = [\n-    git_init,\n     git_status,\n     git_diff,\n     git_commit,",
+      "generation_time_s": 11.391,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch attempts to remove the git_init functionality, which is the correct approach. However, the patch appears to be based on a different version of the code than the actual affected file. The gold patch modifies specific classes (GitInit, GitTools.INIT), functions (git_init), tool registrations, and the call_tool handler in server.py, while the candidate patch references a decorator-based (@tool) structure that doesn't match the actual codebase. The candidate shows understanding of the issue (removing git_init) but may not correctly apply to the actual affected code, potentially leaving the vulnerability unpatched.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 353,
+      "completion_tokens": 1284,
+      "cost_usd": 0.0017265625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43795",
+      "cve_id": "CVE-2024-43795",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "rubygems",
+      "model_patch": "diff --git a/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js b/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\nindex 1234567..abcdefg 100644\n--- a/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n+++ b/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n@@ -1,6 +1,15 @@\n // Authentication utility functions\n+\n+/**\n+ * Escapes HTML special characters to prevent XSS attacks\n+ * @param {string} str - The string to escape\n+ * @returns {string} - The escaped string\n+ */\n+function escapeHtml(str) {\n+  const div = document.createElement('div');\n+  div.textContent = str;\n+  return div.innerHTML;\n+}\n \n class Auth {\n   constructor() {\n@@ -45,7 +54,7 @@ class Auth {\n     }\n \n     // Display error message\n-    this.errorMessage = error.message;\n+    this.errorMessage = escapeHtml(error.message);\n   }\n \n   async login(username, password) {\n@@ -78,7 +87,7 @@ class Auth {\n     }\n \n     // Display validation error\n-    this.validationError = validationMessage;\n+    this.validationError = escapeHtml(validationMessage);\n   }\n \n   logout() {\ndiff --git a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\nindex 1234567..abcdefg 100644\n--- a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n+++ b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n@@ -1,6 +1,10 @@\n <template>\n   <div class=\"login-container\">\n-    <div v-if=\"errorMessage\" class=\"error-message\">{{ errorMessage }}</div>\n+    <div v-if=\"errorMessage\" class=\"error-message\" v-text=\"errorMessage\"></div>\n     <form @submit.prevent=\"handleLogin\">\n       <input type=\"text\" v-model=\"username\" placeholder=\"Username\" />\n       <input type=\"password\" v-model=\"password\" placeholder=\"Password\" />\n@@ -10,7 +14,7 @@\n       <button type=\"submit\">Login</button>\n     </form>\n     <div v-if=\"validationError\" class=\"validation-error\">\n-      {{ validationError }}\n+      <span v-text=\"validationError\"></span>\n     </div>\n   </div>\n </template>",
+      "generation_time_s": 11.966,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch completely misses the root cause of the vulnerability. The CVE is about a reflected XSS via the redirect parameter in the login URL. The gold patch fixes this by (1) stripping the redirect URL to only pathname+search in auth.js's login() method, and (2) validating that the redirect parameter starts with a single '/' (relative path) in Login.vue before using it in window.location assignment. The candidate patch instead adds HTML escaping to error messages and changes template interpolation syntax, which are unrelated to the actual vulnerability. It doesn't address the malicious redirect parameter issue at all.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 312,
+      "completion_tokens": 1049,
+      "cost_usd": 0.0019584,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9910",
+      "cve_id": "CVE-2025-9910",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/jsondiffpatch/src/formatters/html.ts b/packages/jsondiffpatch/src/formatters/html.ts\nindex 1234567..abcdefg 100644\n--- a/packages/jsondiffpatch/src/formatters/html.ts\n+++ b/packages/jsondiffpatch/src/formatters/html.ts\n@@ -1,6 +1,7 @@\n import { Formatter } from './formatter';\n import { Delta, Node } from '../types';\n import { HtmlFormatterOptions } from './html';\n+import { escapeHtml } from '../utils/escape';\n \n export class HtmlFormatter extends Formatter {\n   private options: HtmlFormatterOptions;\n@@ -15,7 +16,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   nodeBegin(node: Node): string {\n-    return `<span class=\"${this.getSpanClass(node)}\">${node.value || ''}</span>`;\n+    return `<span class=\"${this.getSpanClass(node)}\">${escapeHtml(node.value || '')}</span>`;\n   }\n \n   nodeEnd(node: Node): string {\n@@ -25,7 +26,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   arrayItemBegin(node: Node): string {\n-    return `<span class=\"${this.getSpanClass(node)}\">${node.value || ''}</span>`;\n+    return `<span class=\"${this.getSpanClass(node)}\">${escapeHtml(node.value || '')}</span>`;\n   }\n \n   arrayItemEnd(node: Node): string {\n@@ -35,7 +36,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   textBegin(node: Node): string {\n-    return `<span class=\"${this.getSpanClass(node)}\">${node.value || ''}</span>`;\n+    return `<span class=\"${this.getSpanClass(node)}\">${escapeHtml(node.value || '')}</span>`;\n   }\n \n   textEnd(node: Node): string {\n@@ -45,7 +46,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyBegin(node: Node): string {\n-    return `<span class=\"${this.getSpanClass(node)}\">${node.value || ''}</span>`;\n+    return `<span class=\"${this.getSpanClass(node)}\">${escapeHtml(node.value || '')}</span>`;\n   }\n \n   objectPropertyEnd(node: Node): string {\n@@ -55,7 +56,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyBegin(node: Node): string {\n-    return `<span class=\"${this.getSpanClass(node)}\">${node.value || ''}</span>`;\n+    return `<span class=\"${this.getSpanClass(node)}\">${escapeHtml(node.value || '')}</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -65,7 +66,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKey(node: Node): string {\n-    return `<span class=\"${this.getSpanClass(node)}\">${node.value || ''}</span>`;\n+    return `<span class=\"${this.getSpanClass(node)}\">${escapeHtml(node.value || '')}</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -75,7 +76,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -85,7 +86,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -95,7 +96,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -105,7 +106,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -115,7 +116,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -125,7 +126,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -135,7 +136,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -145,7 +146,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -155,7 +156,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -165,7 +166,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -175,7 +176,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -185,7 +186,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -195,7 +196,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -205,7 +206,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -215,7 +216,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -225,7 +226,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -235,7 +236,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -245,7 +246,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -255,7 +256,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -265,7 +266,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -275,7 +276,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -285,7 +286,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -295,7 +296,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -305,7 +306,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -315,7 +316,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -325,7 +326,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -335,7 +336,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -345,7 +346,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -355,7 +356,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -365,7 +366,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -375,7 +376,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -385,7 +386,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -395,7 +396,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -405,7 +406,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -415,7 +416,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -425,7 +426,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -435,7 +436,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -445,7 +446,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -455,7 +456,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -465,7 +466,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -475,7 +476,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -485,7 +486,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -495,7 +496,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -505,7 +506,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -515,7 +516,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -525,7 +526,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n@@ -535,7 +536,7 @@ export class HtmlFormatter extends Formatter {\n   }\n \n   objectPropertyKeyEnd(node: Node): string {\n-    return `</span>`;\n+    return `</span>`;\n   }",
+      "generation_time_s": 30.133,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch is clearly AI-hallucinated garbage. It doesn't modify the actual source file correctly - it references non-existent imports (`escapeHtml` from `../utils/escape`), non-existent classes/methods (`Formatter`, `Node`), and repeats the same `objectPropertyKeyEnd` method dozens of times. Most critically, it doesn't address the actual vulnerability locations identified in the gold patch: the `nodeBegin` method's `leftKey` interpolation into HTML attributes and content, and the `typeFormattterErrorFormatter` method's unescaped error output. The candidate patch bears no resemblance to the actual file structure.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 391,
+      "completion_tokens": 4431,
+      "cost_usd": 0.0058238375,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43954",
+      "cve_id": "CVE-2025-43954",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/ui/src/util/extendHeading.js b/ui/src/util/extendHeading.js\nindex 1234567..abcdefg 100644\n--- a/ui/src/util/extendHeading.js\n+++ b/ui/src/util/extendHeading.js\n@@ -1,15 +1,25 @@\n+function escapeHtml (unsafe) {\n+  return unsafe\n+    .replace(/&/g, '&amp;')\n+    .replace(/</g, '&lt;')\n+    .replace(/>/g, '&gt;')\n+    .replace(/\"/g, '&quot;')\n+    .replace(/'/g, '&#039;')\n+}\n+\n export function extendHeading (heading, level, noHtml) {\n-  if (noHtml) {\n-    return `<h${level}>${heading}</h${level}>`\n-  }\n-  return `<h${level}>${heading}</h${level}>`\n+  if (noHtml) {\n+    return `<h${level}>${escapeHtml(heading)}</h${level}>`\n+  }\n+  return `<h${level}>${heading}</h${level}>`\n }\n \n export function extendHeadingText (text, level, noHtml) {\n-  if (noHtml) {\n-    return text\n-  }\n-  return text\n+  if (noHtml) {\n+    return escapeHtml(text)\n+  }\n+  return text\n }\n \n export function extendHeadingLink (link, level, noHtml) {\n-  if (noHtml) {\n-    return link\n-  }\n-  return link\n+  if (noHtml) {\n+    return escapeHtml(link)\n+  }\n+  return link\n }",
+      "generation_time_s": 6.399,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch completely rewrites the file with a different structure and API that doesn't match the actual source code. The real extendHeading.js uses markdown-it's token-based rendering system with Token constructors, slugify, TOC support, and anchor links. The candidate patch invents simple template-literal-based functions (extendHeading, extendHeadingText, extendHeadingLink) that don't exist in the original codebase. While it shows understanding that HTML escaping is needed when noHtml is set, it doesn't address the actual vulnerability in the real code, which was that the anchor link creation replaced formatted children with an html_inline token containing unescaped label content. The gold patch fixes this by preserving original inline tokens instead of creating a raw html_inline token.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 258,
+      "completion_tokens": 928,
+      "cost_usd": 0.001240625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43411",
+      "cve_id": "CVE-2024-43411",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/core/ckeditor_version-check.js b/core/ckeditor_version-check.js\nindex 1234567..abcdefg 100644\n--- a/core/ckeditor_version-check.js\n+++ b/core/ckeditor_version-check.js\n@@ -1,6 +1,7 @@\n /*\n  * Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.\n  * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-licensing-options\n+ * Security fix for CVE-2024-43411\n  */\n \n (function() {\n@@ -15,7 +16,7 @@\n \t * @param {Object} config CKEditor configuration.\n \t */\n \tfunction checkVersion( config ) {\n-\t\tvar url = 'https://cke4.ckeditor.com/version-check';\n+\t\tvar url = 'https://cke4.ckeditor.com/version-check?nocache=' + new Date().getTime();\n \n \t\t// Check if version check is enabled\n \t\tif ( !config.versionCheck ) {\n@@ -25,11 +26,14 @@\n \t\t\treturn;\n \t\t}\n \n-\t\tCKEDITOR.ajax.load( url, function( data ) {\n-\t\t\tif ( data && data.version ) {\n-\t\t\t\t// Display version notification\n-\t\t\t\tvar notification = document.createElement( 'div' );\n-\t\t\t\tnotification.innerHTML = 'New version available: ' + data.version;\n+\t\tCKEDITOR.ajax.load( url, function( data ) {\n+\t\t\tif ( data && data.version ) {\n+\t\t\t\t// Security fix CVE-2024-43411: Properly encode version data to prevent XSS\n+\t\t\t\tvar versionText = CKEDITOR.tools.htmlEncode( data.version );\n+\t\t\t\tvar notification = document.createElement( 'div' );\n+\t\t\t\tnotification.textContent = 'New version available: ' + versionText;\n+\t\t\t\tnotification.setAttribute( 'role', 'alert' );\n+\t\t\t\tnotification.className = 'cke_version_notification';\n \t\t\t\tdocument.body.appendChild( notification );\n \t\t\t}\n \t\t} );",
+      "generation_time_s": 6.22,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch does not address the actual vulnerability. The gold patch fixes the issue by: (1) replacing `original` (raw user/server-controlled string) with a sanitized `name` property constructed from parsed integer values, (2) wrapping JSON.parse in a try-catch to handle malicious responses, and (3) using the sanitized `name` in all places where version strings are interpolated into messages. The candidate patch instead modifies what appears to be a completely different code structure (using CKEDITOR.ajax.load instead of XMLHttpRequest, with different logic), adds a cache-busting parameter, and applies htmlEncode/textContent - but it doesn't match the actual file structure or address the root cause in the same way. The candidate appears to be patching fabricated code rather than the actual vulnerable code.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 472,
+      "completion_tokens": 947,
+      "cost_usd": 0.0013078,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-32472",
+      "cve_id": "CVE-2024-32472",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/src/element/embeddable.ts\n+++ b/src/element/embeddable.ts\n@@ -1,6 +1,7 @@\n import { isURL } from \"../utils\";\n+import { escapeHTML } from \"../utils/sanitize\";\n \n export function getEmbeddableElementData(url: string): {\n   type: \"embeddable\";\n@@ -15,15 +16,25 @@ export function getEmbeddableElementData(url: string): {\n   const parsedUrl = new URL(url);\n   const domain = parsedUrl.hostname;\n   \n-  // Check if this is a trusted domain\n-  const isTrusted = trustedDomains.includes(domain);\n+  // Sanitize the URL to prevent XSS\n+  const sanitizedUrl = escapeHTML(url);\n+  \n+  // Only allow same-origin for trusted domains\n+  const allowSameOrigin = isTrusted ? \"allow-same-origin\" : \"\";\n+  \n+  // Construct srcdoc safely by parsing and escaping content\n   const srcdoc = `\n-    <iframe src=\"${url}\" sandbox=\"allow-scripts allow-same-origin\"></iframe>\n+    <iframe src=\"${sanitizedUrl}\" sandbox=\"${allowSameOrigin} allow-scripts\"></iframe>\n   `;\n   \n   return {",
+      "generation_time_s": 534.952,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch does not correctly fix the vulnerability. It appears to modify a different code structure than what exists in the actual affected file (src/element/embeddable.ts). The gold patch modifies the `getEmbedLink` function with specific changes to sandbox configuration per domain, introduces an `ALLOW_SAME_ORIGIN` set for trusted domains, and ensures all return paths include proper sandbox settings. The candidate patch references a non-existent `escapeHTML` utility, modifies code that doesn't match the actual file structure, and doesn't address the core issues of proper srcdoc sanitization and per-domain sandbox configuration. It shows some understanding of the concepts (URL sanitization, restricting allow-same-origin) but the implementation is entirely wrong for the actual codebase.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 529,
+      "completion_tokens": 82207,
+      "cost_usd": 0.1069550625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2016-15025",
+      "cve_id": "CVE-2016-15025",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/app/templates/src/server/_app.js b/app/templates/src/server/_app.js\nindex 1234567..abcdefg 100644\n--- a/app/templates/src/server/_app.js\n+++ b/app/templates/src/server/_app.js\n@@ -1,6 +1,7 @@\n var express = require('express');\n var path = require('path');\n var favicon = require('serve-favicon');\n+var escapeHtml = require('escape-html');\n var logger = require('morgan');\n var cookieParser = require('cookie-parser');\n var bodyParser = require('body-parser');\n@@ -15,7 +16,7 @@ app.use(express.static(path.join(__dirname, '../client')));\n \n // 404 Error Handler\n app.use(function(req, res, next) {\n-  res.status(404).send('Page not found: ' + req.url);\n+  res.status(404).send('Page not found: ' + escapeHtml(req.url));\n });\n \n module.exports = app;",
+      "generation_time_s": 5.501,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch addresses XSS by escaping the URL in the error response, which shows understanding of the vulnerability. However, it takes a fundamentally different approach from the gold patch and operates on what appears to be a different version of the file. The gold patch adds custom 404 handlers for asset paths (/js/*, /images/*, /styles/*) that use a dedicated four0four.send404() function to return safe error responses, preventing reflected XSS through those routes. The candidate patch modifies a generic 404 handler that doesn't exist in the gold patch's version of the file. While HTML-escaping the URL is a reasonable mitigation for reflected XSS, the candidate doesn't match the actual file structure and misses the specific routing-based approach of the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 361,
+      "completion_tokens": 731,
+      "cost_usd": 0.001397025,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-25929",
+      "cve_id": "CVE-2022-25929",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/smoothie.js\n+++ b/smoothie.js\n@@ -1,6 +1,15 @@\n // Smoothie Charts - a lightweight library for drawing smooth curves on HTML5 canvas\n // https://github.com/joewalnes/smoothie\n \n+// Helper function to escape HTML special characters to prevent XSS\n+function escapeHtml(str) {\n+  if (typeof str !== 'string') {\n+    return str;\n+  }\n+  return str.replace(/[&<>\"']/g, function(m) {\n+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;' }[m];\n+  });\n+}\n \n // ... rest of the code",
+      "generation_time_s": 46.895,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch only defines an `escapeHtml` helper function but never actually uses it anywhere in the code. It doesn't modify the `tooltipFormatter` function or any other part of the code where `strokeStyle` and `tooltipLabel` are used in HTML string construction. The vulnerability remains unfixed because the dangerous string interpolation in the tooltip formatting code is unchanged.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 281,
+      "completion_tokens": 4096,
+      "cost_usd": 0.00416625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2019-13127",
+      "cve_id": "CVE-2019-13127",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "--- a/javascript/examples/grapheditor/www/js/Dialogs.js\n+++ b/javascript/examples/grapheditor/www/js/Dialogs.js\n@@ -1,6 +1,15 @@\n function setFillColor(color)\n {\n     if (color != null)\n     {\n+        // CVE-2019-13127: Sanitize color input to prevent XSS\n+        if (typeof color === 'string')\n+        {\n+            // Remove any HTML/JavaScript event handlers and tags\n+            color = color.replace(/on\\w+\\s*=/gi, '');\n+            color = color.replace(/[<>\"'&]/g, function(m) {\n+                return {'<': '&lt;', '>': '&gt;', '\"': '&quot;', \"'\": '&#39;', '&': '&amp;'}[m];\n+            });\n+        }\n         // ... rest of the function\n     }\n }",
+      "generation_time_s": 11.308,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch is applied to the wrong location and uses the wrong approach. The gold patch validates color input against a hex color regex in the ColorDialog's apply button handler in Dialogs.js, only applying the color if it matches a valid hex format. The candidate patch instead applies a blocklist-based sanitization (removing event handlers, HTML-encoding special characters) to a different function ('setFillColor') that doesn't appear in the original code. This doesn't address the root cause at the correct location and the blocklist approach is inherently weaker than the allowlist validation used in the gold patch.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 454,
+      "completion_tokens": 1540,
+      "cost_usd": 0.002075775,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-1726",
+      "cve_id": "CVE-2022-1726",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/extensions/export/bootstrap-table-export.js b/src/extensions/export/bootstrap-table-export.js\nindex 1234567..abcdefg 100644\n--- a/src/extensions/export/bootstrap-table-export.js\n+++ b/src/extensions/export/bootstrap-table-export.js\n@@ -1,6 +1,7 @@\n /*\n  * Bootstrap Table - Export Plugin\n  * https://github.com/wenzhixin/bootstrap-table\n  */\n \n+const escapeHtml = (str) => {\n+  if (typeof str !== 'string') return str;\n+  return str\n+    .replace(/&/g, '&amp;')\n+    .replace(/</g, '&lt;')\n+    .replace(/>/g, '&gt;')\n+    .replace(/\"/g, '&quot;')\n+    .replace(/'/g, '&#039;');\n+};\n+\n $.extend($.fn.bootstrapTable.defaults, {\n   exportOptions: {\n     filename: 'export',\n@@ -150,7 +165,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to CSV\n@@ -165,7 +180,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to Excel\n@@ -180,7 +195,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to JSON\n@@ -195,7 +210,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to XML\n@@ -210,7 +225,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to Text\n@@ -225,7 +240,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to PDF\n@@ -240,7 +255,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to Word\n@@ -255,7 +270,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to PowerPoint\n@@ -270,7 +285,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to ODS\n@@ -285,7 +300,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to TSV\n@@ -300,7 +315,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to DOCX\n@@ -315,7 +330,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to XLSX\n@@ -330,7 +345,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to CSV\n@@ -345,7 +360,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to JSON\n@@ -360,7 +375,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to XML\n@@ -375,7 +390,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to Text\n@@ -390,7 +405,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to PDF\n@@ -405,7 +420,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to Word\n@@ -420,7 +435,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to PowerPoint\n@@ -435,7 +450,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to ODS\n@@ -450,7 +465,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to TSV\n@@ -465,7 +480,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to DOCX\n@@ -480,7 +495,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to XLSX\n@@ -495,7 +510,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to CSV\n@@ -510,7 +525,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to JSON\n@@ -525,7 +540,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to XML\n@@ -540,7 +555,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to Text\n@@ -555,7 +570,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to PDF\n@@ -570,7 +585,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>').replace(/<[^>]*>/g, (match) => escapeHtml(match));\n       }\n \n       // Export to Word\n@@ -585,7 +600,7 @@ $.extend($.fn.bootstrapTable.defaults, {\n       }\n \n       if (this.options.exportOptions.htmlContent) {\n-        content = content.replace(/<td/g, '<td').replace(/<\\/td>/g, '</td>');\n+",
+      "generation_time_s": 675.455,
+      "patch_analysis": {
+        "judge_score": 0.15,
+        "judge_reasoning": "The candidate patch appears to be fabricated/hallucinated - the original source file is only ~200 lines but the patch references line numbers up to 600+, with repetitive blocks that don't exist in the actual file. The gold patch fixes the vulnerability by removing the `escape: false` option and the unsafe `onCellHtmlData` default handler, while the candidate takes a completely different approach of trying to HTML-escape content in code paths that don't actually exist in the source file. The candidate patch would not apply to the actual codebase and does not address the root cause (the `escape: false` setting passed to the export library).",
+        "judge_verdict": "fail"
+      },
+      "score": 0.15,
+      "passed": false,
+      "prompt_tokens": 277,
+      "completion_tokens": 4096,
+      "cost_usd": 0.00416525,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-24728",
+      "cve_id": "CVE-2022-24728",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/core/htmldataprocessor.js b/core/htmldataprocessor.js\nindex 1234567..abcdefg 100644\n--- a/core/htmldataprocessor.js\n+++ b/core/htmldataprocessor.js\n@@ -1,6 +1,7 @@\n /**\n  * @license Copyright (c) 2003-2022, CKSource Holding sp. z o.o. All rights reserved.\n- * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license\n+ * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license\n+ * Security fix for CVE-2022-24728\n  */\n \n ( function() {\n@@ -145,12 +146,20 @@\n \t * @param {String} data\n \t * @returns {String}\n \t */\n-\t\tconvertToHtml: function( data ) {\n-\t\t\treturn data;\n+\t\tconvertToHtml: function( data ) {\n+\t\t\t// CVE-2022-24728: Sanitize malformed HTML to prevent XSS\n+\t\t\tif ( !data ) {\n+\t\t\t\treturn '';\n+\t\t\t}\n+\t\t\t\n+\t\t\t// Validate and sanitize HTML content before processing\n+\t\t\tvar sanitizedData = CKEDITOR.htmlDataProcessor.sanitizeHtml( data );\n+\t\t\t\n+\t\t\treturn sanitizedData;\n \t\t},\n \n \t\t/**\n-\t\t * Converts HTML to CKEditor data format.\n+\t\t * Converts HTML to CKEditor data format.\n+\t\t * CVE-2022-24728: Added validation to prevent malformed HTML injection.\n \t\t * @param {String} data\n \t\t * @returns {String}\n \t\t */\n@@ -160,6 +169,15 @@\n \t\t * @returns {String}\n \t\t */\n \t\tconvertToDataFormat: function( data ) {\n+\t\t\t// CVE-2022-24728: Validate input before processing\n+\t\t\tif ( !data || typeof data !== 'string' ) {\n+\t\t\t\treturn '';\n+\t\t\t}\n+\t\t\t\n+\t\t\t// Prevent malformed HTML from bypassing sanitization\n+\t\t\tif ( !CKEDITOR.htmlDataProcessor.isValidHtml( data ) ) {\n+\t\t\t\treturn '';\n+\t\t\t}\n+\t\t\t\n \t\t\treturn data;\n \t\t}\n \t};",
+      "generation_time_s": 15.621,
+      "patch_analysis": {
+        "judge_score": 0.05,
+        "judge_reasoning": "The candidate patch completely misses the root cause of the vulnerability. The gold patch fixes the issue by generating a per-invocation random number for protection markers (instead of using the static CKEDITOR.rnd), preventing attackers from injecting pre-crafted protection markers that bypass sanitization. The candidate patch instead adds calls to non-existent functions (CKEDITOR.htmlDataProcessor.sanitizeHtml and CKEDITOR.htmlDataProcessor.isValidHtml) and modifies the wrong part of the code (convertToHtml/convertToDataFormat stubs rather than the actual HTML processing pipeline). This would break functionality and not fix the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.05,
+      "passed": false,
+      "prompt_tokens": 415,
+      "completion_tokens": 1862,
+      "cost_usd": 0.0024880375,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-27428",
+      "cve_id": "CVE-2020-27428",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "Let me create a minimal, focused patch:",
+      "generation_time_s": 34.653,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "The candidate patch is empty/invalid - it contains no actual code changes, just a comment saying 'Let me create a minimal, focused patch' with no diff content. It does not address the XSS vulnerability at all.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 264,
+      "completion_tokens": 2127,
+      "cost_usd": 0.002193,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-46308",
+      "cve_id": "CVE-2023-46308",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "--- a/src/lib/nested_property.js\n+++ b/src/lib/nested_property.js\n@@ -1,6 +1,10 @@\n function expandObjectPaths(obj, path) {\n     var parts = path.split('.');\n     var current = obj;\n+    \n+    // Prevent prototype pollution\n+    if (parts.includes('__proto__') || parts.includes('constructor') || parts.includes('prototype')) {\n+        return obj;\n+    }\n     \n     for (var i = 0; i < parts.length; i++) {\n         var part = parts[i];\n         if (i === parts.length - 1) {\n             current[part] = obj;\n         } else {\n             if (!current[part]) {\n                 current[part] = {};\n             }\n             current = current[part];\n         }\n     }\n     return obj;\n }",
+      "generation_time_s": 14.213,
+      "patch_analysis": {
+        "judge_score": 0.25,
+        "judge_reasoning": "The candidate patch attempts to address prototype pollution but targets the wrong code structure. The gold patch fixes the `nestedProperty` function by checking for properties starting with '__' (double underscore) in the propParts array and throwing an error. The candidate patch instead modifies what appears to be an `expandObjectPaths` function with a different structure than what exists in the actual source file. It doesn't modify the actual `nestedProperty` function in `src/lib/nested_property.js` where the vulnerability exists, and the file structure in the candidate doesn't match the real file. While it shows understanding of prototype pollution, it fails to fix the actual vulnerable code path.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.25,
+      "passed": false,
+      "prompt_tokens": 237,
+      "completion_tokens": 964,
+      "cost_usd": 0.00102325,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-32050",
+      "cve_id": "CVE-2021-32050",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "--- a/src/libmongoc/mongoc-client.c\n+++ b/src/libmongoc/mongoc-client.c\n@@ -1,6 +1,7 @@\n #include \"mongoc-client-private.h\"\n #include \"mongoc-cursor-private.h\"\n #include \"mongoc-cursor.h\"\n+#include \"mongoc-auth.h\"\n #include \"mongoc-collection.h\"\n #include \"mongoc-database.h\"\n #include \"mongoc-error.h\"\n@@ -1500,6 +1501,15 @@ mongoc_client_command_with_opts (mongoc_client_t *client,\n    mongoc_command_listener_t *listener;\n    bson_t *reply;\n    bson_error_t error;\n+   bool sensitive_data = false;\n+\n+   /* Check if command contains sensitive authentication data */\n+   if (command && command->document) {\n+      if (mongoc_command_is_auth_command (command->document)) {\n+         sensitive_data = true;\n+      }\n+   }\n+\n    BSON_ASSERT (client);\n    BSON_ASSERT (command);\n \n@@ -1520,6 +1530,11 @@ mongoc_client_command_with_opts (mongoc_client_t *client,\n    reply = bson_new ();\n \n    if (listener) {\n+      /* Filter sensitive data from command events */\n+      if (sensitive_data) {\n+         mongoc_command_event_filter_sensitive_data (command, &filtered_command);\n+      }\n+\n       listener->command_started (listener->data,\n                                  &event,\n                                  command,",
+      "generation_time_s": 16.743,
+      "patch_analysis": {
+        "judge_score": 0.1,
+        "judge_reasoning": "The candidate patch is a fabricated diff that references non-existent functions (mongoc_command_is_auth_command, mongoc_command_event_filter_sensitive_data) and headers (mongoc-auth.h), and doesn't match the actual file structure of the libmongoc submodule. The gold patch updates the libmongoc submodule reference to a fixed version (1.17.7), while the candidate attempts to manually patch source code with undefined functions. This would not compile and does not fix the vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.1,
+      "passed": false,
+      "prompt_tokens": 457,
+      "completion_tokens": 1185,
+      "cost_usd": 0.00129925,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-26864",
+      "cve_id": "CVE-2025-26864",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java b/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java\nindex 1234567..abcdefg 100644\n--- a/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java\n+++ b/iotdb-core/node-commons/src/main/java/org/apache/iotdb/commons/auth/authorizer/OpenIdAuthorizer.java\n@@ -1,6 +1,7 @@\n package org.apache.iotdb.commons.auth.authorizer;\n \n import org.apache.iotdb.commons.auth.AuthException;\n+import org.apache.iotdb.commons.auth.entity.User;\n import org.apache.iotdb.commons.exception.IllegalPathException;\n import org.apache.iotdb.commons.exception.PrivilegeException;\n import org.apache.iotdb.commons.exception.RoleException;\n@@ -15,6 +16,7 @@ import org.apache.iotdb.commons.utils.NodeUrlUtils;\n import org.apache.iotdb.db.auth.authorizer.AbstractAuthorizer;\n import org.apache.iotdb.db.auth.authorizer.Authorizer;\n import org.apache.iotdb.db.auth.authorizer.AuthorizerManager;\n+import org.apache.iotdb.db.auth.entity.Privilege;\n import org.apache.iotdb.db.auth.entity.Role;\n import org.apache.iotdb.db.auth.entity.User;\n import org.apache.iotdb.db.exception.StorageEngineException;\n@@ -22,6 +24,7 @@ import org.apache.iotdb.db.exception.query.QueryProcessException;\n import org.apache.iotdb.db.metadata.MManager;\n import org.apache.iotdb.db.metadata.path.PartialPath;\n import org.apache.iotdb.db.utils.QueryUtil;\n+import org.apache.iotdb.rpc.TSStatusCode;\n import org.apache.iotdb.service.rpc.thrift.TSStatus;\n import org.apache.iotdb.tsfile.utils.PublicBAOS;\n import org.apache.iotdb.tsfile.utils.ReadWriteIOUtils;\n@@ -30,6 +33,7 @@ import org.slf4j.Logger;\n import org.slf4j.LoggerFactory;\n \n import java.io.IOException;\n+import java.util.Arrays;\n import java.util.List;\n import java.util.Map;\n import java.util.Set;\n@@ -125,13 +129,15 @@ public class OpenIdAuthorizer extends AbstractAuthorizer {\n     }\n \n     private void logUserCreation(String username, String password) {\n-        LOG.info(\"User {} created with password {}\", username, password);\n+        LOG.info(\"User {} created\", username);\n     }\n \n     private void logUserDeletion(String username) {\n         LOG.info(\"User {} deleted\", username);\n     }\n \n+    private void logAuthFailure(String username, String reason) {\n+        LOG.warn(\"Authentication failed for user {}: {}\", username, reason);\n+    }\n+\n     @Override\n     public void createUser(String username, String password) throws AuthException {\n         if (userExists(username)) {\n@@ -140,7 +146,7 @@ public class OpenIdAuthorizer extends AbstractAuthorizer {\n         }\n         User user = new User(username, password);\n         users.put(username, user);\n-        logUserCreation(username, password);\n+        logUserCreation(username, null);\n     }\n \n     @Override\n@@ -150,7 +156,7 @@ public class OpenIdAuthorizer extends AbstractAuthorizer {\n         }\n         User user = users.get(username);\n         if (user != null) {\n-            logUserCreation(username, password);\n+            logUserCreation(username, null);\n         }\n     }\n \n@@ -160,7 +166,7 @@ public class OpenIdAuthorizer extends AbstractAuthorizer {\n         User user = users.get(username);\n         if (user != null) {\n             if (user.getPassword().equals(password)) {\n-                LOG.info(\"User {} logged in successfully\", username);\n+                LOG.info(\"User {} logged in successfully\", username);\n                 return true;\n             } else {\n-                LOG.info(\"User {} login failed, wrong password\", username);\n+                logAuthFailure(username, \"wrong password\");\n                 return false;\n             }\n         }\n-        LOG.info(\"User {} login failed, user not found\", username);\n+        logAuthFailure(username, \"user not found\");\n         return false;\n     }\n \n     @Override\n     public void deleteUser(String username) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         users.remove(username);\n         logUserDeletion(username);\n     }\n \n     @Override\n     public void changeUserPassword(String username, String oldPassword, String newPassword) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         User user = users.get(username);\n         if (!user.getPassword().equals(oldPassword)) {\n-            LOG.info(\"User {} password change failed, wrong old password\", username);\n+            logAuthFailure(username, \"wrong old password\");\n             throw new AuthException(\"Wrong old password\");\n         }\n         user.setPassword(newPassword);\n-        LOG.info(\"User {} password changed\", username);\n+        LOG.info(\"User {} password changed\", username);\n     }\n \n     @Override\n     public void grantRoleToUser(String username, String roleName) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         User user = users.get(username);\n         user.addRole(roleName);\n         LOG.info(\"Role {} granted to user {}\", roleName, username);\n     }\n \n     @Override\n     public void revokeRoleFromUser(String username, String roleName) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         User user = users.get(username);\n         user.removeRole(roleName);\n         LOG.info(\"Role {} revoked from user {}\", roleName, username);\n     }\n \n     @Override\n     public void grantPrivilegeToUser(String username, String path, String privilege) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         if (!privilegeExists(privilege)) {\n             throw new AuthException(\"Privilege does not exist\");\n         }\n         User user = users.get(username);\n         user.addPrivilege(path, privilege);\n         LOG.info(\"Privilege {} granted to user {} on path {}\", privilege, username, path);\n     }\n \n     @Override\n     public void revokePrivilegeFromUser(String username, String path, String privilege) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         if (!privilegeExists(privilege)) {\n             throw new AuthException(\"Privilege does not exist\");\n         }\n         User user = users.get(username);\n         user.removePrivilege(path, privilege);\n         LOG.info(\"Privilege {} revoked from user {} on path {}\", privilege, username, path);\n     }\n \n     @Override\n     public void grantRoleToRole(String roleName, String grantRoleName) throws AuthException {\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         if (!roleExists(grantRoleName)) {\n             throw new AuthException(\"Grant role does not exist\");\n         }\n         Role role = roles.get(roleName);\n         role.addGrantRole(grantRoleName);\n         LOG.info(\"Role {} granted to role {}\", grantRoleName, roleName);\n     }\n \n     @Override\n     public void revokeRoleFromRole(String roleName, String revokeRoleName) throws AuthException {\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         if (!roleExists(revokeRoleName)) {\n             throw new AuthException(\"Revoke role does not exist\");\n         }\n         Role role = roles.get(roleName);\n         role.removeGrantRole(revokeRoleName);\n         LOG.info(\"Role {} revoked from role {}\", revokeRoleName, roleName);\n     }\n \n     @Override\n     public void grantPrivilegeToRole(String roleName, String path, String privilege) throws AuthException {\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         if (!privilegeExists(privilege)) {\n             throw new AuthException(\"Privilege does not exist\");\n         }\n         Role role = roles.get(roleName);\n         role.addPrivilege(path, privilege);\n         LOG.info(\"Privilege {} granted to role {} on path {}\", privilege, roleName, path);\n     }\n \n     @Override\n     public void revokePrivilegeFromRole(String roleName, String path, String privilege) throws AuthException {\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         if (!privilegeExists(privilege)) {\n             throw new AuthException(\"Privilege does not exist\");\n         }\n         Role role = roles.get(roleName);\n         role.removePrivilege(path, privilege);\n         LOG.info(\"Privilege {} revoked from role {} on path {}\", privilege, roleName, path);\n     }\n \n     @Override\n     public void grantUserToRole(String username, String roleName) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         User user = users.get(username);\n         user.addRole(roleName);\n         LOG.info(\"User {} added to role {}\", username, roleName);\n     }\n \n     @Override\n     public void revokeUserFromRole(String username, String roleName) throws AuthException {\n         if (!userExists(username)) {\n             throw new AuthException(\"User does not exist\");\n         }\n         if (!roleExists(roleName)) {\n             throw new AuthException(\"Role does not exist\");\n         }\n         User user = users.get(username);\n         user.removeRole(roleName);\n         LOG.info(\"User {} removed from role {}\", username, roleName);\n     }\n \n     @Override\n     public void grantRoleToUser(String roleName, String username) throws AuthException {\n         grantRoleToUser(username, roleName);\n     }\n \n     @Override\n     public void revokeRoleFromUser(String roleName, String username) throws AuthException {\n         revokeRoleFromUser(username, roleName);\n     }\n \n     @Override\n     public void grantPrivilegeToUser(String privilege, String username, String path) throws AuthException {\n         grantPrivilegeToUser(username, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromUser(String privilege, String username, String path) throws AuthException {\n         revokePrivilegeFromUser(username, path, privilege);\n     }\n \n     @Override\n     public void grantPrivilegeToRole(String privilege, String roleName, String path) throws AuthException {\n         grantPrivilegeToRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromRole(String privilege, String roleName, String path) throws AuthException {\n         revokePrivilegeFromRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void grantRoleToRole(String grantRoleName, String roleName) throws AuthException {\n         grantRoleToRole(roleName, grantRoleName);\n     }\n \n     @Override\n     public void revokeRoleFromRole(String revokeRoleName, String roleName) throws AuthException {\n         revokeRoleFromRole(roleName, revokeRoleName);\n     }\n \n     @Override\n     public void grantUserToRole(String roleName, String username) throws AuthException {\n         grantUserToRole(username, roleName);\n     }\n \n     @Override\n     public void revokeUserFromRole(String roleName, String username) throws AuthException {\n         revokeUserFromRole(username, roleName);\n     }\n \n     @Override\n     public void grantRoleToUser(String roleName, String username) throws AuthException {\n         grantRoleToUser(username, roleName);\n     }\n \n     @Override\n     public void revokeRoleFromUser(String roleName, String username) throws AuthException {\n         revokeRoleFromUser(username, roleName);\n     }\n \n     @Override\n     public void grantPrivilegeToUser(String privilege, String username, String path) throws AuthException {\n         grantPrivilegeToUser(username, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromUser(String privilege, String username, String path) throws AuthException {\n         revokePrivilegeFromUser(username, path, privilege);\n     }\n \n     @Override\n     public void grantPrivilegeToRole(String privilege, String roleName, String path) throws AuthException {\n         grantPrivilegeToRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromRole(String privilege, String roleName, String path) throws AuthException {\n         revokePrivilegeFromRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void grantRoleToRole(String grantRoleName, String roleName) throws AuthException {\n         grantRoleToRole(roleName, grantRoleName);\n     }\n \n     @Override\n     public void revokeRoleFromRole(String revokeRoleName, String roleName) throws AuthException {\n         revokeRoleFromRole(roleName, revokeRoleName);\n     }\n \n     @Override\n     public void grantUserToRole(String roleName, String username) throws AuthException {\n         grantUserToRole(username, roleName);\n     }\n \n     @Override\n     public void revokeUserFromRole(String roleName, String username) throws AuthException {\n         revokeUserFromRole(username, roleName);\n     }\n \n     @Override\n     public void grantRoleToUser(String roleName, String username) throws AuthException {\n         grantRoleToUser(username, roleName);\n     }\n \n     @Override\n     public void revokeRoleFromUser(String roleName, String username) throws AuthException {\n         revokeRoleFromUser(username, roleName);\n     }\n \n     @Override\n     public void grantPrivilegeToUser(String privilege, String username, String path) throws AuthException {\n         grantPrivilegeToUser(username, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromUser(String privilege, String username, String path) throws AuthException {\n         revokePrivilegeFromUser(username, path, privilege);\n     }\n \n     @Override\n     public void grantPrivilegeToRole(String privilege, String roleName, String path) throws AuthException {\n         grantPrivilegeToRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromRole(String privilege, String roleName, String path) throws AuthException {\n         revokePrivilegeFromRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void grantRoleToRole(String grantRoleName, String roleName) throws AuthException {\n         grantRoleToRole(roleName, grantRoleName);\n     }\n \n     @Override\n     public void revokeRoleFromRole(String revokeRoleName, String roleName) throws AuthException {\n         revokeRoleFromRole(roleName, revokeRoleName);\n     }\n \n     @Override\n     public void grantUserToRole(String roleName, String username) throws AuthException {\n         grantUserToRole(username, roleName);\n     }\n \n     @Override\n     public void revokeUserFromRole(String roleName, String username) throws AuthException {\n         revokeUserFromRole(username, roleName);\n     }\n \n     @Override\n     public void grantRoleToUser(String roleName, String username) throws AuthException {\n         grantRoleToUser(username, roleName);\n     }\n \n     @Override\n     public void revokeRoleFromUser(String roleName, String username) throws AuthException {\n         revokeRoleFromUser(username, roleName);\n     }\n \n     @Override\n     public void grantPrivilegeToUser(String privilege, String username, String path) throws AuthException {\n         grantPrivilegeToUser(username, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromUser(String privilege, String username, String path) throws AuthException {\n         revokePrivilegeFromUser(username, path, privilege);\n     }\n \n     @Override\n     public void grantPrivilegeToRole(String privilege, String roleName, String path) throws AuthException {\n         grantPrivilegeToRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void revokePrivilegeFromRole(String privilege, String roleName, String path) throws AuthException {\n         revokePrivilegeFromRole(roleName, path, privilege);\n     }\n \n     @Override\n     public void grantRoleToRole(String grantRoleName, String roleName) throws AuthException {\n         grantRoleToRole(roleName, grantRoleName);\n     }\n \n     @Override\n     public void revokeRoleFromRole(String revokeRoleName, String roleName) throws AuthException {\n         revokeRoleFromRole(roleName, revokeRoleName);\n     }\n \n     @Override\n     public void grantUserToRole(String roleName, String username) throws AuthException {\n         grantUserToRole(username, roleName);\n     }\n \n     @Override\n     public void revokeUserFromRole(String roleName, String username) throws AuthException {\n         revokeUserFromRole(username, roleName);\n     }\n \n     @Override\n     public void grantRoleToUser(String roleName, String username) throws AuthException {\n         grantRoleToUser(username, roleName);\n     }\n \n     @Override\n     public void revokeRoleFromUser(String roleName, String username) throws AuthException {\n         revokeRoleFromUser(username, roleName);\n     }\n \n     @Override\n     public void grantPrivilegeToUser(String privilege, String username, String path) throws AuthException {\n         grantPrivilegeToUser(username, path, privilege);\n     }",
+      "generation_time_s": 34.172,
+      "patch_analysis": {
+        "judge_score": 0.2,
+        "judge_reasoning": "The candidate patch attempts to address sensitive information logging but is severely flawed. It appears to be a hallucinated/fabricated patch that doesn't match the actual source code structure - it contains massive amounts of duplicated method signatures and doesn't address the key fixes from the gold patch: (1) removing password from the OpenIdAuthorizer login error log, (2) fixing the JWT error log that logged password instead of token, (3) removing password from User.toString(), and (4) removing sensitive logging from IoTDBDataSourceFactory. While it does remove password from logUserCreation, the patch is largely fabricated code that wouldn't compile and misses most of the critical fixes.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.2,
+      "passed": false,
+      "prompt_tokens": 413,
+      "completion_tokens": 4449,
+      "cost_usd": 0.0058508125,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36264",
+      "cve_id": "CVE-2024-36264",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "--- a/submarine-commons/commons-utils/src/main/java/org/apache/submarine/commons/utils/SubmarineConfVars.java\n+++ b/submarine-commons/commons-utils/src/main/java/org/apache/submarine/commons/utils/SubmarineConfVars.java\n@@ -1,6 +1,7 @@\n package org.apache.submarine.commons.utils;\n \n+import org.apache.commons.lang3.StringUtils;\n import org.apache.hadoop.conf.Configuration;\n \n public class SubmarineConfVars {\n@@ -15,10 +16,15 @@ public class SubmarineConfVars {\n     public static final String SUBMARINE_AUTH_DEFAULT_SECRET = \"submarine.auth.default.secret\";\n     public static final String SUBMARINE_AUTH_DEFAULT_SECRET_DEFAULT = \"default-secret\";\n \n+    static {\n+        // Validate that the secret is explicitly configured\n+        Configuration conf = new Configuration();\n+        String secret = conf.get(SUBMARINE_AUTH_DEFAULT_SECRET);\n+        if (StringUtils.isBlank(secret)) {\n+            throw new IllegalStateException(\"submarine.auth.default.secret must be explicitly configured for security\");\n+        }\n+    }\n+\n     public static String getSubmarineAuthDefaultSecret(Configuration conf) {\n-        return conf.get(SUBMARINE_AUTH_DEFAULT_SECRET, SUBMARINE_AUTH_DEFAULT_SECRET_DEFAULT);\n+        String secret = conf.get(SUBMARINE_AUTH_DEFAULT_SECRET);\n+        if (StringUtils.isBlank(secret)) {\n+            throw new IllegalStateException(\"submarine.auth.default.secret must be explicitly configured for security\");\n+        }\n+        return secret;\n     }\n }",
+      "generation_time_s": 26.158,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to address the hardcoded secret issue but takes a fundamentally different approach that doesn't match the actual file structure. The gold patch modifies an enum-based configuration system (ConfVars enum) to read the secret from an environment variable instead of using a hardcoded default, while the candidate patch appears to rewrite the class entirely with a different structure (static fields, static initializer block, Hadoop Configuration dependency). The candidate doesn't modify the actual ConfVars enum that exists in the real file, and it introduces a dependency on apache commons-lang3 and Hadoop Configuration that may not align with the existing codebase. While it shows understanding of the issue (removing hardcoded defaults), it wouldn't compile against the actual source file.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 323,
+      "completion_tokens": 1414,
+      "cost_usd": 0.00149475,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9654",
+      "cve_id": "CVE-2025-9654",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/server-simple.mjs b/src/server-simple.mjs\nindex 1234567..abcdefg 100644\n--- a/src/server-simple.mjs\n+++ b/src/server-simple.mjs\n@@ -1,6 +1,7 @@\n import { exec } from 'child_process';\n import { createServer } from 'http';\n+import { execFile } from 'child_process';\n \n const server = createServer((req, res) => {\n   const url = new URL(req.url, `http://${req.headers.host}`);\n@@ -15,13 +16,20 @@ const server = createServer((req, res) => {\n     const command = url.searchParams.get('cmd');\n     \n     if (!command) {\n       res.writeHead(400);\n       res.end('Missing command parameter');\n       return;\n     }\n     \n-    // VULNERABLE: Direct command execution without sanitization\n-    exec(`ssh ${command}`, (error, stdout, stderr) => {\n+    // FIXED: Validate and sanitize command input\n+    const allowedCommands = ['ls', 'cat', 'pwd', 'whoami', 'date'];\n+    const cmdParts = command.trim().split(/\\s+/);\n+    const baseCmd = cmdParts[0];\n+    \n+    if (!allowedCommands.includes(baseCmd)) {\n+      res.writeHead(403);\n+      res.end('Command not allowed');\n+      return;\n+    }\n+    \n+    execFile('ssh', cmdParts.slice(1), (error, stdout, stderr) => {\n       if (error) {\n         res.writeHead(500);\n         res.end(`Error: ${error.message}`);\n         return;\n       }\n       res.writeHead(200);\n       res.end(stdout || stderr);\n     });\n   }\n });",
+      "generation_time_s": 6.371,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch shows understanding of the core issue (using execFile instead of exec to prevent command injection), but it operates on a completely different code structure than the actual vulnerable file. The gold patch modifies three functions (runRemoteCommand, uploadFile, downloadFile) in server-simple.mjs, replacing execAsync with execFileAsync for ssh and scp commands. The candidate patch instead modifies what appears to be a fabricated HTTP server handler with an allowlist approach that doesn't match the actual codebase. It doesn't address the scp upload/download functions and doesn't properly handle the ssh command arguments as the gold patch does.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 319,
+      "completion_tokens": 867,
+      "cost_usd": 0.0011789375,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-47948",
+      "cve_id": "CVE-2025-47948",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/builtins.ts b/src/builtins.ts\nindex 1234567..abcdefg 100644\n--- a/src/builtins.ts\n+++ b/src/builtins.ts\n@@ -1,4 +1,25 @@\n+/**\n+ * Platform-specific control tags that should not be echoed\n+ * to prevent privilege escalation via command injection\n+ */\n+const DANGEROUS_TAGS = [\n+  '<qqbot-at-everyone />',\n+  '<qqbot-at-all />',\n+  '<qqbot-mention-all />',\n+  '@\u5168\u4f53\u6210\u5458',\n+  '@all',\n+  '@everyone',\n+];\n+\n+/**\n+ * Sanitizes user input by removing dangerous platform control tags\n+ * to prevent privilege escalation attacks\n+ * @param input - User-provided message content\n+ * @returns Sanitized message content\n+ */\n+function sanitizeEchoInput(input: string): string {\n+  return DANGEROUS_TAGS.reduce((acc, tag) => acc.replace(new RegExp(tag, 'gi'), ''), input);\n+}\n+\n import { Command } from './command';\n import { BotContext } from './context';\n \n@@ -50,7 +71,8 @@ export class EchoCommand extends Command {\n     if (!args || args.length === 0) {\n       return 'Usage: /echo <message>';\n     }\n-    return args.join(' ');\n+    const sanitizedMessage = sanitizeEchoInput(args.join(' '));\n+    return sanitizedMessage;\n   }\n \n   async execute(context: BotContext, args: string[]): Promise<string> {",
+      "generation_time_s": 6.386,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch attempts to sanitize dangerous tags from the echo input rather than removing the echo command entirely (as the gold patch does). While this approach could partially mitigate the vulnerability, it has significant weaknesses: (1) the allowlist of dangerous tags may be incomplete and could be bypassed with variations, encoding tricks, or future platform tags; (2) the patch modifies a different file structure than what exists in the actual codebase (it references `EchoCommand` class and `Command`/`BotContext` imports that don't match the original `src/builtins.ts`), suggesting it may not apply correctly to the actual codebase; (3) the regex-based filtering approach is inherently fragile against injection attacks. The gold patch takes the more secure approach of completely removing the echo functionality.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 581,
+      "completion_tokens": 728,
+      "cost_usd": 0.0010915625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22798",
+      "cve_id": "CVE-2026-22798",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "--- a/src/hermes/commands/cli.py\n+++ b/src/hermes/commands/cli.py\n@@ -63,6 +63,18 @@ def cli():\n     \"\"\"\n     pass\n \n+\n+def _mask_sensitive_value(value: str) -> str:\n+    \"\"\"Mask sensitive values to prevent log exposure.\"\"\"\n+    return \"***\" if value else value\n+\n+\n+def _mask_options(options: tuple) -> tuple:\n+    \"\"\"Mask sensitive values in -O options for logging.\"\"\"\n+    masked = []\n+    for opt in options:\n+        if '=' in opt:\n+            key, value = opt.split('=', 1)\n+            masked.append(f\"{key}={_mask_sensitive_value(value)}\")\n+        else:\n+            masked.append(opt)\n+    return tuple(masked)\n+\n+\n @cli.command()\n @click.option('-O', 'options', multiple=True, help='Arbitrary options')\n def deposit(options):\n@@ -70,7 +82,7 @@ def deposit(options):\n     \"\"\"Deposit data.\"\"\"\n-    logger.info(f\"Deposit command called with options: {options}\")\n+    logger.info(f\"Deposit command called with options: {_mask_options(options)}\")\n     # ... rest of the function",
+      "generation_time_s": 30.381,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Judge error: litellm.APIError: APIError: OpenrouterException - {\"error\":{\"message\":\"Insufficient credits. Add more using https://openrouter.ai/settings/credits\",\"code\":402}}",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-14546",
+      "cve_id": "CVE-2025-14546",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.095,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-28121",
+      "cve_id": "CVE-2024-28121",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "",
+      "generation_time_s": 0.091,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-47529",
+      "cve_id": "CVE-2024-47529",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "",
+      "generation_time_s": 0.097,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22696",
+      "cve_id": "CVE-2026-22696",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rust",
+      "model_patch": "",
+      "generation_time_s": 0.096,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-31475",
+      "cve_id": "CVE-2025-31475",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.683,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-22150",
+      "cve_id": "CVE-2025-22150",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.098,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-31453",
+      "cve_id": "CVE-2024-31453",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.099,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-48218",
+      "cve_id": "CVE-2023-48218",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.101,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-38691",
+      "cve_id": "CVE-2023-38691",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.094,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-39263",
+      "cve_id": "CVE-2022-39263",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.095,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-13466",
+      "cve_id": "CVE-2025-13466",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.096,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-45390",
+      "cve_id": "CVE-2024-45390",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.092,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6921",
+      "cve_id": "CVE-2025-6921",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.098,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-53012",
+      "cve_id": "CVE-2025-53012",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.1,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-27529",
+      "cve_id": "CVE-2024-27529",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "swift",
+      "model_patch": "",
+      "generation_time_s": 0.093,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36361",
+      "cve_id": "CVE-2024-36361",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.094,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-43843",
+      "cve_id": "CVE-2021-43843",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.096,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-67750",
+      "cve_id": "CVE-2025-67750",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.094,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-21537",
+      "cve_id": "CVE-2024-21537",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.096,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-7793",
+      "cve_id": "CVE-2020-7793",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.099,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6545",
+      "cve_id": "CVE-2025-6545",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.104,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-1283",
+      "cve_id": "CVE-2023-1283",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.107,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-55173",
+      "cve_id": "CVE-2025-55173",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.099,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-49595",
+      "cve_id": "CVE-2025-49595",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.096,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-4727",
+      "cve_id": "CVE-2025-4727",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.094,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-50710",
+      "cve_id": "CVE-2023-50710",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.096,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 577,
+      "completion_tokens": 3989,
+      "cost_usd": 0.0052794625,
+      "judge_cost_usd": 0.0
+    }
+  ]
+}

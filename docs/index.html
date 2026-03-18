@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VulnBench - Can LLMs Fix Real-World Security Vulnerabilities?</title>
+    <meta name="description" content="VulnBench benchmarks 16 frontier LLMs on generating security patches for 200 real-world CVEs across 7 ecosystems and 55 CWE types.">
+    <meta property="og:title" content="VulnBench - LLM Security Patch Generation Benchmark">
+    <meta property="og:description" content="The best AI model patches 57% of real vulnerabilities. The median model: only 22%. See how 16 frontier LLMs perform on real CVE patch generation.">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --bg: #0a0e17;
+            --bg-card: #111827;
+            --bg-card-hover: #1a2332;
+            --border: #1e293b;
+            --text: #e2e8f0;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+            --accent: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.15);
+            --green: #22c55e;
+            --yellow: #eab308;
+            --red: #ef4444;
+            --orange: #f97316;
+            --purple: #a855f7;
+            --cyan: #06b6d4;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Hero */
+        .hero {
+            padding: 80px 0 60px;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(59,130,246,0.08) 0%, transparent 100%);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: var(--accent-glow);
+            border: 1px solid rgba(59,130,246,0.3);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+            letter-spacing: 0.02em;
+        }
+
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, #94a3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
+
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+
+        .hero-stat {
+            text-align: center;
+        }
+
+        .hero-stat .number {
+            font-size: 2.4rem;
+            font-weight: 800;
+            color: #fff;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-stat .label {
+            font-size: 0.85rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Section */
+        section {
+            padding: 64px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        section:last-child { border-bottom: none; }
+
+        .section-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 12px;
+        }
+
+        .section-desc {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            max-width: 700px;
+            margin-bottom: 36px;
+        }
+
+        /* Leaderboard table */
+        .leaderboard-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .leaderboard {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .leaderboard thead {
+            background: var(--bg-card);
+        }
+
+        .leaderboard th {
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .leaderboard th.num { text-align: right; }
+
+        .leaderboard td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+
+        .leaderboard td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+        .leaderboard tr:last-child td { border-bottom: none; }
+
+        .leaderboard tbody tr {
+            background: var(--bg);
+            transition: background 0.15s;
+        }
+
+        .leaderboard tbody tr:hover { background: var(--bg-card-hover); }
+
+        .leaderboard .rank-1 { background: rgba(234, 179, 8, 0.06); }
+        .leaderboard .rank-2 { background: rgba(148, 163, 184, 0.06); }
+        .leaderboard .rank-3 { background: rgba(205, 127, 50, 0.06); }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .rank-1 .rank-badge { background: rgba(234,179,8,0.2); color: #eab308; }
+        .rank-2 .rank-badge { background: rgba(148,163,184,0.2); color: #94a3b8; }
+        .rank-3 .rank-badge { background: rgba(205,127,50,0.2); color: #cd7f32; }
+
+        .model-name {
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .model-provider {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .pass-bar-cell {
+            min-width: 200px;
+        }
+
+        .pass-bar-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pass-bar {
+            flex: 1;
+            height: 8px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .pass-bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.8s ease;
+        }
+
+        .pass-pct {
+            font-weight: 700;
+            font-size: 1rem;
+            min-width: 52px;
+            text-align: right;
+        }
+
+        /* Findings grid */
+        .findings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .finding-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .finding-card h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #fff;
+        }
+
+        .finding-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .finding-number {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        /* Tier table */
+        .tier-table-wrapper {
+            overflow-x: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .tier-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .tier-table thead { background: var(--bg-card); }
+
+        .tier-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tier-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tier-table tr:last-child td { border-bottom: none; }
+        .tier-table tbody tr { transition: background 0.15s; }
+        .tier-table tbody tr:hover { background: var(--bg-card-hover); }
+
+        .tier-tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .tier-1 { background: rgba(34,197,94,0.15); color: var(--green); }
+        .tier-2 { background: rgba(234,179,8,0.15); color: var(--yellow); }
+        .tier-3 { background: rgba(239,68,68,0.15); color: var(--red); }
+
+        /* Methodology */
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .method-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .method-card .step-num {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--accent-glow);
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .method-card h3 {
+            font-size: 1rem;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        .method-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Dataset stats */
+        .dataset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .dataset-stat {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .dataset-stat .val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #fff;
+        }
+
+        .dataset-stat .lbl {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* CTA */
+        .cta-section {
+            text-align: center;
+            padding: 80px 0;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-1px);
+        }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border);
+        }
+
+        footer a { color: var(--text-muted); text-decoration: none; }
+        footer a:hover { color: var(--accent); }
+
+        /* Value table */
+        .value-highlight {
+            color: var(--green);
+            font-weight: 700;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero { padding: 48px 0 40px; }
+            .hero h1 { font-size: 2rem; }
+            .hero-stats { gap: 24px; }
+            .hero-stat .number { font-size: 1.8rem; }
+            h2 { font-size: 1.5rem; }
+            .findings-grid { grid-template-columns: 1fr; }
+            .method-grid { grid-template-columns: 1fr; }
+            .dataset-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+    <div class="container">
+        <div class="hero-badge">RSA Conference 2026 &middot; Ghost Security</div>
+        <h1>Can LLMs Fix Real-World<br><span>Security Vulnerabilities?</span></h1>
+        <p>We tested 16 frontier language models on generating security patches for 200 real CVEs. The best model fixes 57%. The median: only 22%.</p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <div class="number">16</div>
+                <div class="label">Models Tested</div>
+            </div>
+            <div class="hero-stat">
+                <div class="number">200</div>
+                <div class="label">Real CVEs</div>
+            </div>
+            <div class="hero-stat">
+                <div class="number">55</div>
+                <div class="label">CWE Types</div>
+            </div>
+            <div class="hero-stat">
+                <div class="number">7</div>
+                <div class="label">Ecosystems</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Findings -->
+<section>
+    <div class="container">
+        <div class="section-label">Key Findings</div>
+        <h2>What We Learned</h2>
+        <p class="section-desc">Even the best models leave nearly half of real vulnerabilities unpatched. Performance varies dramatically across model families, vulnerability types, and cost tiers.</p>
+        <div class="findings-grid">
+            <div class="finding-card">
+                <div class="finding-number" style="color: var(--green);">57%</div>
+                <h3>Best Model Pass Rate</h3>
+                <p>GPT-5.3 Codex leads the benchmark, successfully patching 114 of 200 real vulnerabilities &mdash; 11.5 percentage points ahead of second place.</p>
+            </div>
+            <div class="finding-card">
+                <div class="finding-number" style="color: var(--yellow);">22%</div>
+                <h3>Median Model Pass Rate</h3>
+                <p>The median model fixes roughly 1 in 5 vulnerabilities. There is a sharp drop-off after the top 5 models, which all exceed 40%.</p>
+            </div>
+            <div class="finding-card">
+                <div class="finding-number" style="color: var(--cyan);">$0.001</div>
+                <h3>Cheapest Per-Instance Cost</h3>
+                <p>DeepSeek V3.2 achieves 23.5% pass rate at $0.001 per instance &mdash; 60x cheaper than the top model with half the accuracy.</p>
+            </div>
+            <div class="finding-card">
+                <div class="finding-number" style="color: var(--orange);">61%</div>
+                <h3>Max Tier 1 Performance</h3>
+                <p>Even on the easiest vulnerabilities (XSS, SQL injection), no model exceeds 62%. Pattern-matching fixes are not yet solved.</p>
+            </div>
+            <div class="finding-card">
+                <div class="finding-number" style="color: var(--purple);">~0%</div>
+                <h3>Rust &amp; Swift Coverage</h3>
+                <p>Most models score 0% on Rust and Swift CVEs. Security patch generation remains heavily skewed toward JavaScript and Python ecosystems.</p>
+            </div>
+            <div class="finding-card">
+                <div class="finding-number" style="color: var(--red);">$49</div>
+                <h3>Total Eval Cost</h3>
+                <p>All 16 models evaluated on all 200 instances for under $50 total via OpenRouter &mdash; making this benchmark highly reproducible.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Leaderboard -->
+<section>
+    <div class="container">
+        <div class="section-label">Results</div>
+        <h2>VulnBench-200 Leaderboard</h2>
+        <p class="section-desc">All models evaluated on the same 200 CVE instances using Claude Opus 4.6 as judge. Temperature 0.0, max 4096 tokens.</p>
+        <div class="leaderboard-wrapper">
+            <table class="leaderboard">
+                <thead>
+                    <tr>
+                        <th style="width:50px">#</th>
+                        <th>Model</th>
+                        <th class="pass-bar-cell">Pass Rate</th>
+                        <th class="num">Score</th>
+                        <th class="num">Passed</th>
+                        <th class="num">Avg Time</th>
+                        <th class="num">Cost</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="rank-1">
+                        <td><span class="rank-badge">1</span></td>
+                        <td><span class="model-name">GPT-5.3 Codex</span><br><span class="model-provider">OpenAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:57%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--green)">57.0%</span></div></td>
+                        <td class="num">0.514</td>
+                        <td class="num">111/200</td>
+                        <td class="num">40.5s</td>
+                        <td class="num">$6.24</td>
+                    </tr>
+                    <tr class="rank-2">
+                        <td><span class="rank-badge">2</span></td>
+                        <td><span class="model-name">Claude Opus 4.6</span><br><span class="model-provider">Anthropic</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:45.5%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--green)">45.5%</span></div></td>
+                        <td class="num">0.457</td>
+                        <td class="num">91/200</td>
+                        <td class="num">18.8s</td>
+                        <td class="num">$6.46</td>
+                    </tr>
+                    <tr class="rank-3">
+                        <td><span class="rank-badge">3</span></td>
+                        <td><span class="model-name">GPT-5.4</span><br><span class="model-provider">OpenAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:42.5%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">42.5%</span></div></td>
+                        <td class="num">0.431</td>
+                        <td class="num">85/200</td>
+                        <td class="num">7.9s</td>
+                        <td class="num">$1.94</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">4</span></td>
+                        <td><span class="model-name">Claude Sonnet 4.6</span><br><span class="model-provider">Anthropic</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:42%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">42.0%</span></div></td>
+                        <td class="num">0.419</td>
+                        <td class="num">84/200</td>
+                        <td class="num">13.7s</td>
+                        <td class="num">$3.65</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">5</span></td>
+                        <td><span class="model-name">GPT-5.2</span><br><span class="model-provider">OpenAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:42%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">42.0%</span></div></td>
+                        <td class="num">0.374</td>
+                        <td class="num">84/200</td>
+                        <td class="num">67.6s</td>
+                        <td class="num">$8.50</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">6</span></td>
+                        <td><span class="model-name">Gemini 3 Flash</span><br><span class="model-provider">Google</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:33.5%;background:var(--yellow)"></div></div><span class="pass-pct" style="color:var(--yellow)">33.5%</span></div></td>
+                        <td class="num">0.373</td>
+                        <td class="num">67/200</td>
+                        <td class="num">4.2s</td>
+                        <td class="num">$0.34</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">7</span></td>
+                        <td><span class="model-name">Kimi K2.5</span><br><span class="model-provider">Moonshot AI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:29%;background:var(--yellow)"></div></div><span class="pass-pct" style="color:var(--yellow)">29.0%</span></div></td>
+                        <td class="num">0.301</td>
+                        <td class="num">58/200</td>
+                        <td class="num">261s</td>
+                        <td class="num">$1.98</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">8</span></td>
+                        <td><span class="model-name">Claude Haiku 4.5</span><br><span class="model-provider">Anthropic</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:25%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">25.0%</span></div></td>
+                        <td class="num">0.317</td>
+                        <td class="num">50/200</td>
+                        <td class="num">7.0s</td>
+                        <td class="num">$1.06</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">9</span></td>
+                        <td><span class="model-name">DeepSeek V3.2</span><br><span class="model-provider">DeepSeek</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:23.5%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">23.5%</span></div></td>
+                        <td class="num">0.314</td>
+                        <td class="num">47/200</td>
+                        <td class="num">36.1s</td>
+                        <td class="num">$0.17</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">10</span></td>
+                        <td><span class="model-name">GLM-5</span><br><span class="model-provider">Zhipu AI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:19.5%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">19.5%</span></div></td>
+                        <td class="num">0.268</td>
+                        <td class="num">39/200</td>
+                        <td class="num">80.1s</td>
+                        <td class="num">$2.32</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">11</span></td>
+                        <td><span class="model-name">GPT-5 Mini</span><br><span class="model-provider">OpenAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:17.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">17.5%</span></div></td>
+                        <td class="num">0.307</td>
+                        <td class="num">35/200</td>
+                        <td class="num">27.6s</td>
+                        <td class="num">$0.71</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">12</span></td>
+                        <td><span class="model-name">Qwen 3.5-27B</span><br><span class="model-provider">Alibaba</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:15%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">15.0%</span></div></td>
+                        <td class="num">0.259</td>
+                        <td class="num">30/200</td>
+                        <td class="num">163s</td>
+                        <td class="num">$4.53</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">13</span></td>
+                        <td><span class="model-name">MiniMax M2.5</span><br><span class="model-provider">MiniMax</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:14.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">14.5%</span></div></td>
+                        <td class="num">0.248</td>
+                        <td class="num">29/200</td>
+                        <td class="num">49.0s</td>
+                        <td class="num">$0.47</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">14</span></td>
+                        <td><span class="model-name">Qwen 3.5-35B-A3B</span><br><span class="model-provider">Alibaba</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:11%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">11.0%</span></div></td>
+                        <td class="num">0.235</td>
+                        <td class="num">22/200</td>
+                        <td class="num">28.8s</td>
+                        <td class="num">$1.01</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">15</span></td>
+                        <td><span class="model-name">Gemini 3.1 Pro</span><br><span class="model-provider">Google</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:6.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">6.5%</span></div></td>
+                        <td class="num">0.093</td>
+                        <td class="num">13/200</td>
+                        <td class="num">60.0s</td>
+                        <td class="num">$9.96</td>
+                    </tr>
+                    <tr>
+                        <td><span class="rank-badge">16</span></td>
+                        <td><span class="model-name">Step 3.5 Flash</span><br><span class="model-provider">StepFun</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:0.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--text-dim)">0.0%</span></div></td>
+                        <td class="num">0.000</td>
+                        <td class="num">0/200</td>
+                        <td class="num">24.4s</td>
+                        <td class="num">$0.00</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Tier Breakdown -->
+<section>
+    <div class="container">
+        <div class="section-label">Difficulty Analysis</div>
+        <h2>Performance by Vulnerability Tier</h2>
+        <p class="section-desc">Vulnerabilities are categorized into three difficulty tiers based on the complexity of the required fix. The benchmark is balanced: 67 / 67 / 66 instances across tiers.</p>
+        <div class="tier-table-wrapper">
+            <table class="tier-table">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th><span class="tier-tag tier-1">Tier 1</span> Pattern</th>
+                        <th><span class="tier-tag tier-2">Tier 2</span> Logic</th>
+                        <th><span class="tier-tag tier-3">Tier 3</span> Deep</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>GPT-5.3 Codex</strong></td><td>61.2%</td><td>53.7%</td><td>51.5%</td></tr>
+                    <tr><td><strong>Claude Opus 4.6</strong></td><td>50.7%</td><td>43.3%</td><td>42.4%</td></tr>
+                    <tr><td><strong>GPT-5.4</strong></td><td>46.3%</td><td>32.8%</td><td>48.5%</td></tr>
+                    <tr><td><strong>Claude Sonnet 4.6</strong></td><td>41.8%</td><td>40.3%</td><td>43.9%</td></tr>
+                    <tr><td><strong>GPT-5.2</strong></td><td>47.8%</td><td>41.8%</td><td>36.4%</td></tr>
+                    <tr><td><strong>Gemini 3 Flash</strong></td><td>35.8%</td><td>26.9%</td><td>37.9%</td></tr>
+                    <tr><td><strong>Kimi K2.5</strong></td><td>35.8%</td><td>25.4%</td><td>25.8%</td></tr>
+                    <tr><td><strong>Claude Haiku 4.5</strong></td><td>23.9%</td><td>26.9%</td><td>24.2%</td></tr>
+                    <tr><td><strong>DeepSeek V3.2</strong></td><td>25.4%</td><td>22.4%</td><td>22.7%</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="findings-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="finding-card">
+                <div class="tier-tag tier-1" style="margin-bottom:12px">Tier 1 &mdash; Pattern</div>
+                <p>XSS (CWE-79), SQL injection (CWE-89), path traversal (CWE-22). Fixes follow well-known patterns: escape output, parameterize queries, sanitize paths.</p>
+            </div>
+            <div class="finding-card">
+                <div class="tier-tag tier-2" style="margin-bottom:12px">Tier 2 &mdash; Logic</div>
+                <p>Authorization (CWE-862/863), CSRF (CWE-352), information disclosure (CWE-200). Requires understanding application logic to add missing checks.</p>
+            </div>
+            <div class="finding-card">
+                <div class="tier-tag tier-3" style="margin-bottom:12px">Tier 3 &mdash; Deep</div>
+                <p>Code injection (CWE-94), resource exhaustion (CWE-400), input validation (CWE-20). Requires deep reasoning about execution flow and system behavior.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Methodology -->
+<section>
+    <div class="container">
+        <div class="section-label">Methodology</div>
+        <h2>How VulnBench Works</h2>
+        <p class="section-desc">Each model receives the vulnerability description, affected source code, and CWE-specific guidance. An LLM judge (Claude Opus 4.6) scores the candidate patch against the ground-truth fix commit.</p>
+        <div class="method-grid">
+            <div class="method-card">
+                <div class="step-num">1</div>
+                <h3>Collect Real CVEs</h3>
+                <p>10,000+ CVEs from the GitHub Advisory Database, enriched with CVSS scores and CWE IDs from NVD.</p>
+            </div>
+            <div class="method-card">
+                <div class="step-num">2</div>
+                <h3>Build Instances</h3>
+                <p>Select CVEs with fix commits, download vulnerable source code, extract ground-truth diffs. Quality-scored and tier-classified.</p>
+            </div>
+            <div class="method-card">
+                <div class="step-num">3</div>
+                <h3>Prompt Models</h3>
+                <p>Each model receives CVE description, CWE guidance, affected files, and vulnerable source. Must generate a unified diff patch.</p>
+            </div>
+            <div class="method-card">
+                <div class="step-num">4</div>
+                <h3>Judge Patches</h3>
+                <p>Claude Opus 4.6 compares candidate against reference: root cause addressed, no new vulnerabilities, correct scope. Score 0.0&ndash;1.0.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Dataset -->
+<section>
+    <div class="container">
+        <div class="section-label">Dataset</div>
+        <h2>VulnBench-200 at a Glance</h2>
+        <p class="section-desc">200 curated instances from 200 unique GitHub repositories, balanced across difficulty tiers.</p>
+        <div class="dataset-grid">
+            <div class="dataset-stat"><div class="val">200</div><div class="lbl">CVE Instances</div></div>
+            <div class="dataset-stat"><div class="val">200</div><div class="lbl">Unique Repos</div></div>
+            <div class="dataset-stat"><div class="val">55</div><div class="lbl">CWE Types</div></div>
+            <div class="dataset-stat"><div class="val">7</div><div class="lbl">Ecosystems</div></div>
+            <div class="dataset-stat"><div class="val">36</div><div class="lbl">Mean Lines Changed</div></div>
+            <div class="dataset-stat"><div class="val">1.9</div><div class="lbl">Mean Files Changed</div></div>
+        </div>
+        <div class="findings-grid">
+            <div class="finding-card">
+                <h3>Severity Distribution</h3>
+                <p style="font-variant-numeric:tabular-nums;margin-top:8px">
+                    <span style="color:var(--red)">Critical:</span> 21 &nbsp;
+                    <span style="color:var(--orange)">High:</span> 42 &nbsp;
+                    <span style="color:var(--yellow)">Medium:</span> 137
+                </p>
+            </div>
+            <div class="finding-card">
+                <h3>Top CWEs</h3>
+                <p style="font-variant-numeric:tabular-nums;margin-top:8px">
+                    CWE-79 (XSS): 38 &nbsp; CWE-22 (Path Traversal): 25 &nbsp; CWE-400 (DoS): 25 &nbsp; CWE-20 (Input Val): 23 &nbsp; CWE-94 (Code Inj): 19
+                </p>
+            </div>
+            <div class="finding-card">
+                <h3>Ecosystems</h3>
+                <p style="font-variant-numeric:tabular-nums;margin-top:8px">
+                    npm: 134 &nbsp; pip: 54 &nbsp; Maven: 5 &nbsp; RubyGems: 3 &nbsp; Composer: 2 &nbsp; Rust: 1 &nbsp; Swift: 1
+                </p>
+            </div>
+            <div class="finding-card">
+                <h3>CVE Year Range</h3>
+                <p style="font-variant-numeric:tabular-nums;margin-top:8px">
+                    2026: 16 &nbsp; 2025: 55 &nbsp; 2024: 48 &nbsp; 2023: 26 &nbsp; 2022: 24 &nbsp; Earlier: 31
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container">
+        <h2>Run the Benchmark Yourself</h2>
+        <p class="section-desc" style="margin:0 auto 24px">VulnBench is fully open source and reproducible. Evaluate any LLM in under an hour for less than $10.</p>
+        <div class="cta-buttons">
+            <a href="https://github.com/ghostsecuritydev/APPSEC_BENCH" class="btn btn-primary">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+                View on GitHub
+            </a>
+            <a href="vulnbench_results.html" class="btn btn-secondary">
+                Detailed Results
+            </a>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>VulnBench &middot; <a href="https://github.com/ghostsecuritydev">Ghost Security</a> &middot; RSA Conference 2026</p>
+        <p style="margin-top:8px">Built with data from the <a href="https://github.com/advisories">GitHub Advisory Database</a> and <a href="https://nvd.nist.gov/">NIST NVD</a></p>
+    </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,986 @@
+{
+  "metadata": {
+    "benchmark": "data/benchmark/vulnbench_mini.json",
+    "evaluated_at": "2026-03-09T18:02:27.409761+00:00Z",
+    "total_instances": 50,
+    "judge_model": "openrouter/anthropic/claude-opus-4-6",
+    "model": "openrouter/openai/gpt-5.3-codex"
+  },
+  "aggregate": {
+    "total_instances": 50,
+    "total_passed": 6,
+    "pass_rate": 0.12,
+    "mean_score": 0.124,
+    "pass_rate_by_tier": {
+      "tier_1": 0.3529,
+      "tier_2": 0.0,
+      "tier_3": 0.0
+    },
+    "pass_rate_by_ecosystem": {
+      "maven": 0.0,
+      "npm": 0.1212,
+      "pip": 0.3333,
+      "rubygems": 0.0,
+      "composer": 0.0,
+      "rust": 0.0,
+      "swift": 0.0
+    },
+    "mean_generation_time_s": 7.908,
+    "total_cost_usd": 1.085609,
+    "total_judge_cost_usd": 0.0,
+    "total_prompt_tokens": 15772,
+    "total_completion_tokens": 75572
+  },
+  "results": [
+    {
+      "instance_id": "vulnbench-CVE-2024-49771",
+      "cve_id": "CVE-2024-49771",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\nindex 4b8df24..f2c1b9a 100644\n--- a/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n+++ b/src/main/java/net/sf/mpxj/common/InputStreamHelper.java\n@@ -147,11 +147,19 @@ public final class InputStreamHelper\n                continue;\n             }\n \n-            String outputCanonicalPath = outputFile.getCanonicalPath();\n-            if (!outputCanonicalPath.startsWith(tempFolder.getCanonicalPath()))\n+            String tempFolderCanonicalPath = tempFolder.getCanonicalPath();\n+            if (!tempFolderCanonicalPath.endsWith(File.separator))\n             {\n-               throw new IOException(\"Archive contains files that would be extracted outside of output directory.\");\n+               tempFolderCanonicalPath += File.separator;\n             }\n+\n+            String outputCanonicalPath = outputFile.getCanonicalPath();\n+            if (!outputCanonicalPath.startsWith(tempFolderCanonicalPath))\n+            {\n+               throw new IOException(\n+                  \"Archive contains files that would be extracted outside of output directory.\");\n+            }\n+\n             outputFile.getParentFile().mkdirs();\n \n             try (OutputStream output = new FileOutputStream(outputFile))",
+      "generation_time_s": 22.702,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch only fixes one of the two locations where zip path traversal checks occur. It modifies the check around line 147 (in a different method handling zip entries with tempFolder) but does not address the vulnerable code in the `processZipStream` method around line 174-194, which is the location identified in the gold patch. The gold patch fixes the check in `processZipStream` by using `Path.startsWith()` instead of string-based `startsWith()`, which is the proper fix for the incomplete CVE-2020-35460 patch. The candidate's approach of appending File.separator is a different mitigation strategy that addresses a similar class of issue but in the wrong location.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 323,
+      "completion_tokens": 1101,
+      "cost_usd": 0.01597925,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43761",
+      "cve_id": "CVE-2025-43761",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "diff --git a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\nindex 6a7c1b2..9f3d5a1 100644\n--- a/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n+++ b/modules/apps/frontend-editor/frontend-editor-ckeditor-web/package.json\n@@ -18,7 +18,7 @@\n \t\"dependencies\": {\n \t\t\"@claviska/jquery-minicolors\": \"2.3.6\",\n \t\t\"alloyeditor\": \"2.11.10\",\n-\t\t\"ckeditor4\": \"4.24.0-lts\",\n+\t\t\"ckeditor4\": \"4.25.1-lts\",\n \t\t\"liferay-npm-build-tools-common\": \"3.2.2\",\n \t\t\"metal-position\": \"2.0.1\"\n \t},\ndiff --git a/modules/apps/frontend-js/frontend-js-dependencies-web/package.json b/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\nindex 5b2a8dc..b7fbe44 100644\n--- a/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n+++ b/modules/apps/frontend-js/frontend-js-dependencies-web/package.json\n@@ -22,7 +22,7 @@\n \t\t\"@github/clipboard-copy-element\": \"1.3.0\",\n \t\t\"@liferay/analytics-client-js\": \"5.0.17\",\n \t\t\"@liferay/object-js-components-web\": \"1.0.2\",\n-\t\t\"ckeditor4\": \"4.24.0-lts\",\n+\t\t\"ckeditor4\": \"4.25.1-lts\",\n \t\t\"dompurify\": \"3.1.6\",\n \t\t\"jquery\": \"3.7.1\",\n \t\t\"jquery-ui-dist\": \"1.13.3\"",
+      "generation_time_s": 24.042,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch updates a different package ('ckeditor4' from 4.24.0-lts to 4.25.1-lts) than what the gold patch updates ('liferay-ckeditor' from 4.21.0-liferay.9 to 4.21.0-liferay.10). The vulnerability is specifically in the liferay-ckeditor package's sample files (frontend-editor-ckeditor-web/ckeditor/samples/old/ajax.html), and the fix was applied to the liferay-ckeditor fork. While the candidate shows understanding that a CKEditor dependency needs updating, it targets the wrong package and version, so it would not fix the specific XSS vulnerability described.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 369,
+      "completion_tokens": 1358,
+      "cost_usd": 0.01965775,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-27210",
+      "cve_id": "CVE-2026-27210",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/js/pannellum.js b/src/js/pannellum.js\nindex 8c2b5f1..f4a1d9e 100644\n--- a/src/js/pannellum.js\n+++ b/src/js/pannellum.js\n@@ -1532,10 +1532,16 @@\n             }\n             hotSpotDiv.classList.add('custom-tooltip');\n             if (hs.attributes) {\n-                for (var attr in hs.attributes) {\n-                    hotSpotDiv.setAttribute(attr, hs.attributes[attr]);\n+                for (var attr in hs.attributes) {\n+                    if (!Object.prototype.hasOwnProperty.call(hs.attributes, attr)) {\n+                        continue;\n+                    }\n+                    // Block inline event handlers (e.g. onclick, onmouseover)\n+                    // to prevent XSS from untrusted hotspot configuration.\n+                    if (/^on/i.test(attr)) {\n+                        continue;\n+                    }\n+                    hotSpotDiv.setAttribute(attr, hs.attributes[attr]);\n                 }\n             }\n             if (hs.cssClass) {\n                 hotSpotDiv.classList.add(hs.cssClass);\n             }",
+      "generation_time_s": 10.006,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch addresses a different location in the code (custom tooltip hotspot div around line 1532) but misses the primary vulnerable location (the anchor element 'a' around line 1734) where the gold patch applies the fix. The gold patch fixes the setAttribute call on the anchor element where hs.URL hotspots set attributes, which is the main attack vector. Additionally, the candidate patch only blocks 'on*' event handlers but doesn't block 'href' attributes, and it doesn't respect the escapeHTML configuration flag. The candidate also doesn't normalize the key (lowercase, strip non-ASCII) to prevent bypasses.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 494,
+      "completion_tokens": 601,
+      "cost_usd": 0.0092785,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-25228",
+      "cve_id": "CVE-2026-25228",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/interfaces/applicationData.js b/src/interfaces/applicationData.js\nindex 3f4a1b2..8c9d7e1 100644\n--- a/src/interfaces/applicationData.js\n+++ b/src/interfaces/applicationData.js\n@@ -12,7 +12,7 @@ const fs = require('fs')\n const path = require('path')\n \n function validateAppId (appid) {\n-  if (appid.includes('/') || appid.length >= 30) {\n+  if (appid.includes('/') || appid.includes('\\\\') || appid.length >= 30) {\n     return false\n   }\n   return true",
+      "generation_time_s": 10.046,
+      "patch_analysis": {
+        "judge_score": 0.5,
+        "judge_reasoning": "The candidate patch addresses the input validation part by adding backslash checking to validateAppId(), which is necessary. However, it misses the defense-in-depth path normalization and resolution check in pathForApplicationData() that the gold patch includes. The gold patch adds a critical secondary safeguard that verifies the resolved path stays within the configuration directory, which protects against other potential bypass vectors. Additionally, the candidate patch appears to modify a different version of the code (the function signature and logic structure differ from the gold patch's version), though the core fix of adding backslash validation is present. The missing path containment check is a significant gap.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.5,
+      "passed": true,
+      "prompt_tokens": 1261,
+      "completion_tokens": 567,
+      "cost_usd": 0.01014475,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-21892",
+      "cve_id": "CVE-2026-21892",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/parsl/monitoring/visualization/views.py b/parsl/monitoring/visualization/views.py\nindex 7f2f8b1..c3a9a5e 100644\n--- a/parsl/monitoring/visualization/views.py\n+++ b/parsl/monitoring/visualization/views.py\n@@ -8,6 +8,7 @@ import networkx as nx\n import pandas as pd\n from flask import Blueprint, jsonify, render_template\n from flask import current_app as app\n+from sqlalchemy import text\n \n from parsl.monitoring.visualization.models import db\n \n@@ -120,7 +121,10 @@ def dag_group_by_states(workflow_id):\n                AND status.timestamp = (SELECT MAX(status.timestamp)\n                                        FROM status\n                                        WHERE status.task_id = task.task_id and status.run_id = task.run_id\n                                       )\n-               WHERE task.run_id='%s'\"\"\" % (workflow_id)\n+               WHERE task.run_id=:workflow_id\"\"\"\n+    df_tasks = pd.read_sql_query(\n+        text(query), db.engine, params={\"workflow_id\": workflow_id}\n+    )\n-    df_tasks = pd.read_sql_query(query, db.engine)\n \n     # existing logic continues...\n@@ -206,10 +210,12 @@ def workflow_details(workflow_id):\n-    df_task_tries = pd.read_sql_query(\"\"\"SELECT task.task_id, try.try_id, try.task_try_time_running,\n+    df_task_tries = pd.read_sql_query(text(\"\"\"SELECT task.task_id, try.try_id, try.task_try_time_running,\n                                          try.task_try_time_returned, status.task_status_name\n                                          FROM task, try LEFT JOIN status\n                                          ON try.try_id = status.try_id\n                                          AND try.run_id = status.run_id\n                                          AND status.timestamp = (SELECT MAX(status.timestamp)\n                                                                  FROM status\n                                                                  WHERE status.try_id = try.try_id and status.run_id = try.run_id\n                                                                 )\n-                                         WHERE task.task_id = try.task_id AND task.run_id='%s' and try.run_id='%s'\"\"\"\n-                                     % (workflow_id, workflow_id), db.engine)\n+                                         WHERE task.task_id = try.task_id\n+                                         AND task.run_id=:workflow_id\n+                                         AND try.run_id=:workflow_id\"\"\"),\n+                                     db.engine, params={\"workflow_id\": workflow_id})\n \n     # existing logic continues...",
+      "generation_time_s": 16.17,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses SQL injection in two locations by switching to parameterized queries with sqlalchemy.text(), which is the correct approach. However, it targets different functions than the gold patch - it fixes dag_group_by_states and workflow_details, while the gold patch fixes workflow_dag_details and workflow_resources. The candidate patch also has formatting issues (removing the old df_tasks line after the new code block, and using 'existing logic continues...' comments suggesting it may not apply cleanly). While the approach is correct, it doesn't cover the same vulnerable code locations as the gold patch, missing the two specific SQL injection points identified in the vulnerability description.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 965,
+      "completion_tokens": 1012,
+      "cost_usd": 0.01585675,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-68143",
+      "cve_id": "CVE-2025-68143",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "pip",
+      "model_patch": "diff --git a/src/git/src/mcp_server_git/server.py b/src/git/src/mcp_server_git/server.py\nindex 7b2d8c1..e1d6f44 100644\n--- a/src/git/src/mcp_server_git/server.py\n+++ b/src/git/src/mcp_server_git/server.py\n@@ -164,22 +164,6 @@ async def handle_list_tools() -> list[types.Tool]:\n                 },\n             ),\n-            types.Tool(\n-                name=\"git_init\",\n-                description=\"Initialize a new git repository at the provided path.\",\n-                inputSchema={\n-                    \"type\": \"object\",\n-                    \"properties\": {\n-                        \"path\": {\n-                            \"type\": \"string\",\n-                            \"description\": \"Filesystem path where a repository should be initialized\",\n-                        }\n-                    },\n-                    \"required\": [\"path\"],\n-                    \"additionalProperties\": False,\n-                },\n-            ),\n         ]\n     )\n \n@@ -291,14 +275,6 @@ async def handle_call_tool(\n             return [\n                 types.TextContent(type=\"text\", text=result),\n             ]\n-        elif name == \"git_init\":\n-            path = arguments.get(\"path\")\n-            if not isinstance(path, str) or not path:\n-                raise ValueError(\"Missing required argument: path\")\n-\n-            result = await run_git_command([\"init\"], cwd=path)\n-            return [types.TextContent(type=\"text\", text=result)]\n-\n         raise ValueError(f\"Unknown tool: {name}\")\n     except Exception as e:\n         logger.exception(\"Tool execution failed\")",
+      "generation_time_s": 26.205,
+      "patch_analysis": {
+        "judge_score": 0.8,
+        "judge_reasoning": "The candidate patch correctly removes the git_init tool entirely - both its registration in list_tools and its handler in call_tool. While the candidate patch appears to be against a slightly different version of the codebase (using a different code structure with run_git_command instead of git.Repo.init), it achieves the same security goal: completely removing the git_init functionality that allowed arbitrary repository initialization. The core vulnerability (CVE-2025-68143) is addressed by eliminating the tool that could create Git repositories at arbitrary filesystem paths.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.8,
+      "passed": true,
+      "prompt_tokens": 330,
+      "completion_tokens": 1362,
+      "cost_usd": 0.0196455,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43795",
+      "cve_id": "CVE-2024-43795",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "rubygems",
+      "model_patch": "diff --git a/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js b/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\nindex 2f3f7ab..f3c8d6a 100644\n--- a/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n+++ b/openc3-cosmos-init/plugins/openc3-tool-base/public/js/auth.js\n@@ -34,9 +34,11 @@ function initLogin() {\n   const params = new URLSearchParams(window.location.search)\n   const error = params.get('error')\n   if (error) {\n-    document.getElementById('login-error').innerHTML = decodeURIComponent(error)\n+    // Avoid reflected XSS from query-string controlled values\n+    document.getElementById('login-error').textContent = decodeURIComponent(error)\n   }\n \n   const notice = params.get('notice')\n   if (notice) {\n-    document.getElementById('login-notice').innerHTML = decodeURIComponent(notice)\n+    // Avoid reflected XSS from query-string controlled values\n+    document.getElementById('login-notice').textContent = decodeURIComponent(notice)\n   }\n }\ndiff --git a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\nindex 0e1b9cf..9d4fb93 100644\n--- a/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n+++ b/openc3-cosmos-init/plugins/packages/openc3-tool-common/src/tools/base/components/Login.vue\n@@ -8,7 +8,7 @@\n       <!-- ... -->\n     </div>\n \n-    <div v-if=\"errorMessage\" class=\"login__error\" v-html=\"errorMessage\" />\n+    <div v-if=\"errorMessage\" class=\"login__error\">{{ errorMessage }}</div>\n   </div>\n </template>",
+      "generation_time_s": 23.705,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch addresses XSS through innerHTML/v-html usage (switching to textContent and text interpolation), which is a valid XSS mitigation but targets different attack vectors than the gold patch. The gold patch specifically fixes the redirect parameter handling in both auth.js (stripping the origin to prevent open redirect/XSS via javascript: URLs) and Login.vue (validating the redirect is a relative path). The candidate patch does not address the redirect-based XSS vulnerability at all, which is the core issue described in the CVE. The candidate modifies different code sections than the gold patch and misses the primary vulnerability.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 293,
+      "completion_tokens": 1394,
+      "cost_usd": 0.02002875,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9910",
+      "cve_id": "CVE-2025-9910",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/packages/jsondiffpatch/src/formatters/html.ts b/packages/jsondiffpatch/src/formatters/html.ts\nindex 2a6f4d1..7b9d7d3 100644\n--- a/packages/jsondiffpatch/src/formatters/html.ts\n+++ b/packages/jsondiffpatch/src/formatters/html.ts\n@@ -1,5 +1,14 @@\n import BaseFormatter, { type BaseFormatterContext } from './base.js';\n \n+const htmlEscape = (value: string): string =>\n+  value\n+    .replace(/&/g, '&amp;')\n+    .replace(/</g, '&lt;')\n+    .replace(/>/g, '&gt;')\n+    .replace(/\"/g, '&quot;')\n+    .replace(/'/g, '&#39;');\n+\n export interface HtmlFormatterContext extends BaseFormatterContext {\n   buffer: string[];\n   out: (text: string) => void;\n@@ -28,10 +37,12 @@ export default class HtmlFormatter extends BaseFormatter<HtmlFormatterContext> {\n   nodeBegin(context: HtmlFormatterContext, key: string, leftKey: string, type: string, nodeType?: string): void {\n     const nodeClass = `jsondiffpatch-${type}${nodeType ? ` jsondiffpatch-child-node-type-${nodeType}` : ''}`;\n-    context.out(`<li class=\"${nodeClass}\" data-key=\"${leftKey}\">`);\n+    const safeLeftKey = htmlEscape(String(leftKey));\n+    context.out(`<li class=\"${nodeClass}\" data-key=\"${safeLeftKey}\">`);\n     if (typeof key !== 'undefined') {\n-      context.out(`<div class=\"jsondiffpatch-property-name\">${key}</div>`);\n+      const safeKey = htmlEscape(String(key));\n+      context.out(`<div class=\"jsondiffpatch-property-name\">${safeKey}</div>`);\n     }\n     context.out('<div class=\"jsondiffpatch-value\">');\n   }",
+      "generation_time_s": 31.683,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the core XSS vulnerability in `nodeBegin` by escaping `leftKey` in both the `data-key` attribute and the property name div, which is the primary attack vector described in the CVE. It also escapes `key` (not just `leftKey` as in the gold patch, but this is reasonable). However, it misses the `typeFormattterErrorFormatter` fix where error messages should also be escaped, and it moves/redefines the `htmlEscape` function rather than modifying the existing one. The main vulnerability path (nodeBegin XSS) is properly addressed, making this an effective mitigation even though it's not complete.",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 374,
+      "completion_tokens": 1712,
+      "cost_usd": 0.0246225,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43954",
+      "cve_id": "CVE-2025-43954",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/ui/src/util/extendHeading.js b/ui/src/util/extendHeading.js\nindex 8b7e5ef..0c9d7be 100644\n--- a/ui/src/util/extendHeading.js\n+++ b/ui/src/util/extendHeading.js\n@@ -1,9 +1,24 @@\n import slugify from './slugify'\n \n+function escapeHtml (str) {\n+  return String(str)\n+    .replace(/&/g, '&amp;')\n+    .replace(/</g, '&lt;')\n+    .replace(/>/g, '&gt;')\n+}\n+\n+function escapeAttr (str) {\n+  return escapeHtml(str)\n+    .replace(/\"/g, '&quot;')\n+    .replace(/'/g, '&#39;')\n+}\n+\n export default function extendHeading (renderer, anchorLinkSymbol, noHeadingAnchorLinks, noHeaderId) {\n   renderer.heading = function (text, level, raw) {\n+    const noHtml = this.options !== void 0\n+      && (this.options.noHtml === true || this.options['no-html'] === true)\n     const link = slugify(raw)\n+    const safeText = noHtml === true ? escapeHtml(text) : text\n \n     let id = ''\n     if (noHeaderId !== true) {\n@@ -11,8 +26,8 @@ export default function extendHeading (renderer, anchorLinkSymbol, noHeadingAnc\n     }\n \n     const anchor = noHeadingAnchorLinks === true\n       ? ''\n-      : `<a class=\"q-markdown__heading-anchor-link\" href=\"#${ link }\" aria-hidden=\"true\">${ anchorLinkSymbol }</a>`\n+      : `<a class=\"q-markdown__heading-anchor-link\" href=\"#${ link }\" aria-label=\"${ escapeAttr(raw) }\" aria-hidden=\"true\">${ anchorLinkSymbol }</a>`\n \n-    return `<h${ level }${ id }>${ anchor }${ text }</h${ level }>\\n`\n+    return `<h${ level }${ id }>${ anchor }${ safeText }</h${ level }>\\n`\n   }\n }",
+      "generation_time_s": 64.232,
+      "patch_analysis": {
+        "judge_score": 0.4,
+        "judge_reasoning": "The candidate patch addresses the XSS vulnerability concept by adding HTML escaping when no-html is set, which shows understanding of the issue. However, it operates on a completely different version/structure of the extendHeading.js file. The gold patch works with markdown-it's token-based rendering system (using Token objects, md.core.ruler, md.renderer.rules), while the candidate patch works with a simpler renderer.heading callback pattern. The candidate patch modifies a different code structure than what exists in the affected version (v2.0.x before 2.0.5), and the approach of checking `this.options.noHtml` may not correctly integrate with how the no-html option is actually passed in the affected version's architecture. The fix is conceptually related but targets the wrong code structure.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.4,
+      "passed": false,
+      "prompt_tokens": 242,
+      "completion_tokens": 3262,
+      "cost_usd": 0.0460915,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-43411",
+      "cve_id": "CVE-2024-43411",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/core/ckeditor_version-check.js b/core/ckeditor_version-check.js\nindex 7b1c0c1..2f7ac6a 100644\n--- a/core/ckeditor_version-check.js\n+++ b/core/ckeditor_version-check.js\n@@ -1,6 +1,20 @@\n ( function() {\n \t'use strict';\n \n+\tfunction escapeHtml( value ) {\n+\t\treturn CKEDITOR.tools.htmlEncode( String( value || '' ) );\n+\t}\n+\n+\tfunction sanitizeCkeUrl( url ) {\n+\t\turl = String( url || '' );\n+\n+\t\t// Only allow HTTPS links to the official CKEditor 4 version-check domain.\n+\t\t// Anything else falls back to a safe default.\n+\t\tif ( /^https:\\/\\/cke4\\.ckeditor\\.com(?:\\/|$)/.test( url ) ) {\n+\t\t\treturn url;\n+\t\t}\n+\t\treturn 'https://cke4.ckeditor.com/';\n+\t}\n+\n \t// ... existing code ...\n \n \tfunction showUpgradeNotification( editor, versionInfo ) {\n@@ -42,12 +56,12 @@\n-\t\tvar latestVersion = versionInfo.latestVersion,\n-\t\t\tdownloadUrl = versionInfo.downloadUrl;\n+\t\tvar latestVersion = escapeHtml( versionInfo.latestVersion ),\n+\t\t\tdownloadUrl = sanitizeCkeUrl( versionInfo.downloadUrl );\n \n \t\teditor.showNotification( notificationTemplate.output( {\n-\t\t\tcurrentVersion: CKEDITOR.version,\n+\t\t\tcurrentVersion: escapeHtml( CKEDITOR.version ),\n \t\t\tlatestVersion: latestVersion,\n-\t\t\tdownloadUrl: downloadUrl\n+\t\t\tdownloadUrl: escapeHtml( downloadUrl )\n \t\t} ), 'warning' );\n \t}\n \n \t// ... existing code ...\n } )();",
+      "generation_time_s": 47.532,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to address XSS by adding HTML encoding and URL sanitization, which shows understanding of the vulnerability. However, it takes a fundamentally different approach from the gold patch and misses key fixes: (1) it doesn't replace 'original' with a sanitized 'name' property in parseVersion(), which is the core fix that prevents attacker-controlled version strings from being injected; (2) it doesn't wrap JSON.parse in a try-catch to handle malicious responses; (3) the candidate's escapeHtml/sanitizeCkeUrl functions don't match the actual code structure (the diff references code that doesn't exist in the original file like 'versionInfo.latestVersion' and 'versionInfo.downloadUrl' at the notification level). The patch appears to be based on incorrect assumptions about the code structure and would likely not apply cleanly.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 450,
+      "completion_tokens": 2480,
+      "cost_usd": 0.0355075,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-32472",
+      "cve_id": "CVE-2024-32472",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/src/element/embeddable.ts b/src/element/embeddable.ts\nindex 8a4b0a1..f3d1e41 100644\n--- a/src/element/embeddable.ts\n+++ b/src/element/embeddable.ts\n@@ -1,6 +1,39 @@\n+const EMBED_BASE_SANDBOX = \"allow-scripts allow-popups allow-forms\";\n+const EMBED_SANDBOX_WITH_SAME_ORIGIN = `${EMBED_BASE_SANDBOX} allow-same-origin`;\n+\n+const escapeHtmlAttr = (value: string) =>\n+  value\n+    .replaceAll(\"&\", \"&amp;\")\n+    .replaceAll('\"', \"&quot;\")\n+    .replaceAll(\"<\", \"&lt;\")\n+    .replaceAll(\">\", \"&gt;\");\n+\n+const toSafeSrcdoc = (html: string) => {\n+  const doc = new DOMParser().parseFromString(html, \"text/html\");\n+\n+  // We only allow a very small subset and rebuild the markup ourselves.\n+  // This prevents HTML/script injection via untrusted oEmbed/html payloads.\n+  const iframe = doc.querySelector(\"iframe[src]\");\n+  if (iframe) {\n+    const src = iframe.getAttribute(\"src\");\n+    if (!src) {\n+      return null;\n+    }\n+    const safeSrc = new URL(src, \"https://excalidraw.com\").toString();\n+    return `<iframe src=\"${escapeHtmlAttr(safeSrc)}\"></iframe>`;\n+  }\n+\n+  const script = doc.querySelector(\"script[src]\");\n+  if (script) {\n+    const src = script.getAttribute(\"src\");\n+    if (!src) {\n+      return null;\n+    }\n+    const safeSrc = new URL(src, \"https://excalidraw.com\").toString();\n+    return `<script src=\"${escapeHtmlAttr(safeSrc)}\"></script>`;\n+  }\n+\n+  return null;\n+};\n+\n // ...existing imports / code...\n \n@@ -132,14 +165,24 @@ export const getEmbedLink = async (url: string) => {\n   // ...existing logic...\n \n   if (oembed?.html) {\n+    const srcdoc = toSafeSrcdoc(oembed.html);\n+    if (!srcdoc) {\n+      return null;\n+    }\n+\n+    // same-origin is required only for script-based embeds (e.g. gist),\n+    // iframe-based embeds should run with least privilege.\n+    const sandbox = srcdoc.startsWith(\"<script\")\n+      ? EMBED_SANDBOX_WITH_SAME_ORIGIN\n+      : EMBED_BASE_SANDBOX;\n+\n     return {\n-      srcdoc: oembed.html,\n-      sandbox: \"allow-scripts allow-same-origin allow-popups allow-forms\",\n+      srcdoc,\n+      sandbox,\n     };\n   }\n \n   return {\n     link: normalizedUrl,\n-    sandbox: \"allow-scripts allow-same-origin allow-popups allow-forms\",\n+    sandbox: EMBED_BASE_SANDBOX,\n   };\n };",
+      "generation_time_s": 60.073,
+      "patch_analysis": {
+        "judge_score": 0.3,
+        "judge_reasoning": "The candidate patch attempts to address the XSS vulnerability through HTML sanitization (toSafeSrcdoc) and restricting allow-same-origin, which shows understanding of the issue. However, it doesn't match the actual structure of the affected file (src/element/embeddable.ts). The gold patch modifies the getEmbedLink function which has a very different structure with specific regex matching for YouTube, Vimeo, Figma, Twitter, etc., and introduces an ALLOW_SAME_ORIGIN whitelist with specific domains. The candidate patch appears to be written against a different version or misunderstanding of the file structure, using async/oembed patterns that don't exist in the actual code. It also doesn't implement the per-domain allowSameOrigin logic that the gold patch introduces, and doesn't properly sanitize the srcdoc construction for Twitter/open-source embeds that the gold patch addresses.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.3,
+      "passed": false,
+      "prompt_tokens": 506,
+      "completion_tokens": 3352,
+      "cost_usd": 0.0478135,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2016-15025",
+      "cve_id": "CVE-2016-15025",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/app/templates/src/server/_app.js b/app/templates/src/server/_app.js\nindex 6b8b2e1..b0c9c8a 100644\n--- a/app/templates/src/server/_app.js\n+++ b/app/templates/src/server/_app.js\n@@ -8,6 +8,15 @@ var express = require('express');\n var path = require('path');\n var favicon = require('serve-favicon');\n \n+function escapeHtml(value) {\n+    return String(value)\n+        .replace(/&/g, '&amp;')\n+        .replace(/</g, '&lt;')\n+        .replace(/>/g, '&gt;')\n+        .replace(/\"/g, '&quot;')\n+        .replace(/'/g, '&#39;');\n+}\n+\n module.exports = function(app, config) {\n     app.set('views', config.root + '/server/views');\n     app.set('view engine', 'jade');\n@@ -63,7 +72,7 @@ module.exports = function(app, config) {\n         // respond with html page\n         if (req.accepts('html')) {\n             res.status(404);\n-            res.render('404', { url: req.url });\n+            res.render('404', { url: escapeHtml(req.originalUrl || req.url) });\n             return;\n         }",
+      "generation_time_s": 28.907,
+      "patch_analysis": {
+        "judge_score": 0.6,
+        "judge_reasoning": "The candidate patch addresses the XSS vulnerability through a different but reasonable approach - escaping HTML in the 404 error handler's URL output. However, the gold patch takes a different approach by intercepting requests to asset paths (/js/*, /images/*, /styles/*) and returning a custom 404 response before they reach the vulnerable error handler that reflects the URL. The candidate's approach of escaping HTML output is a valid XSS mitigation technique, but it only addresses the render path in the catch-all 404 handler and doesn't cover the specific asset path routing that the gold patch adds. The candidate patch could be effective at preventing XSS in the 404 template rendering, but it differs significantly in scope and approach from the intended fix.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.6,
+      "passed": true,
+      "prompt_tokens": 323,
+      "completion_tokens": 1473,
+      "cost_usd": 0.02118725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-25929",
+      "cve_id": "CVE-2022-25929",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "diff --git a/smoothie.js b/smoothie.js\nindex 6b7f3f1..f3c8a91 100644\n--- a/smoothie.js\n+++ b/smoothie.js\n@@ -34,6 +34,16 @@\n     return this.maxValue - this.minValue;\n   };\n \n+  function escapeHTML(value) {\n+    return String(value)\n+      .replace(/&/g, '&amp;')\n+      .replace(/</g, '&lt;')\n+      .replace(/>/g, '&gt;')\n+      .replace(/\"/g, '&quot;')\n+      .replace(/'/g, '&#39;');\n+  }\n+\n+\n   /**\n    * The SmoothieChart class.\n    * @constructor\n@@ -614,9 +624,12 @@\n     var t = new Date(timestamp);\n     var html = '<span>' + t.toString() + '</span>';\n     for (var d = 0; d < data.length; d++) {\n+      var seriesOptions = data[d].series.options || {};\n+      var safeStrokeStyle = escapeHTML(seriesOptions.strokeStyle || '');\n+      var safeTooltipLabel = escapeHTML(seriesOptions.tooltipLabel || '');\n       html += '<br /><span style=\"color:'\n-        + data[d].series.options.strokeStyle + ';\">'\n-        + data[d].series.options.tooltipLabel + '</span> ' + data[d].value;\n+        + safeStrokeStyle + ';\">'\n+        + safeTooltipLabel + '</span> ' + data[d].value;\n     }\n     return html;\n   };",
+      "generation_time_s": 25.409,
+      "patch_analysis": {
+        "judge_score": 0.7,
+        "judge_reasoning": "The candidate patch addresses the root cause of the XSS vulnerability by escaping HTML special characters in both `strokeStyle` and `tooltipLabel` properties using a dedicated `escapeHTML` function. While the implementation differs from the gold patch (which uses DOM manipulation to avoid HTML injection), the candidate's approach of HTML entity escaping is a valid and effective mitigation against XSS. The candidate patch targets a different code location (a different tooltip formatter function at line 614 vs the gold patch's `SmoothieChart.tooltipFormatter` at line 378), which suggests it may be working with a slightly different version of the code, but it addresses the same vulnerability. The escaping function covers all critical HTML special characters (&, <, >, \", ').",
+        "judge_verdict": "pass"
+      },
+      "score": 0.7,
+      "passed": true,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2019-13127",
+      "cve_id": "CVE-2019-13127",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.128,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-1726",
+      "cve_id": "CVE-2022-1726",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.121,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-24728",
+      "cve_id": "CVE-2022-24728",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.126,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-27428",
+      "cve_id": "CVE-2020-27428",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.123,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-46308",
+      "cve_id": "CVE-2023-46308",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "",
+      "generation_time_s": 0.127,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-32050",
+      "cve_id": "CVE-2021-32050",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "composer",
+      "model_patch": "",
+      "generation_time_s": 0.121,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-26864",
+      "cve_id": "CVE-2025-26864",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "",
+      "generation_time_s": 0.115,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36264",
+      "cve_id": "CVE-2024-36264",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "maven",
+      "model_patch": "",
+      "generation_time_s": 0.117,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-9654",
+      "cve_id": "CVE-2025-9654",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.129,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-47948",
+      "cve_id": "CVE-2025-47948",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.114,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22798",
+      "cve_id": "CVE-2026-22798",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.124,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-14546",
+      "cve_id": "CVE-2025-14546",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.156,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-28121",
+      "cve_id": "CVE-2024-28121",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "",
+      "generation_time_s": 0.119,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-47529",
+      "cve_id": "CVE-2024-47529",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rubygems",
+      "model_patch": "",
+      "generation_time_s": 0.117,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2026-22696",
+      "cve_id": "CVE-2026-22696",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "rust",
+      "model_patch": "",
+      "generation_time_s": 0.124,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-31475",
+      "cve_id": "CVE-2025-31475",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.112,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-22150",
+      "cve_id": "CVE-2025-22150",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.116,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-31453",
+      "cve_id": "CVE-2024-31453",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.117,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-48218",
+      "cve_id": "CVE-2023-48218",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.338,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-38691",
+      "cve_id": "CVE-2023-38691",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.118,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2022-39263",
+      "cve_id": "CVE-2022-39263",
+      "difficulty_tier": "tier_2",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.122,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-13466",
+      "cve_id": "CVE-2025-13466",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.113,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-45390",
+      "cve_id": "CVE-2024-45390",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.109,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6921",
+      "cve_id": "CVE-2025-6921",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.11,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-53012",
+      "cve_id": "CVE-2025-53012",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "pip",
+      "model_patch": "",
+      "generation_time_s": 0.116,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-27529",
+      "cve_id": "CVE-2024-27529",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "swift",
+      "model_patch": "",
+      "generation_time_s": 0.122,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-36361",
+      "cve_id": "CVE-2024-36361",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.118,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2021-43843",
+      "cve_id": "CVE-2021-43843",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.12,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-67750",
+      "cve_id": "CVE-2025-67750",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.131,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2024-21537",
+      "cve_id": "CVE-2024-21537",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.116,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2020-7793",
+      "cve_id": "CVE-2020-7793",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.113,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-6545",
+      "cve_id": "CVE-2025-6545",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.139,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-1283",
+      "cve_id": "CVE-2023-1283",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.113,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-55173",
+      "cve_id": "CVE-2025-55173",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.118,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-49595",
+      "cve_id": "CVE-2025-49595",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.114,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-4727",
+      "cve_id": "CVE-2025-4727",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.119,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2023-50710",
+      "cve_id": "CVE-2023-50710",
+      "difficulty_tier": "tier_3",
+      "ecosystem": "npm",
+      "model_patch": "",
+      "generation_time_s": 0.118,
+      "patch_analysis": {
+        "judge_score": 0.0,
+        "judge_reasoning": "Empty or no patch produced.",
+        "judge_verdict": "fail"
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 259,
+      "completion_tokens": 1471,
+      "cost_usd": 0.02104725,
+      "judge_cost_usd": 0.0
+    }
+  ]
+}

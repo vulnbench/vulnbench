@@ -1,0 +1,67 @@
+{
+  "metadata": {
+    "benchmark": "data/benchmark/vulnbench_mini.json",
+    "evaluated_at": "2026-02-25T18:40:07.394482+00:00Z",
+    "total_instances": 2,
+    "model": "openai/gpt-5-mini"
+  },
+  "aggregate": {
+    "total_instances": 2,
+    "total_passed": 0,
+    "pass_rate": 0.0,
+    "mean_score": 0.0,
+    "pass_rate_by_tier": {
+      "tier_1": 0.0
+    },
+    "pass_rate_by_ecosystem": {
+      "maven": 0.0
+    },
+    "pass_rate_by_cwe": {},
+    "mean_generation_time_s": 0.016,
+    "total_cost_usd": 0.0,
+    "total_prompt_tokens": 0,
+    "total_completion_tokens": 0
+  },
+  "results": [
+    {
+      "instance_id": "vulnbench-CVE-2024-49771",
+      "cve_id": "CVE-2024-49771",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "",
+      "generation_time_s": 0.022,
+      "patch_analysis": {
+        "files_overlap": 0.0,
+        "files_exact_match": false,
+        "cwe_pattern_detected": false,
+        "patch_applies": false,
+        "tests_pass": null
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "cost_usd": 0.0
+    },
+    {
+      "instance_id": "vulnbench-CVE-2025-43761",
+      "cve_id": "CVE-2025-43761",
+      "difficulty_tier": "tier_1",
+      "ecosystem": "maven",
+      "model_patch": "",
+      "generation_time_s": 0.01,
+      "patch_analysis": {
+        "files_overlap": 0.0,
+        "files_exact_match": false,
+        "cwe_pattern_detected": false,
+        "patch_applies": false,
+        "tests_pass": null
+      },
+      "score": 0.0,
+      "passed": false,
+      "prompt_tokens": 0,
+      "completion_tokens": 0,
+      "cost_usd": 0.0
+    }
+  ]
+}
