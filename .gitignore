@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+venv/
+
+# Secrets / API keys
+.env
+.env.*
+*.key
+*.pem
+*.secret
+credentials.json
+secrets.json
+
+# macOS
+.DS_Store
+
+pipeline.log
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
