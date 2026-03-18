@@ -4,7 +4,7 @@
 
 VulnBench tests whether AI models can generate correct security patches for real CVE vulnerabilities. We evaluated **16 frontier LLMs** across **200 real-world CVEs** spanning 7 ecosystems, 55 CWE types, and 3 difficulty tiers — using an LLM-as-judge evaluation methodology scored by Claude Opus 4.6.
 
-> Presented at **RSA Conference 2026** by [Ghost Security](https://github.com/ghostsecuritydev)
+> Presented at **RSA Conference 2026** by [Ghost Security](https://ghost.security)
 
 ---
 
@@ -230,7 +230,7 @@ If you use VulnBench in your research, please cite:
   title={VulnBench: Evaluating LLMs on Real-World Security Patch Generation},
   author={Ghost Security},
   year={2026},
-  url={https://github.com/ghostsecuritydev/APPSEC_BENCH}
+  url={https://github.com/appsecbench/appsec_bench/}
 }
 ```
 
