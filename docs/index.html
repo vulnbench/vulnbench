@@ -483,7 +483,7 @@
     <div class="container">
         <div class="hero-badge">RSA Conference 2026 &middot; Ghost Security</div>
         <h1>Can LLMs Fix Real-World<br><span>Security Vulnerabilities?</span></h1>
-        <p>We tested 16 frontier language models on the curated VulnBench-200 evaluation subset. The best model fixes 57% of those instances. The median: only 22%.</p>
+        <p>We tested 16 frontier language models on the curated VulnBench-200 evaluation subset using best-of-3 runs with description-only file hints. The best model fixes 22.5% of instances. The median: only ~5.5%.</p>
         <div class="hero-stats">
             <div class="hero-stat">
                 <div class="number">16</div>
@@ -510,37 +510,37 @@
     <div class="container">
         <div class="section-label">Key Findings</div>
         <h2>What We Learned</h2>
-        <p class="section-desc">Even the best models leave nearly half of real vulnerabilities unpatched. Performance varies dramatically across model families, vulnerability types, and cost tiers.</p>
+        <p class="section-desc">With description-only file hints and best-of-3 variance reduction, even the best model patches fewer than 1 in 4 real vulnerabilities. Performance drops sharply outside the top 5.</p>
         <div class="findings-grid">
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--green);">57%</div>
+                <div class="finding-number" style="color: var(--green);">22.5%</div>
                 <h3>Best Model Pass Rate</h3>
-                <p>GPT-5.3 Codex leads the benchmark, successfully patching 114 of 200 real vulnerabilities &mdash; 11.5 percentage points ahead of second place.</p>
+                <p>GPT-5.3 Codex leads the benchmark, successfully patching 45 of 200 real vulnerabilities &mdash; 4 percentage points ahead of second place.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--yellow);">22%</div>
+                <div class="finding-number" style="color: var(--yellow);">~5.5%</div>
                 <h3>Median Model Pass Rate</h3>
-                <p>The median model fixes roughly 1 in 5 vulnerabilities. There is a sharp drop-off after the top 5 models, which all exceed 40%.</p>
+                <p>The median model fixes roughly 1 in 18 vulnerabilities. Only the top 4 models exceed 15%, and none reach 25%.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--cyan);">$0.001</div>
-                <h3>Cheapest Per-Instance Cost</h3>
-                <p>DeepSeek V3.2 achieves 23.5% pass rate at $0.001 per instance &mdash; 60x cheaper than the top model with half the accuracy.</p>
+                <div class="finding-number" style="color: var(--cyan);">$1.74</div>
+                <h3>Cheapest Total Cost</h3>
+                <p>MiniMax M2.7 completes the full 200-instance best-of-3 evaluation for $1.74 total (gen+judge), though at only 1.5% pass rate.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--orange);">61%</div>
-                <h3>Max Tier 1 Performance</h3>
-                <p>Even on the easiest vulnerabilities (XSS, SQL injection), no model exceeds 62%. Pattern-matching fixes are not yet solved.</p>
+                <div class="finding-number" style="color: var(--orange);">$0.13</div>
+                <h3>Best Cost per Pass</h3>
+                <p>GPT-5.4 achieves the best cost efficiency at $0.13 per passed instance, combining 18.5% pass rate with a $4.81 total cost.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--purple);">~0%</div>
-                <h3>Rust &amp; Swift Coverage</h3>
-                <p>Most models score 0% on Rust and Swift CVEs. Security patch generation remains heavily skewed toward JavaScript and Python ecosystems.</p>
+                <div class="finding-number" style="color: var(--purple);">3x</div>
+                <h3>Best-of-3 Variance Reduction</h3>
+                <p>Each model is run 3 times per instance, taking the best result. This reduces noise from sampling variance and gives a more stable ranking.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--red);">$49</div>
+                <div class="finding-number" style="color: var(--red);">~$82</div>
                 <h3>Total Eval Cost</h3>
-                <p>All 16 models evaluated on all 200 instances for under $50 total via OpenRouter &mdash; making this benchmark highly reproducible.</p>
+                <p>All 16 models evaluated on all 200 instances (best-of-3) for ~$82 total via OpenRouter &mdash; making this benchmark highly reproducible.</p>
             </div>
         </div>
     </div>
@@ -551,7 +551,7 @@
     <div class="container">
         <div class="section-label">Results</div>
         <h2>VulnBench-200 Leaderboard</h2>
-        <p class="section-desc">All models evaluated on the same 200 CVE instances using Claude Opus 4.6 as judge. Temperature 0.0, max 4096 tokens.</p>
+        <p class="section-desc">All models evaluated on the same 200 CVE instances using best-of-3 runs with description-only file hints. Judge: Claude Opus 4.6.</p>
         <div class="leaderboard-wrapper">
             <table class="leaderboard">
                 <thead>
@@ -569,137 +569,137 @@
                     <tr class="rank-1">
                         <td><span class="rank-badge">1</span></td>
                         <td><span class="model-name">GPT-5.3 Codex</span><br><span class="model-provider">OpenAI</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:57%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--green)">57.0%</span></div></td>
-                        <td class="num">0.514</td>
-                        <td class="num">111/200</td>
-                        <td class="num">40.5s</td>
-                        <td class="num">$6.24</td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:92%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--green)">22.5%</span></div></td>
+                        <td class="num">0.468</td>
+                        <td class="num">45/200</td>
+                        <td class="num">43.4s</td>
+                        <td class="num">$8.74</td>
                     </tr>
                     <tr class="rank-2">
                         <td><span class="rank-badge">2</span></td>
-                        <td><span class="model-name">Claude Opus 4.6</span><br><span class="model-provider">Anthropic</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:45.5%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--green)">45.5%</span></div></td>
-                        <td class="num">0.457</td>
-                        <td class="num">91/200</td>
-                        <td class="num">18.8s</td>
-                        <td class="num">$6.46</td>
+                        <td><span class="model-name">GPT-5.4</span><br><span class="model-provider">OpenAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:75.6%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--green)">18.5%</span></div></td>
+                        <td class="num">0.407</td>
+                        <td class="num">37/200</td>
+                        <td class="num">7.3s</td>
+                        <td class="num">$4.81</td>
                     </tr>
                     <tr class="rank-3">
                         <td><span class="rank-badge">3</span></td>
-                        <td><span class="model-name">GPT-5.4</span><br><span class="model-provider">OpenAI</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:42.5%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">42.5%</span></div></td>
-                        <td class="num">0.431</td>
-                        <td class="num">85/200</td>
-                        <td class="num">7.9s</td>
-                        <td class="num">$1.94</td>
+                        <td><span class="model-name">Claude Opus 4.6</span><br><span class="model-provider">Anthropic</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:65.4%;background:linear-gradient(90deg,var(--green),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--green)">16.0%</span></div></td>
+                        <td class="num">0.404</td>
+                        <td class="num">32/200</td>
+                        <td class="num">19.6s</td>
+                        <td class="num">$10.17</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">4</span></td>
-                        <td><span class="model-name">Claude Sonnet 4.6</span><br><span class="model-provider">Anthropic</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:42%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">42.0%</span></div></td>
-                        <td class="num">0.419</td>
-                        <td class="num">84/200</td>
-                        <td class="num">13.7s</td>
-                        <td class="num">$3.65</td>
+                        <td><span class="model-name">GPT-5.2</span><br><span class="model-provider">OpenAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:61.3%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">15.0%</span></div></td>
+                        <td class="num">0.322</td>
+                        <td class="num">30/200</td>
+                        <td class="num">75.2s</td>
+                        <td class="num">$11.30</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">5</span></td>
-                        <td><span class="model-name">GPT-5.2</span><br><span class="model-provider">OpenAI</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:42%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">42.0%</span></div></td>
-                        <td class="num">0.374</td>
-                        <td class="num">84/200</td>
-                        <td class="num">67.6s</td>
-                        <td class="num">$8.50</td>
+                        <td><span class="model-name">Claude Sonnet 4.6</span><br><span class="model-provider">Anthropic</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:42.9%;background:linear-gradient(90deg,var(--accent),var(--cyan))"></div></div><span class="pass-pct" style="color:var(--accent)">10.5%</span></div></td>
+                        <td class="num">0.322</td>
+                        <td class="num">21/200</td>
+                        <td class="num">16.0s</td>
+                        <td class="num">$6.87</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">6</span></td>
                         <td><span class="model-name">Gemini 3 Flash</span><br><span class="model-provider">Google</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:33.5%;background:var(--yellow)"></div></div><span class="pass-pct" style="color:var(--yellow)">33.5%</span></div></td>
-                        <td class="num">0.373</td>
-                        <td class="num">67/200</td>
-                        <td class="num">4.2s</td>
-                        <td class="num">$0.34</td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:30.7%;background:var(--yellow)"></div></div><span class="pass-pct" style="color:var(--yellow)">7.5%</span></div></td>
+                        <td class="num">0.318</td>
+                        <td class="num">15/200</td>
+                        <td class="num">5.1s</td>
+                        <td class="num">$3.13</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">7</span></td>
-                        <td><span class="model-name">Kimi K2.5</span><br><span class="model-provider">Moonshot AI</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:29%;background:var(--yellow)"></div></div><span class="pass-pct" style="color:var(--yellow)">29.0%</span></div></td>
-                        <td class="num">0.301</td>
-                        <td class="num">58/200</td>
-                        <td class="num">261s</td>
-                        <td class="num">$1.98</td>
+                        <td><span class="model-name">GLM-5</span><br><span class="model-provider">Zhipu AI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:28.6%;background:var(--yellow)"></div></div><span class="pass-pct" style="color:var(--yellow)">7.0%</span></div></td>
+                        <td class="num">0.249</td>
+                        <td class="num">14/200</td>
+                        <td class="num">91.9s</td>
+                        <td class="num">$4.26</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">8</span></td>
-                        <td><span class="model-name">Claude Haiku 4.5</span><br><span class="model-provider">Anthropic</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:25%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">25.0%</span></div></td>
-                        <td class="num">0.317</td>
-                        <td class="num">50/200</td>
-                        <td class="num">7.0s</td>
-                        <td class="num">$1.06</td>
+                        <td><span class="model-name">Kimi K2.5</span><br><span class="model-provider">Moonshot AI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:26.6%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">6.5%</span></div></td>
+                        <td class="num">0.228</td>
+                        <td class="num">13/200</td>
+                        <td class="num">65.7s</td>
+                        <td class="num">$3.47</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">9</span></td>
-                        <td><span class="model-name">DeepSeek V3.2</span><br><span class="model-provider">DeepSeek</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:23.5%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">23.5%</span></div></td>
-                        <td class="num">0.314</td>
-                        <td class="num">47/200</td>
-                        <td class="num">36.1s</td>
-                        <td class="num">$0.17</td>
+                        <td><span class="model-name">Grok 4.1 Fast</span><br><span class="model-provider">xAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:22.5%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">5.5%</span></div></td>
+                        <td class="num">0.273</td>
+                        <td class="num">11/200</td>
+                        <td class="num">61.1s</td>
+                        <td class="num">$3.46</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">10</span></td>
-                        <td><span class="model-name">GLM-5</span><br><span class="model-provider">Zhipu AI</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:19.5%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">19.5%</span></div></td>
-                        <td class="num">0.268</td>
-                        <td class="num">39/200</td>
-                        <td class="num">80.1s</td>
-                        <td class="num">$2.32</td>
+                        <td><span class="model-name">GPT-5 Mini</span><br><span class="model-provider">OpenAI</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:20.4%;background:var(--orange)"></div></div><span class="pass-pct" style="color:var(--orange)">5.0%</span></div></td>
+                        <td class="num">0.275</td>
+                        <td class="num">10/200</td>
+                        <td class="num">25.4s</td>
+                        <td class="num">$3.63</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">11</span></td>
-                        <td><span class="model-name">GPT-5 Mini</span><br><span class="model-provider">OpenAI</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:17.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">17.5%</span></div></td>
-                        <td class="num">0.307</td>
-                        <td class="num">35/200</td>
-                        <td class="num">27.6s</td>
-                        <td class="num">$0.71</td>
+                        <td><span class="model-name">DeepSeek V3.2</span><br><span class="model-provider">DeepSeek</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:18.4%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">4.5%</span></div></td>
+                        <td class="num">0.253</td>
+                        <td class="num">9/200</td>
+                        <td class="num">78.7s</td>
+                        <td class="num">$3.25</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">12</span></td>
-                        <td><span class="model-name">Qwen 3.5-27B</span><br><span class="model-provider">Alibaba</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:15%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">15.0%</span></div></td>
-                        <td class="num">0.259</td>
-                        <td class="num">30/200</td>
-                        <td class="num">163s</td>
-                        <td class="num">$4.53</td>
+                        <td><span class="model-name">Claude Haiku 4.5</span><br><span class="model-provider">Anthropic</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:14.3%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">3.5%</span></div></td>
+                        <td class="num">0.263</td>
+                        <td class="num">7/200</td>
+                        <td class="num">7.0s</td>
+                        <td class="num">$3.95</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">13</span></td>
-                        <td><span class="model-name">MiniMax M2.5</span><br><span class="model-provider">MiniMax</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:14.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">14.5%</span></div></td>
-                        <td class="num">0.248</td>
-                        <td class="num">29/200</td>
-                        <td class="num">49.0s</td>
-                        <td class="num">$0.47</td>
+                        <td><span class="model-name">Gemini 3.1 Pro</span><br><span class="model-provider">Google</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:10.2%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">2.5%</span></div></td>
+                        <td class="num">0.093</td>
+                        <td class="num">5/200</td>
+                        <td class="num">44.4s</td>
+                        <td class="num">$9.60</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">14</span></td>
-                        <td><span class="model-name">Qwen 3.5-35B-A3B</span><br><span class="model-provider">Alibaba</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:11%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">11.0%</span></div></td>
-                        <td class="num">0.235</td>
-                        <td class="num">22/200</td>
-                        <td class="num">28.8s</td>
-                        <td class="num">$1.01</td>
+                        <td><span class="model-name">MiniMax M2.5</span><br><span class="model-provider">MiniMax</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:6.1%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">1.5%</span></div></td>
+                        <td class="num">0.181</td>
+                        <td class="num">3/200</td>
+                        <td class="num">45.0s</td>
+                        <td class="num">$3.25</td>
                     </tr>
                     <tr>
-                        <td><span class="rank-badge">15</span></td>
-                        <td><span class="model-name">Gemini 3.1 Pro</span><br><span class="model-provider">Google</span></td>
-                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:6.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">6.5%</span></div></td>
-                        <td class="num">0.093</td>
-                        <td class="num">13/200</td>
-                        <td class="num">60.0s</td>
-                        <td class="num">$9.96</td>
+                        <td><span class="rank-badge">14</span></td>
+                        <td><span class="model-name">MiniMax M2.7</span><br><span class="model-provider">MiniMax</span></td>
+                        <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:6.1%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--red)">1.5%</span></div></td>
+                        <td class="num">0.099</td>
+                        <td class="num">3/200</td>
+                        <td class="num">22.8s</td>
+                        <td class="num">$1.74</td>
                     </tr>
                     <tr>
                         <td><span class="rank-badge">16</span></td>
@@ -707,7 +707,7 @@
                         <td class="pass-bar-cell"><div class="pass-bar-wrapper"><div class="pass-bar"><div class="pass-bar-fill" style="width:0.5%;background:var(--red)"></div></div><span class="pass-pct" style="color:var(--text-dim)">0.0%</span></div></td>
                         <td class="num">0.000</td>
                         <td class="num">0/200</td>
-                        <td class="num">24.4s</td>
+                        <td class="num">44.0s</td>
                         <td class="num">$0.00</td>
                     </tr>
                 </tbody>
@@ -716,35 +716,12 @@
     </div>
 </section>
 
-<!-- Tier Breakdown -->
+<!-- Difficulty Tiers (reference only) -->
 <section>
     <div class="container">
-        <div class="section-label">Difficulty Analysis</div>
-        <h2>Performance by Vulnerability Tier</h2>
-        <p class="section-desc">Vulnerabilities are categorized into three difficulty tiers based on the complexity of the required fix. The benchmark is balanced: 67 / 67 / 66 instances across tiers.</p>
-        <div class="tier-table-wrapper">
-            <table class="tier-table">
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th><span class="tier-tag tier-1">Tier 1</span> Pattern</th>
-                        <th><span class="tier-tag tier-2">Tier 2</span> Logic</th>
-                        <th><span class="tier-tag tier-3">Tier 3</span> Deep</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><strong>GPT-5.3 Codex</strong></td><td>61.2%</td><td>53.7%</td><td>51.5%</td></tr>
-                    <tr><td><strong>Claude Opus 4.6</strong></td><td>50.7%</td><td>43.3%</td><td>42.4%</td></tr>
-                    <tr><td><strong>GPT-5.4</strong></td><td>46.3%</td><td>32.8%</td><td>48.5%</td></tr>
-                    <tr><td><strong>Claude Sonnet 4.6</strong></td><td>41.8%</td><td>40.3%</td><td>43.9%</td></tr>
-                    <tr><td><strong>GPT-5.2</strong></td><td>47.8%</td><td>41.8%</td><td>36.4%</td></tr>
-                    <tr><td><strong>Gemini 3 Flash</strong></td><td>35.8%</td><td>26.9%</td><td>37.9%</td></tr>
-                    <tr><td><strong>Kimi K2.5</strong></td><td>35.8%</td><td>25.4%</td><td>25.8%</td></tr>
-                    <tr><td><strong>Claude Haiku 4.5</strong></td><td>23.9%</td><td>26.9%</td><td>24.2%</td></tr>
-                    <tr><td><strong>DeepSeek V3.2</strong></td><td>25.4%</td><td>22.4%</td><td>22.7%</td></tr>
-                </tbody>
-            </table>
-        </div>
+        <div class="section-label">Difficulty Tiers</div>
+        <h2>Vulnerability Difficulty Classification</h2>
+        <p class="section-desc">VulnBench-200 instances are classified into three difficulty tiers (67 / 67 / 66 instances). Per-tier breakdowns are not available for best-of-3 aggregate results; see single-run reports for tier-level analysis.</p>
         <div class="findings-grid" style="grid-template-columns: repeat(3, 1fr);">
             <div class="finding-card">
                 <div class="tier-tag tier-1" style="margin-bottom:12px">Tier 1 &mdash; Pattern</div>

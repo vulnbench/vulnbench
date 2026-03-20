@@ -14,57 +14,42 @@ VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evalu
 
 ## Key Findings
 
-On the curated `VulnBench-200` subset, the best model — **GPT-5.3 Codex** — successfully patches **57% of instances**, while the median model achieves only ~22%. No model exceeds 62% on even the easiest vulnerability class (Tier 1: pattern-matching fixes like XSS and SQL injection), revealing significant room for improvement in AI-assisted security remediation.
+On the curated `VulnBench-200` subset evaluated with **best-of-3 variance reduction** and **description-only file hints** (derived from advisory text, not the reference fix), the best model — **GPT-5.3 Codex** — successfully patches **22.5% of instances**, while the median model achieves only ~5.5%. These results use a more conservative, realistic evaluation than earlier gold-hint runs, revealing how much room remains for improvement in AI-assisted security remediation.
 
 ### VulnBench-200 Leaderboard
 
-This leaderboard is for the **curated 200-instance evaluation subset**. It should not be treated as equivalent to a full-benchmark score.
+This leaderboard is for the **curated 200-instance evaluation subset** using **best-of-3** runs with `--file-hint-mode description`. It should not be treated as equivalent to a full-benchmark score or compared directly to single-run gold-hint results.
 
-| Rank | Model | Pass Rate | Mean Score | Instances | Cost |
-|:----:|-------|:---------:|:----------:|:---------:|-----:|
-| 1 | **OpenAI GPT-5.3 Codex** | **57.0%** | 0.514 | 111/200 | $6.24 |
-| 2 | Anthropic Claude Opus 4.6 | 45.5% | 0.457 | 91/200 | $6.46 |
-| 3 | OpenAI GPT-5.4 | 42.5% | 0.431 | 85/200 | $1.94 |
-| 4 | Anthropic Claude Sonnet 4.6 | 42.0% | 0.419 | 84/200 | $3.65 |
-| 5 | OpenAI GPT-5.2 | 42.0% | 0.374 | 84/200 | $8.50 |
-| 6 | Google Gemini 3 Flash | 33.5% | 0.373 | 67/200 | $0.34 |
-| 7 | Moonshot Kimi K2.5 | 29.0% | 0.301 | 58/200 | $1.98 |
-| 8 | Anthropic Claude Haiku 4.5 | 25.0% | 0.317 | 50/200 | $1.06 |
-| 9 | DeepSeek V3.2 | 23.5% | 0.314 | 47/200 | $0.17 |
-| 10 | Zhipu GLM-5 | 19.5% | 0.268 | 39/200 | $2.32 |
-| 11 | OpenAI GPT-5 Mini | 17.5% | 0.307 | 35/200 | $0.71 |
-| 12 | Qwen 3.5-27B | 15.0% | 0.259 | 30/200 | $4.53 |
-| 13 | MiniMax M2.5 | 14.5% | 0.248 | 29/200 | $0.47 |
-| 14 | Qwen 3.5-35B-A3B | 11.0% | 0.235 | 22/200 | $1.01 |
-| 15 | Google Gemini 3.1 Pro | 6.5% | 0.093 | 13/200 | $9.96 |
+| Rank | Model | Pass Rate | Mean Score | Passed | Cost (gen+judge) |
+|:----:|-------|:---------:|:----------:|:------:|-----:|
+| 1 | **OpenAI GPT-5.3 Codex** | **22.5%** | 0.468 | 45/200 | $8.74 |
+| 2 | OpenAI GPT-5.4 | 18.5% | 0.407 | 37/200 | $4.81 |
+| 3 | Anthropic Claude Opus 4.6 | 16.0% | 0.404 | 32/200 | $10.17 |
+| 4 | OpenAI GPT-5.2 | 15.0% | 0.322 | 30/200 | $11.30 |
+| 5 | Anthropic Claude Sonnet 4.6 | 10.5% | 0.322 | 21/200 | $6.87 |
+| 6 | Google Gemini 3 Flash | 7.5% | 0.318 | 15/200 | $3.13 |
+| 7 | Zhipu GLM-5 | 7.0% | 0.249 | 14/200 | $4.26 |
+| 8 | Moonshot Kimi K2.5 | 6.5% | 0.228 | 13/200 | $3.47 |
+| 9 | xAI Grok 4.1 Fast | 5.5% | 0.273 | 11/200 | $3.46 |
+| 10 | OpenAI GPT-5 Mini | 5.0% | 0.275 | 10/200 | $3.63 |
+| 11 | DeepSeek V3.2 | 4.5% | 0.253 | 9/200 | $3.25 |
+| 12 | Anthropic Claude Haiku 4.5 | 3.5% | 0.263 | 7/200 | $3.95 |
+| 13 | Google Gemini 3.1 Pro | 2.5% | 0.093 | 5/200 | $9.60 |
+| 14 | MiniMax M2.5 | 1.5% | 0.181 | 3/200 | $3.25 |
+| 14 | MiniMax M2.7 | 1.5% | 0.099 | 3/200 | $1.74 |
 | 16 | StepFun Step 3.5 Flash | 0.0% | 0.000 | 0/200 | $0.00 |
 
-*All models evaluated on identical 200 CVE instances. Total evaluation cost across all 16 models: $49.34.*
-
-### Performance by Difficulty Tier
-
-| Model | Tier 1 (Pattern) | Tier 2 (Logic) | Tier 3 (Deep) |
-|-------|:-----------------:|:---------------:|:--------------:|
-| GPT-5.3 Codex | 61.2% | 53.7% | 51.5% |
-| Claude Opus 4.6 | 50.7% | 43.3% | 42.4% |
-| GPT-5.4 | 46.3% | 32.8% | 48.5% |
-| Claude Sonnet 4.6 | 41.8% | 40.3% | 43.9% |
-| GPT-5.2 | 47.8% | 41.8% | 36.4% |
-| Gemini 3 Flash | 35.8% | 26.9% | 37.9% |
-
-**Tier 1** = Pattern-matching fixes (XSS, SQL injection, path traversal)
-**Tier 2** = Logic fixes (authorization, CSRF, information disclosure)
-**Tier 3** = Deep reasoning (code injection, resource exhaustion, input validation)
+*All models evaluated on identical 200 CVE instances with best-of-3 variance reduction and description-only file hints. Total evaluation cost across all 16 models: ~$82.*
 
 ### Best Value Models
 
-| Model | Pass Rate | Cost per Instance | Cost per Pass |
-|-------|:---------:|:-----------------:|:-------------:|
-| DeepSeek V3.2 | 23.5% | $0.001 | $0.004 |
-| Gemini 3 Flash | 33.5% | $0.002 | $0.005 |
-| GPT-5.4 | 42.5% | $0.010 | $0.023 |
-| Claude Sonnet 4.6 | 42.0% | $0.018 | $0.043 |
-| GPT-5.3 Codex | 57.0% | $0.031 | $0.056 |
+| Model | Pass Rate | Total Cost | Cost per Pass |
+|-------|:---------:|:----------:|:-------------:|
+| MiniMax M2.7 | 1.5% | $1.74 | $0.58 |
+| Gemini 3 Flash | 7.5% | $3.13 | $0.21 |
+| GPT-5.4 | 18.5% | $4.81 | $0.13 |
+| GPT-5.3 Codex | 22.5% | $8.74 | $0.19 |
+| Claude Sonnet 4.6 | 10.5% | $6.87 | $0.33 |
 
 ---
 

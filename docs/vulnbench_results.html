@@ -225,13 +225,13 @@
 
 <div class="hero">
   <h1>VulnBench Results</h1>
-  <p class="subtitle">Public leaderboard for the curated VulnBench-200 subset. The full VulnBench dataset contains 1,650 CVEs.</p>
+  <p class="subtitle">Public leaderboard for the curated VulnBench-200 subset (best-of-3, description-only file hints). The full VulnBench dataset contains 1,650 CVEs.</p>
   <div class="meta">
     <span><span class="num">16</span> Models Evaluated</span>
     <span><span class="num">200</span> Curated Instances</span>
     <span><span class="num">55</span> CWE Types</span>
     <span><span class="num">7</span> Ecosystems</span>
-    <span><span class="num">$49.34</span> Total Cost</span>
+    <span><span class="num">~$82</span> Total Cost</span>
   </div>
 </div>
 
@@ -240,20 +240,20 @@
   <!-- Key Stats -->
   <div class="stats-grid">
     <div class="stat-card">
-      <div class="value">57.0%</div>
-      <div class="label">Best Curated-200 Pass Rate</div>
+      <div class="value">22.5%</div>
+      <div class="label">Best Pass Rate (GPT-5.3 Codex)</div>
     </div>
     <div class="stat-card">
-      <div class="value">~22%</div>
+      <div class="value">~5.5%</div>
       <div class="label">Median Model Pass Rate</div>
     </div>
     <div class="stat-card">
-      <div class="value">$0.001</div>
-      <div class="label">Cheapest per Instance (DeepSeek V3.2)</div>
+      <div class="value">$1.74</div>
+      <div class="label">Cheapest Total (MiniMax M2.7)</div>
     </div>
     <div class="stat-card">
-      <div class="value">61.2%</div>
-      <div class="label">Best Tier 1 Score (GPT-5.3 Codex)</div>
+      <div class="value">$0.13</div>
+      <div class="label">Best Cost/Pass (GPT-5.4)</div>
     </div>
   </div>
 
@@ -264,63 +264,63 @@
       <div class="h-bar-chart">
         <div class="h-bar-row">
           <div class="h-bar-label">GPT-5.3 Codex</div>
-          <div class="h-bar-track"><div class="h-bar-fill gold" style="width:92.6%">57.0%</div></div>
-        </div>
-        <div class="h-bar-row">
-          <div class="h-bar-label">Claude Opus 4.6</div>
-          <div class="h-bar-track"><div class="h-bar-fill silver" style="width:74.2%">45.5%</div></div>
+          <div class="h-bar-track"><div class="h-bar-fill gold" style="width:92%">22.5%</div></div>
         </div>
         <div class="h-bar-row">
           <div class="h-bar-label">GPT-5.4</div>
-          <div class="h-bar-track"><div class="h-bar-fill bronze" style="width:69.4%">42.5%</div></div>
+          <div class="h-bar-track"><div class="h-bar-fill silver" style="width:75.6%">18.5%</div></div>
         </div>
         <div class="h-bar-row">
-          <div class="h-bar-label">Claude Sonnet 4.6</div>
-          <div class="h-bar-track"><div class="h-bar-fill bronze" style="width:68.5%">42.0%</div></div>
+          <div class="h-bar-label">Claude Opus 4.6</div>
+          <div class="h-bar-track"><div class="h-bar-fill bronze" style="width:65.4%">16.0%</div></div>
         </div>
         <div class="h-bar-row">
           <div class="h-bar-label">GPT-5.2</div>
-          <div class="h-bar-track"><div class="h-bar-fill bronze" style="width:68.5%">42.0%</div></div>
+          <div class="h-bar-track"><div class="h-bar-fill bronze" style="width:61.3%">15.0%</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label">Claude Sonnet 4.6</div>
+          <div class="h-bar-track"><div class="h-bar-fill normal" style="width:42.9%">10.5%</div></div>
         </div>
         <div class="h-bar-row">
           <div class="h-bar-label">Gemini 3 Flash</div>
-          <div class="h-bar-track"><div class="h-bar-fill normal" style="width:54.6%">33.5%</div></div>
-        </div>
-        <div class="h-bar-row">
-          <div class="h-bar-label">Kimi K2.5</div>
-          <div class="h-bar-track"><div class="h-bar-fill normal" style="width:47.3%">29.0%</div></div>
-        </div>
-        <div class="h-bar-row">
-          <div class="h-bar-label">Claude Haiku 4.5</div>
-          <div class="h-bar-track"><div class="h-bar-fill normal" style="width:40.7%">25.0%</div></div>
-        </div>
-        <div class="h-bar-row">
-          <div class="h-bar-label">DeepSeek V3.2</div>
-          <div class="h-bar-track"><div class="h-bar-fill low" style="width:38.3%">23.5%</div></div>
+          <div class="h-bar-track"><div class="h-bar-fill normal" style="width:30.7%">7.5%</div></div>
         </div>
         <div class="h-bar-row">
           <div class="h-bar-label">GLM-5</div>
-          <div class="h-bar-track"><div class="h-bar-fill low" style="width:31.8%">19.5%</div></div>
+          <div class="h-bar-track"><div class="h-bar-fill normal" style="width:28.6%">7.0%</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label">Kimi K2.5</div>
+          <div class="h-bar-track"><div class="h-bar-fill normal" style="width:26.6%">6.5%</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label">Grok 4.1 Fast</div>
+          <div class="h-bar-track"><div class="h-bar-fill low" style="width:22.5%">5.5%</div></div>
         </div>
         <div class="h-bar-row">
           <div class="h-bar-label">GPT-5 Mini</div>
-          <div class="h-bar-track"><div class="h-bar-fill low" style="width:28.5%">17.5%</div></div>
+          <div class="h-bar-track"><div class="h-bar-fill low" style="width:20.4%">5.0%</div></div>
         </div>
         <div class="h-bar-row">
-          <div class="h-bar-label">Qwen 3.5-27B</div>
-          <div class="h-bar-track"><div class="h-bar-fill low" style="width:24.4%">15.0%</div></div>
+          <div class="h-bar-label">DeepSeek V3.2</div>
+          <div class="h-bar-track"><div class="h-bar-fill low" style="width:18.4%">4.5%</div></div>
         </div>
         <div class="h-bar-row">
-          <div class="h-bar-label">MiniMax M2.5</div>
-          <div class="h-bar-track"><div class="h-bar-fill low" style="width:23.6%">14.5%</div></div>
-        </div>
-        <div class="h-bar-row">
-          <div class="h-bar-label">Qwen 3.5-35B-A3B</div>
-          <div class="h-bar-track"><div class="h-bar-fill low" style="width:17.9%">11.0%</div></div>
+          <div class="h-bar-label">Claude Haiku 4.5</div>
+          <div class="h-bar-track"><div class="h-bar-fill low" style="width:14.3%">3.5%</div></div>
         </div>
         <div class="h-bar-row">
           <div class="h-bar-label">Gemini 3.1 Pro</div>
-          <div class="h-bar-track"><div class="h-bar-fill low" style="width:10.6%">6.5%</div></div>
+          <div class="h-bar-track"><div class="h-bar-fill low" style="width:10.2%">2.5%</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label">MiniMax M2.5</div>
+          <div class="h-bar-track"><div class="h-bar-fill low" style="width:8%">1.5%</div></div>
+        </div>
+        <div class="h-bar-row">
+          <div class="h-bar-label">MiniMax M2.7</div>
+          <div class="h-bar-track"><div class="h-bar-fill low" style="width:8%">1.5%</div></div>
         </div>
         <div class="h-bar-row">
           <div class="h-bar-label">Step 3.5 Flash</div>
@@ -342,193 +342,145 @@
           <th class="num">Pass Rate</th>
           <th class="num">Passed</th>
           <th class="num">Mean Score</th>
-          <th class="num">Tier 1</th>
-          <th class="num">Tier 2</th>
-          <th class="num">Tier 3</th>
           <th class="num">Cost</th>
-          <th class="num">$/Instance</th>
+          <th class="num">Gen Time</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td class="rank">1</td>
           <td><span class="model-name">GPT-5.3 Codex</span> <span class="provider">OpenAI</span></td>
-          <td class="num"><strong>57.0%</strong></td>
-          <td class="num">111/200</td>
-          <td class="num">0.504</td>
-          <td class="num">61.2%</td>
-          <td class="num">53.7%</td>
-          <td class="num">51.5%</td>
-          <td class="num">$6.23</td>
-          <td class="num">$0.031</td>
+          <td class="num"><strong>22.5%</strong></td>
+          <td class="num">45/200</td>
+          <td class="num">0.468</td>
+          <td class="num">$8.74</td>
+          <td class="num">43.4s</td>
         </tr>
         <tr>
           <td class="rank">2</td>
-          <td><span class="model-name">Claude Opus 4.6</span> <span class="provider">Anthropic</span></td>
-          <td class="num">45.5%</td>
-          <td class="num">91/200</td>
-          <td class="num">0.457</td>
-          <td class="num">50.7%</td>
-          <td class="num">43.3%</td>
-          <td class="num">42.4%</td>
-          <td class="num">$6.46</td>
-          <td class="num">$0.032</td>
+          <td><span class="model-name">GPT-5.4</span> <span class="provider">OpenAI</span></td>
+          <td class="num">18.5%</td>
+          <td class="num">37/200</td>
+          <td class="num">0.407</td>
+          <td class="num">$4.81</td>
+          <td class="num">7.3s</td>
         </tr>
         <tr>
           <td class="rank">3</td>
-          <td><span class="model-name">GPT-5.4</span> <span class="provider">OpenAI</span></td>
-          <td class="num">42.5%</td>
-          <td class="num">85/200</td>
-          <td class="num">0.431</td>
-          <td class="num">46.3%</td>
-          <td class="num">32.8%</td>
-          <td class="num">48.5%</td>
-          <td class="num">$1.94</td>
-          <td class="num">$0.010</td>
+          <td><span class="model-name">Claude Opus 4.6</span> <span class="provider">Anthropic</span></td>
+          <td class="num">16.0%</td>
+          <td class="num">32/200</td>
+          <td class="num">0.404</td>
+          <td class="num">$10.17</td>
+          <td class="num">19.6s</td>
         </tr>
         <tr>
           <td class="rank">4</td>
-          <td><span class="model-name">Claude Sonnet 4.6</span> <span class="provider">Anthropic</span></td>
-          <td class="num">42.0%</td>
-          <td class="num">84/200</td>
-          <td class="num">0.419</td>
-          <td class="num">41.8%</td>
-          <td class="num">40.3%</td>
-          <td class="num">43.9%</td>
-          <td class="num">$3.65</td>
-          <td class="num">$0.018</td>
+          <td><span class="model-name">GPT-5.2</span> <span class="provider">OpenAI</span></td>
+          <td class="num">15.0%</td>
+          <td class="num">30/200</td>
+          <td class="num">0.322</td>
+          <td class="num">$11.30</td>
+          <td class="num">75.2s</td>
         </tr>
         <tr>
           <td class="rank">5</td>
-          <td><span class="model-name">GPT-5.2</span> <span class="provider">OpenAI</span></td>
-          <td class="num">42.0%</td>
-          <td class="num">84/200</td>
-          <td class="num">0.374</td>
-          <td class="num">47.8%</td>
-          <td class="num">41.8%</td>
-          <td class="num">36.4%</td>
-          <td class="num">$8.50</td>
-          <td class="num">$0.042</td>
+          <td><span class="model-name">Claude Sonnet 4.6</span> <span class="provider">Anthropic</span></td>
+          <td class="num">10.5%</td>
+          <td class="num">21/200</td>
+          <td class="num">0.322</td>
+          <td class="num">$6.87</td>
+          <td class="num">16.0s</td>
         </tr>
         <tr>
           <td class="rank">6</td>
           <td><span class="model-name">Gemini 3 Flash</span> <span class="provider">Google</span></td>
-          <td class="num">33.5%</td>
-          <td class="num">67/200</td>
-          <td class="num">0.373</td>
-          <td class="num">35.8%</td>
-          <td class="num">26.9%</td>
-          <td class="num">37.9%</td>
-          <td class="num">$0.34</td>
-          <td class="num">$0.002</td>
+          <td class="num">7.5%</td>
+          <td class="num">15/200</td>
+          <td class="num">0.318</td>
+          <td class="num">$3.13</td>
+          <td class="num">5.1s</td>
         </tr>
         <tr>
           <td class="rank">7</td>
-          <td><span class="model-name">Kimi K2.5</span> <span class="provider">Moonshot</span></td>
-          <td class="num">29.0%</td>
-          <td class="num">58/200</td>
-          <td class="num">0.301</td>
-          <td class="num">35.8%</td>
-          <td class="num">25.4%</td>
-          <td class="num">25.8%</td>
-          <td class="num">$1.98</td>
-          <td class="num">$0.010</td>
+          <td><span class="model-name">GLM-5</span> <span class="provider">Zhipu AI</span></td>
+          <td class="num">7.0%</td>
+          <td class="num">14/200</td>
+          <td class="num">0.249</td>
+          <td class="num">$4.26</td>
+          <td class="num">91.9s</td>
         </tr>
         <tr>
           <td class="rank">8</td>
-          <td><span class="model-name">Claude Haiku 4.5</span> <span class="provider">Anthropic</span></td>
-          <td class="num">25.0%</td>
-          <td class="num">50/200</td>
-          <td class="num">0.317</td>
-          <td class="num">23.9%</td>
-          <td class="num">26.9%</td>
-          <td class="num">24.2%</td>
-          <td class="num">$1.06</td>
-          <td class="num">$0.005</td>
+          <td><span class="model-name">Kimi K2.5</span> <span class="provider">Moonshot AI</span></td>
+          <td class="num">6.5%</td>
+          <td class="num">13/200</td>
+          <td class="num">0.228</td>
+          <td class="num">$3.47</td>
+          <td class="num">65.7s</td>
         </tr>
         <tr>
           <td class="rank">9</td>
-          <td><span class="model-name">DeepSeek V3.2</span> <span class="provider">DeepSeek</span></td>
-          <td class="num">23.5%</td>
-          <td class="num">47/200</td>
-          <td class="num">0.314</td>
-          <td class="num">25.4%</td>
-          <td class="num">22.4%</td>
-          <td class="num">22.7%</td>
-          <td class="num">$0.17</td>
-          <td class="num">$0.001</td>
+          <td><span class="model-name">Grok 4.1 Fast</span> <span class="provider">xAI</span></td>
+          <td class="num">5.5%</td>
+          <td class="num">11/200</td>
+          <td class="num">0.273</td>
+          <td class="num">$3.46</td>
+          <td class="num">61.1s</td>
         </tr>
         <tr>
           <td class="rank">10</td>
-          <td><span class="model-name">GLM-5</span> <span class="provider">Zhipu</span></td>
-          <td class="num">19.5%</td>
-          <td class="num">39/200</td>
-          <td class="num">0.268</td>
-          <td class="num">17.9%</td>
-          <td class="num">19.4%</td>
-          <td class="num">21.2%</td>
-          <td class="num">$2.32</td>
-          <td class="num">$0.012</td>
+          <td><span class="model-name">GPT-5 Mini</span> <span class="provider">OpenAI</span></td>
+          <td class="num">5.0%</td>
+          <td class="num">10/200</td>
+          <td class="num">0.275</td>
+          <td class="num">$3.63</td>
+          <td class="num">25.4s</td>
         </tr>
         <tr>
           <td class="rank">11</td>
-          <td><span class="model-name">GPT-5 Mini</span> <span class="provider">OpenAI</span></td>
-          <td class="num">17.5%</td>
-          <td class="num">35/200</td>
-          <td class="num">0.307</td>
-          <td class="num">19.4%</td>
-          <td class="num">14.9%</td>
-          <td class="num">18.2%</td>
-          <td class="num">$0.71</td>
-          <td class="num">$0.004</td>
+          <td><span class="model-name">DeepSeek V3.2</span> <span class="provider">DeepSeek</span></td>
+          <td class="num">4.5%</td>
+          <td class="num">9/200</td>
+          <td class="num">0.253</td>
+          <td class="num">$3.25</td>
+          <td class="num">78.7s</td>
         </tr>
         <tr>
           <td class="rank">12</td>
-          <td><span class="model-name">Qwen 3.5-27B</span> <span class="provider">Qwen</span></td>
-          <td class="num">15.0%</td>
-          <td class="num">30/200</td>
-          <td class="num">0.259</td>
-          <td class="num">14.9%</td>
-          <td class="num">17.9%</td>
-          <td class="num">12.1%</td>
-          <td class="num">$4.53</td>
-          <td class="num">$0.023</td>
+          <td><span class="model-name">Claude Haiku 4.5</span> <span class="provider">Anthropic</span></td>
+          <td class="num">3.5%</td>
+          <td class="num">7/200</td>
+          <td class="num">0.263</td>
+          <td class="num">$3.95</td>
+          <td class="num">7.0s</td>
         </tr>
         <tr>
           <td class="rank">13</td>
-          <td><span class="model-name">MiniMax M2.5</span> <span class="provider">MiniMax</span></td>
-          <td class="num">14.5%</td>
-          <td class="num">29/200</td>
-          <td class="num">0.248</td>
-          <td class="num">14.9%</td>
-          <td class="num">11.9%</td>
-          <td class="num">16.7%</td>
-          <td class="num">$0.47</td>
-          <td class="num">$0.002</td>
+          <td><span class="model-name">Gemini 3.1 Pro</span> <span class="provider">Google</span></td>
+          <td class="num">2.5%</td>
+          <td class="num">5/200</td>
+          <td class="num">0.093</td>
+          <td class="num">$9.60</td>
+          <td class="num">44.4s</td>
         </tr>
         <tr>
           <td class="rank">14</td>
-          <td><span class="model-name">Qwen 3.5-35B-A3B</span> <span class="provider">Qwen</span></td>
-          <td class="num">11.0%</td>
-          <td class="num">22/200</td>
-          <td class="num">0.236</td>
-          <td class="num">14.9%</td>
-          <td class="num">9.0%</td>
-          <td class="num">9.1%</td>
-          <td class="num">$1.01</td>
-          <td class="num">$0.005</td>
+          <td><span class="model-name">MiniMax M2.5</span> <span class="provider">MiniMax</span></td>
+          <td class="num">1.5%</td>
+          <td class="num">3/200</td>
+          <td class="num">0.181</td>
+          <td class="num">$3.25</td>
+          <td class="num">45.0s</td>
         </tr>
         <tr>
-          <td class="rank">15</td>
-          <td><span class="model-name">Gemini 3.1 Pro</span> <span class="provider">Google</span></td>
-          <td class="num">6.5%</td>
-          <td class="num">13/200</td>
-          <td class="num">0.094</td>
-          <td class="num">7.5%</td>
-          <td class="num">6.0%</td>
-          <td class="num">6.1%</td>
-          <td class="num">$9.96</td>
-          <td class="num">$0.050</td>
+          <td class="rank">14</td>
+          <td><span class="model-name">MiniMax M2.7</span> <span class="provider">MiniMax</span></td>
+          <td class="num">1.5%</td>
+          <td class="num">3/200</td>
+          <td class="num">0.099</td>
+          <td class="num">$1.74</td>
+          <td class="num">22.8s</td>
         </tr>
         <tr>
           <td class="rank">16</td>
@@ -536,157 +488,21 @@
           <td class="num" style="color:var(--text-muted)">0.0%</td>
           <td class="num">0/200</td>
           <td class="num">0.000</td>
-          <td class="num">0.0%</td>
-          <td class="num">0.0%</td>
-          <td class="num">0.0%</td>
           <td class="num">$0.00</td>
-          <td class="num">$0.000</td>
+          <td class="num">44.0s</td>
         </tr>
       </tbody>
     </table>
     </div>
-    <p style="color:var(--text-muted);font-size:0.82em;margin-top:10px;">All 16 models evaluated on identical 200 CVE instances. Judge: Claude Opus 4.6. Total evaluation cost: $49.34.</p>
+    <p style="color:var(--text-muted);font-size:0.82em;margin-top:10px;">All 16 models evaluated on identical 200 CVE instances. Best-of-3 runs with description-only file hints. Judge: Claude Opus 4.6. Total evaluation cost: ~$82.</p>
   </div>
 
-  <!-- Difficulty Tiers -->
+  <!-- Note about tier and ecosystem data -->
   <div class="section">
-    <h2>Performance by Difficulty Tier</h2>
-    <div class="tier-grid">
-      <div class="tier-card">
-        <h3>Tier 1 — Pattern Matching</h3>
-        <div class="desc">XSS, SQL injection, path traversal — well-known fix patterns (67 instances)</div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.3 Codex</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:61.2%;background:var(--accent)"></div></div><div class="tier-bar-val">61.2%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Claude Opus 4.6</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:50.7%;background:var(--accent)"></div></div><div class="tier-bar-val">50.7%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.2</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:47.8%;background:var(--accent)"></div></div><div class="tier-bar-val">47.8%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.4</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:46.3%;background:var(--accent)"></div></div><div class="tier-bar-val">46.3%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Claude Sonnet 4.6</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:41.8%;background:var(--accent)"></div></div><div class="tier-bar-val">41.8%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Gemini 3 Flash</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:35.8%;background:var(--accent)"></div></div><div class="tier-bar-val">35.8%</div></div>
-      </div>
-      <div class="tier-card">
-        <h3>Tier 2 — Logic Fixes</h3>
-        <div class="desc">Authorization, CSRF, info disclosure — requires understanding app logic (67 instances)</div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.3 Codex</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:53.7%;background:var(--orange)"></div></div><div class="tier-bar-val">53.7%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Claude Opus 4.6</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:43.3%;background:var(--orange)"></div></div><div class="tier-bar-val">43.3%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.2</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:41.8%;background:var(--orange)"></div></div><div class="tier-bar-val">41.8%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Claude Sonnet 4.6</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:40.3%;background:var(--orange)"></div></div><div class="tier-bar-val">40.3%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.4</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:32.8%;background:var(--orange)"></div></div><div class="tier-bar-val">32.8%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Gemini 3 Flash</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:26.9%;background:var(--orange)"></div></div><div class="tier-bar-val">26.9%</div></div>
-      </div>
-      <div class="tier-card" style="grid-column: 1 / -1; max-width: 680px;">
-        <h3>Tier 3 — Deep Reasoning</h3>
-        <div class="desc">Code injection, resource exhaustion, input validation — requires deep analysis (66 instances)</div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.3 Codex</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:51.5%;background:var(--red)"></div></div><div class="tier-bar-val">51.5%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.4</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:48.5%;background:var(--red)"></div></div><div class="tier-bar-val">48.5%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Claude Sonnet 4.6</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:43.9%;background:var(--red)"></div></div><div class="tier-bar-val">43.9%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Claude Opus 4.6</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:42.4%;background:var(--red)"></div></div><div class="tier-bar-val">42.4%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">Gemini 3 Flash</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:37.9%;background:var(--red)"></div></div><div class="tier-bar-val">37.9%</div></div>
-        <div class="tier-bar-row"><div class="tier-bar-label">GPT-5.2</div><div class="tier-bar-outer"><div class="tier-bar-inner" style="width:36.4%;background:var(--red)"></div></div><div class="tier-bar-val">36.4%</div></div>
-      </div>
+    <h2>Difficulty Tier &amp; Ecosystem Breakdown</h2>
+    <div class="tier-card">
+      <p style="font-size:0.95em;color:var(--text-muted);">Per-tier and per-ecosystem breakdowns are not available for best-of-3 aggregate results. The benchmark classifies instances into three difficulty tiers (Tier 1: Pattern, Tier 2: Logic, Tier 3: Deep) with 67/67/66 instances each, and spans 7 ecosystems (npm, pip, Maven, RubyGems, Composer, Rust, Swift). See individual single-run result files for tier-level and ecosystem-level analysis.</p>
     </div>
-  </div>
-
-  <!-- Ecosystem Performance -->
-  <div class="section">
-    <h2>Performance by Ecosystem (Top 8 Models)</h2>
-    <div style="overflow-x:auto;">
-    <table class="eco-table">
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th class="num">npm</th>
-          <th class="num">pip</th>
-          <th class="num">Maven</th>
-          <th class="num">RubyGems</th>
-          <th class="num">Composer</th>
-          <th class="num">Rust</th>
-          <th class="num">Swift</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>GPT-5.3 Codex</td>
-          <td class="eco-val">56.0%</td>
-          <td class="eco-val">55.6%</td>
-          <td class="eco-val">40.0%</td>
-          <td class="eco-val">66.7%</td>
-          <td class="eco-val">100%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-        <tr>
-          <td>Claude Opus 4.6</td>
-          <td class="eco-val">44.8%</td>
-          <td class="eco-val">42.6%</td>
-          <td class="eco-val">60.0%</td>
-          <td class="eco-val">66.7%</td>
-          <td class="eco-val">100%</td>
-          <td class="eco-val">100%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-        <tr>
-          <td>GPT-5.4</td>
-          <td class="eco-val">41.0%</td>
-          <td class="eco-val">46.3%</td>
-          <td class="eco-val">20.0%</td>
-          <td class="eco-val">66.7%</td>
-          <td class="eco-val">50.0%</td>
-          <td class="eco-val">100%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-        <tr>
-          <td>Claude Sonnet 4.6</td>
-          <td class="eco-val">42.5%</td>
-          <td class="eco-val">40.7%</td>
-          <td class="eco-val">20.0%</td>
-          <td class="eco-val">66.7%</td>
-          <td class="eco-val">50.0%</td>
-          <td class="eco-val">100%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-        <tr>
-          <td>GPT-5.2</td>
-          <td class="eco-val">38.8%</td>
-          <td class="eco-val">50.0%</td>
-          <td class="eco-val">40.0%</td>
-          <td class="eco-val">66.7%</td>
-          <td class="eco-val">50.0%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-        <tr>
-          <td>Gemini 3 Flash</td>
-          <td class="eco-val">36.6%</td>
-          <td class="eco-val">27.8%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val">66.7%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val">100%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-        <tr>
-          <td>Kimi K2.5</td>
-          <td class="eco-val">32.1%</td>
-          <td class="eco-val">27.8%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-        <tr>
-          <td>Claude Haiku 4.5</td>
-          <td class="eco-val">27.6%</td>
-          <td class="eco-val">16.7%</td>
-          <td class="eco-val">40.0%</td>
-          <td class="eco-val">66.7%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-          <td class="eco-val eco-zero">0%</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-    <p style="color:var(--text-muted);font-size:0.82em;margin-top:10px;">Note: Rust (1 instance) and Swift (1 instance) have very small sample sizes. Composer has 2 instances, RubyGems 3, Maven 5.</p>
   </div>
 
   <!-- Cost Efficiency -->
@@ -699,75 +515,66 @@
           <th>Model</th>
           <th class="num">Pass Rate</th>
           <th class="num">Total Cost</th>
-          <th class="num">Cost / Instance</th>
           <th class="num">Cost / Pass</th>
           <th class="num">Avg Gen Time</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><span class="model-name">DeepSeek V3.2</span></td>
-          <td class="num">23.5%</td>
-          <td class="num cost-highlight">$0.17</td>
-          <td class="num cost-highlight">$0.001</td>
-          <td class="num cost-highlight">$0.004</td>
-          <td class="num">36.1s</td>
+          <td><span class="model-name">MiniMax M2.7</span></td>
+          <td class="num">1.5%</td>
+          <td class="num cost-highlight">$1.74</td>
+          <td class="num">$0.58</td>
+          <td class="num">22.8s</td>
         </tr>
         <tr>
           <td><span class="model-name">Gemini 3 Flash</span></td>
-          <td class="num">33.5%</td>
-          <td class="num cost-highlight">$0.34</td>
-          <td class="num cost-highlight">$0.002</td>
-          <td class="num cost-highlight">$0.005</td>
-          <td class="num">4.2s</td>
+          <td class="num">7.5%</td>
+          <td class="num cost-highlight">$3.13</td>
+          <td class="num cost-highlight">$0.21</td>
+          <td class="num">5.1s</td>
         </tr>
         <tr>
-          <td><span class="model-name">MiniMax M2.5</span></td>
-          <td class="num">14.5%</td>
-          <td class="num">$0.47</td>
-          <td class="num">$0.002</td>
-          <td class="num">$0.016</td>
-          <td class="num">49.0s</td>
+          <td><span class="model-name">DeepSeek V3.2</span></td>
+          <td class="num">4.5%</td>
+          <td class="num cost-highlight">$3.25</td>
+          <td class="num">$0.36</td>
+          <td class="num">78.7s</td>
         </tr>
         <tr>
           <td><span class="model-name">GPT-5.4</span></td>
-          <td class="num">42.5%</td>
-          <td class="num">$1.94</td>
-          <td class="num">$0.010</td>
-          <td class="num">$0.023</td>
-          <td class="num">7.9s</td>
+          <td class="num">18.5%</td>
+          <td class="num">$4.81</td>
+          <td class="num cost-highlight">$0.13</td>
+          <td class="num">7.3s</td>
         </tr>
         <tr>
           <td><span class="model-name">Claude Sonnet 4.6</span></td>
-          <td class="num">42.0%</td>
-          <td class="num">$3.65</td>
-          <td class="num">$0.018</td>
-          <td class="num">$0.043</td>
-          <td class="num">13.7s</td>
+          <td class="num">10.5%</td>
+          <td class="num">$6.87</td>
+          <td class="num">$0.33</td>
+          <td class="num">16.0s</td>
         </tr>
         <tr>
           <td><span class="model-name">GPT-5.3 Codex</span></td>
-          <td class="num"><strong>57.0%</strong></td>
-          <td class="num">$6.23</td>
-          <td class="num">$0.031</td>
-          <td class="num">$0.056</td>
-          <td class="num">40.5s</td>
+          <td class="num"><strong>22.5%</strong></td>
+          <td class="num">$8.74</td>
+          <td class="num">$0.19</td>
+          <td class="num">43.4s</td>
         </tr>
         <tr>
           <td><span class="model-name">Claude Opus 4.6</span></td>
-          <td class="num">45.5%</td>
-          <td class="num">$6.46</td>
-          <td class="num">$0.032</td>
-          <td class="num">$0.071</td>
-          <td class="num">18.8s</td>
+          <td class="num">16.0%</td>
+          <td class="num">$10.17</td>
+          <td class="num">$0.32</td>
+          <td class="num">19.6s</td>
         </tr>
         <tr>
           <td><span class="model-name">Gemini 3.1 Pro</span></td>
-          <td class="num">6.5%</td>
-          <td class="num cost-warn">$9.96</td>
-          <td class="num cost-warn">$0.050</td>
-          <td class="num cost-warn">$0.766</td>
-          <td class="num">60.0s</td>
+          <td class="num">2.5%</td>
+          <td class="num cost-warn">$9.60</td>
+          <td class="num cost-warn">$1.92</td>
+          <td class="num">44.4s</td>
         </tr>
       </tbody>
     </table>
@@ -784,7 +591,7 @@
       </div>
       <div class="tier-card">
         <h3>Prompt</h3>
-        <p style="font-size:0.9em;color:var(--text-muted);">Each model receives CVE text, CWE guidance, and runtime source context when localization succeeds. Gold affected-file hints are supported only as a separate ablation mode.</p>
+        <p style="font-size:0.9em;color:var(--text-muted);">Each model receives CVE text, CWE guidance, and runtime source context. File hints are derived from advisory text only (description mode). Each model is run 3 times per instance (best-of-3) for variance reduction.</p>
       </div>
       <div class="tier-card">
         <h3>Scoring (LLM-as-Judge)</h3>
