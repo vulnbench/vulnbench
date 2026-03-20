@@ -231,7 +231,7 @@
     <span><span class="num">200</span> Curated Instances</span>
     <span><span class="num">55</span> CWE Types</span>
     <span><span class="num">7</span> Ecosystems</span>
-    <span><span class="num">~$82</span> Total Cost</span>
+    <span><span class="num">3</span> Runs per Model</span>
   </div>
 </div>
 
@@ -248,12 +248,12 @@
       <div class="label">Median Model Pass Rate</div>
     </div>
     <div class="stat-card">
-      <div class="value">$1.74</div>
-      <div class="label">Cheapest Total (MiniMax M2.7)</div>
+      <div class="value">16.0%</div>
+      <div class="label">Best Non-OpenAI (Claude Opus 4.6)</div>
     </div>
     <div class="stat-card">
-      <div class="value">$0.13</div>
-      <div class="label">Best Cost/Pass (GPT-5.4)</div>
+      <div class="value">0.468</div>
+      <div class="label">Highest Mean Score (GPT-5.3 Codex)</div>
     </div>
   </div>
 
@@ -494,7 +494,7 @@
       </tbody>
     </table>
     </div>
-    <p style="color:var(--text-muted);font-size:0.82em;margin-top:10px;">All 16 models evaluated on identical 200 CVE instances. Best-of-3 runs with description-only file hints. Judge: Claude Opus 4.6. Total evaluation cost: ~$82.</p>
+    <p style="color:var(--text-muted);font-size:0.82em;margin-top:10px;">All 16 models evaluated on identical 200 CVE instances. Best-of-3 runs with description-only file hints. Judge: Claude Opus 4.6.</p>
   </div>
 
   <!-- Note about tier and ecosystem data -->
@@ -505,81 +505,6 @@
     </div>
   </div>
 
-  <!-- Cost Efficiency -->
-  <div class="section">
-    <h2>Cost Efficiency</h2>
-    <div style="overflow-x:auto;">
-    <table>
-      <thead>
-        <tr>
-          <th>Model</th>
-          <th class="num">Pass Rate</th>
-          <th class="num">Total Cost</th>
-          <th class="num">Cost / Pass</th>
-          <th class="num">Avg Gen Time</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="model-name">MiniMax M2.7</span></td>
-          <td class="num">1.5%</td>
-          <td class="num cost-highlight">$1.74</td>
-          <td class="num">$0.58</td>
-          <td class="num">22.8s</td>
-        </tr>
-        <tr>
-          <td><span class="model-name">Gemini 3 Flash</span></td>
-          <td class="num">7.5%</td>
-          <td class="num cost-highlight">$3.13</td>
-          <td class="num cost-highlight">$0.21</td>
-          <td class="num">5.1s</td>
-        </tr>
-        <tr>
-          <td><span class="model-name">DeepSeek V3.2</span></td>
-          <td class="num">4.5%</td>
-          <td class="num cost-highlight">$3.25</td>
-          <td class="num">$0.36</td>
-          <td class="num">78.7s</td>
-        </tr>
-        <tr>
-          <td><span class="model-name">GPT-5.4</span></td>
-          <td class="num">18.5%</td>
-          <td class="num">$4.81</td>
-          <td class="num cost-highlight">$0.13</td>
-          <td class="num">7.3s</td>
-        </tr>
-        <tr>
-          <td><span class="model-name">Claude Sonnet 4.6</span></td>
-          <td class="num">10.5%</td>
-          <td class="num">$6.87</td>
-          <td class="num">$0.33</td>
-          <td class="num">16.0s</td>
-        </tr>
-        <tr>
-          <td><span class="model-name">GPT-5.3 Codex</span></td>
-          <td class="num"><strong>22.5%</strong></td>
-          <td class="num">$8.74</td>
-          <td class="num">$0.19</td>
-          <td class="num">43.4s</td>
-        </tr>
-        <tr>
-          <td><span class="model-name">Claude Opus 4.6</span></td>
-          <td class="num">16.0%</td>
-          <td class="num">$10.17</td>
-          <td class="num">$0.32</td>
-          <td class="num">19.6s</td>
-        </tr>
-        <tr>
-          <td><span class="model-name">Gemini 3.1 Pro</span></td>
-          <td class="num">2.5%</td>
-          <td class="num cost-warn">$9.60</td>
-          <td class="num cost-warn">$1.92</td>
-          <td class="num">44.4s</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-  </div>
 
   <!-- Methodology -->
   <div class="section">

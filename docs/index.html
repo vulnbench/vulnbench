@@ -523,14 +523,14 @@
                 <p>The median model fixes roughly 1 in 18 vulnerabilities. Only the top 4 models exceed 15%, and none reach 25%.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--cyan);">$1.74</div>
-                <h3>Cheapest Total Cost</h3>
-                <p>MiniMax M2.7 completes the full 200-instance best-of-3 evaluation for $1.74 total (gen+judge), though at only 1.5% pass rate.</p>
+                <div class="finding-number" style="color: var(--cyan);">16.0%</div>
+                <h3>Best Non-OpenAI Model</h3>
+                <p>Claude Opus 4.6 is the highest-scoring non-OpenAI model at 16.0%, followed by Claude Sonnet 4.6 at 10.5% &mdash; showing Anthropic models are competitive but trail the GPT-5 family.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--orange);">$0.13</div>
-                <h3>Best Cost per Pass</h3>
-                <p>GPT-5.4 achieves the best cost efficiency at $0.13 per passed instance, combining 18.5% pass rate with a $4.81 total cost.</p>
+                <div class="finding-number" style="color: var(--orange);">0.468</div>
+                <h3>Highest Mean Judge Score</h3>
+                <p>GPT-5.3 Codex achieves the highest mean judge score, indicating its patches are not only more likely to pass but also closer to the ground-truth fix when they don't.</p>
             </div>
             <div class="finding-card">
                 <div class="finding-number" style="color: var(--purple);">3x</div>
@@ -538,9 +538,9 @@
                 <p>Each model is run 3 times per instance, taking the best result. This reduces noise from sampling variance and gives a more stable ranking.</p>
             </div>
             <div class="finding-card">
-                <div class="finding-number" style="color: var(--red);">~$82</div>
-                <h3>Total Eval Cost</h3>
-                <p>All 16 models evaluated on all 200 instances (best-of-3) for ~$82 total via OpenRouter &mdash; making this benchmark highly reproducible.</p>
+                <div class="finding-number" style="color: var(--red);">0%</div>
+                <h3>Complete Failures</h3>
+                <p>StepFun Step 3.5 Flash produced no valid patches across all 3 runs, scoring 0% on every instance &mdash; highlighting the wide capability gap between model families.</p>
             </div>
         </div>
     </div>
@@ -819,7 +819,7 @@
 <section class="cta-section">
     <div class="container">
         <h2>Run the Benchmark Yourself</h2>
-        <p class="section-desc" style="margin:0 auto 24px">VulnBench is fully open source and reproducible. Evaluate any LLM in under an hour for less than $10.</p>
+        <p class="section-desc" style="margin:0 auto 24px">VulnBench is fully open source and reproducible. Evaluate any LLM on the curated 200-instance subset with a single command.</p>
         <div class="cta-buttons">
             <a href="https://github.com/vulnbench/vulnbench" class="btn btn-primary">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
