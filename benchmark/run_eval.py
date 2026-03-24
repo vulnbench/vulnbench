@@ -33,8 +33,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
 
+import site
 import litellm
 from tqdm import tqdm
+
+# CVE mitigation: detect litellm supply chain attack (issues/24512)
+for _sp in site.getsitepackages() + [site.getusersitepackages()]:
+    _pth = Path(_sp) / "litellm_init.pth" if isinstance(_sp, str) else None
+    if _pth and _pth.exists():
+        raise SystemExit(
+            f"SECURITY: Malicious litellm_init.pth detected at {_pth}.\n"
+            "Your litellm installation is compromised (see github.com/BerriAI/litellm/issues/24512).\n"
+            "Remove litellm, delete the .pth file, rotate ALL credentials, and reinstall a safe version."
+        )
 
 from benchmark.eval_models import (
     AggregateMetrics,

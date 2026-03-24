@@ -2,5 +2,7 @@ requests>=2.31.0
 pydantic>=2.5.0
 packaging>=23.0
 tqdm>=4.66.0
-litellm>=1.40.0
+# Pin litellm: versions 1.82.7 and 1.82.8 contain a supply chain attack
+# (malicious .pth credential stealer). See: github.com/BerriAI/litellm/issues/24512
+litellm>=1.40.0,!=1.82.7,!=1.82.8
 pyyaml>=6.0
