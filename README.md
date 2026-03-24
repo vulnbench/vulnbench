@@ -1,12 +1,8 @@
-<p align="center">
-  <img src="docs/vuln_bench.png" alt="VulnBench" width="600">
-</p>
-
 # VulnBench: Can LLMs Fix Real-World Security Vulnerabilities?
 
 **A benchmark for evaluating large language models on open-source security patch generation.**
 
-VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evaluation subset of 200 instances**. The public leaderboard in this repo is currently reported on the curated `VulnBench-200` subset, not the full benchmark. The evaluation harness can include vulnerable source context at runtime and supports both no-hint and gold-hint localization modes.
+VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evaluation subset of 200 instances**. All 16 models have been evaluated on both the curated `VulnBench-200` subset (best-of-3) and the full `VulnBench-1650` benchmark (single pass). The evaluation harness can include vulnerable source context at runtime and supports both no-hint and gold-hint localization modes.
 
 > Presented at **RSA Conference 2026** by [Ghost Security](https://ghost.security)
 
@@ -14,7 +10,7 @@ VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evalu
 
 ## Key Findings
 
-On the curated `VulnBench-200` subset evaluated with **best-of-3 variance reduction** and **description-only file hints** (derived from advisory text, not the reference fix), the best model — **GPT-5.3 Codex** — successfully patches **22.5% of instances**, while the median model achieves only ~5.5%. These results use a more conservative, realistic evaluation than earlier gold-hint runs, revealing how much room remains for improvement in AI-assisted security remediation.
+On the curated `VulnBench-200` subset (best-of-3, description-only hints), the best model — **GPT-5.3 Codex** — patches **22.5% of instances**. On the full `VulnBench-1650` benchmark (single pass), **Claude Opus 4.6** leads at **16.6%**, narrowly ahead of GPT-5.3 Codex at 16.4% — a notable ranking reversal. The median model fixes under 4% of the full benchmark, revealing how much room remains for improvement in AI-assisted security remediation.
 
 ### VulnBench-200 Leaderboard
 
@@ -39,7 +35,32 @@ This leaderboard is for the **curated 200-instance evaluation subset** using **b
 | 14 | MiniMax M2.7 | 1.5% | 0.099 | 3/200 | $1.74 |
 | 16 | StepFun Step 3.5 Flash | 0.0% | 0.000 | 0/200 | $0.00 |
 
-*All models evaluated on identical 200 CVE instances with best-of-3 variance reduction and description-only file hints. Total evaluation cost across all 16 models: ~$82.*
+*All models evaluated on identical 200 CVE instances with best-of-3 variance reduction and description-only file hints.*
+
+### VulnBench-1650 Leaderboard (Full Benchmark)
+
+All 16 models evaluated on the full 1,650-instance benchmark (single pass, description-only file hints).
+
+| Rank | Model | Pass Rate | Mean Score | Passed |
+|:----:|-------|:---------:|:----------:|:------:|
+| 1 | **Anthropic Claude Opus 4.6** | **16.6%** | 0.417 | 273/1650 |
+| 2 | OpenAI GPT-5.3 Codex | 16.4% | 0.301 | 271/1650 |
+| 3 | Anthropic Claude Sonnet 4.6 | 12.2% | 0.335 | 201/1650 |
+| 4 | Google Gemini 3 Flash | 9.7% | 0.311 | 160/1650 |
+| 5 | OpenAI GPT-5.2 | 6.7% | 0.129 | 111/1650 |
+| 6 | Zhipu GLM-5 | 5.9% | 0.219 | 98/1650 |
+| 7 | OpenAI GPT-5 Mini | 5.1% | 0.246 | 85/1650 |
+| 8 | Anthropic Claude Haiku 4.5 | 4.9% | 0.259 | 80/1650 |
+| 9 | Google Gemini 3.1 Pro | 3.5% | 0.097 | 58/1650 |
+| 10 | OpenAI GPT-5.4 | 3.4% | 0.092 | 56/1650 |
+| 10 | Moonshot Kimi K2.5 | 3.4% | 0.102 | 56/1650 |
+| 12 | MiniMax M2.7 | 2.2% | 0.114 | 36/1650 |
+| 13 | MiniMax M2.5 | 2.1% | 0.092 | 35/1650 |
+| 14 | xAI Grok 4.1 Fast | 1.9% | 0.108 | 31/1650 |
+| 15 | DeepSeek V3.2 | 1.7% | 0.094 | 28/1650 |
+| 16 | StepFun Step 3.5 Flash | 0.1% | 0.001 | 2/1650 |
+
+**Notable differences from VulnBench-200:** Claude Opus 4.6 overtakes GPT-5.3 Codex at the top. GPT-5.4 drops from 2nd (18.5%) to 10th (3.4%). Anthropic models (Opus, Sonnet, Haiku) all scale well to the harder full benchmark, as does Gemini 3 Flash.
 
 ### Best Value Models
 
@@ -113,6 +134,10 @@ The harness stores normalized and raw judge verdicts, flags score/verdict disagr
 ---
 
 ## Reproduce the Results
+
+### Security Notice: litellm Supply Chain Attack
+
+> **litellm versions 1.82.7 and 1.82.8 contain a malicious payload** that steals credentials on Python startup. See [BerriAI/litellm#24512](https://github.com/BerriAI/litellm/issues/24512). VulnBench pins its dependency to exclude these versions (`!=1.82.7,!=1.82.8`) and includes a runtime check that halts execution if the malicious `litellm_init.pth` file is detected. If you have previously installed litellm 1.82.7 or 1.82.8, remove it immediately, delete `litellm_init.pth` from your site-packages, and **rotate all credentials** on the affected machine.
 
 ### Requirements
 
@@ -227,8 +252,10 @@ Six sequential stages with checkpoint persistence (safe to interrupt and resume)
 ### Evaluation Harness
 
 - `benchmark/run_eval.py` — Single-model evaluation with LLM judge
+- `benchmark/run_eval_skills.py` — Skills-augmented evaluation (injects SAST analysis criteria into prompts)
 - `benchmark/compare.py` — Multi-model comparison with summary tables
 - `benchmark/run_best_of_n.py` — Best-of-N runner for variance reduction
+- `benchmark/skills/` — Security analysis criteria adapted from [Ghost Security scan-code](https://github.com/ghostsecurity/skills)
 - `benchmark/adapters/` — Protocol-based model adapters (LiteLLM supports 100+ providers)
 
 ### Difficulty Tiers
@@ -248,7 +275,9 @@ Six sequential stages with checkpoint persistence (safe to interrupt and resume)
 | `data/cve_database.json` | Full CVE database (10,000+ records) |
 | `data/benchmark/vulnbench_full.json` | Full benchmark (1,650 instances) |
 | `data/benchmark/vulnbench_200.json` | Curated 200-instance evaluation subset |
-| `results/v200_*.json` | Per-model evaluation reports |
+| `results/best3_*.json` | VulnBench-200 best-of-3 reports per model |
+| `results/full_*.json` | VulnBench-1650 single-pass reports per model |
+| `results/skills/` | Skills-augmented evaluation reports (experimental) |
 
 ---
 
