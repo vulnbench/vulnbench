@@ -1,0 +1,57 @@
+category: info_exposure
+description: >
+  Information exposure, SSRF, and open redirect vulnerabilities where
+  sensitive data leaks or requests are misdirected.
+cwes:
+  - CWE-200
+  - CWE-532
+  - CWE-601
+  - CWE-918
+  - CWE-209
+  - CWE-538
+
+analysis_methodology:
+  plan: |
+    1. Identify what sensitive information is exposed and through what channel (logs, errors, responses, redirects).
+    2. For SSRF: identify where user-controlled URLs are fetched server-side.
+    3. For open redirects: locate redirect logic that accepts user-controlled destination URLs.
+    4. Determine the impact: internal network access, credential exposure, or phishing enablement.
+  analyze: |
+    1. Locate the exact code path that exposes information or processes untrusted URLs.
+    2. For information disclosure: determine what data is leaked and whether it includes credentials, tokens, or internal state.
+    3. For SSRF: check whether the URL is validated against an allowlist of permitted hosts/schemes.
+    4. For open redirects: verify whether the redirect target is validated against allowed domains.
+    5. Check whether existing protections (URL parsing, domain checks) can be bypassed.
+  verify: |
+    1. Confirm the fix removes the information leak or restricts the URL target.
+    2. For SSRF: verify the allowlist is applied after URL resolution (not just on the raw input).
+    3. For redirects: ensure the validation handles protocol-relative URLs, unicode, and URL encoding.
+    4. Check that error messages in the fix do not introduce new information leaks.
+
+fix_patterns:
+  CWE-200:
+    name: Information Exposure
+    common_fixes:
+      - Remove sensitive data from error messages and logs
+      - Use generic error messages for user-facing responses
+      - Implement proper access control on sensitive endpoints
+    anti_patterns:
+      - Hiding data in comments or non-displayed HTML
+  CWE-918:
+    name: Server-Side Request Forgery (SSRF)
+    common_fixes:
+      - Allowlist of permitted destination hosts or URL schemes
+      - Resolve DNS and validate IP against blocklist (no internal IPs)
+      - Use dedicated HTTP client with restricted capabilities
+    anti_patterns:
+      - Blocklist of internal IPs (incomplete, DNS rebinding bypass)
+      - URL validation on raw input without resolution
+  CWE-601:
+    name: Open Redirect
+    common_fixes:
+      - Validate redirect URLs against allowlist of permitted domains
+      - Use relative paths only for redirects
+      - Map redirect targets to predefined safe URLs via lookup
+    anti_patterns:
+      - Checking only the hostname prefix (subdomain bypass)
+      - Allowing protocol-relative URLs

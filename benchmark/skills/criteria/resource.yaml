@@ -1,0 +1,60 @@
+category: resource
+description: >
+  Resource exhaustion and denial of service vulnerabilities including
+  ReDoS, infinite loops, memory exhaustion, and uncontrolled recursion.
+cwes:
+  - CWE-400
+  - CWE-770
+  - CWE-674
+  - CWE-835
+  - CWE-1333
+  - CWE-405
+  - CWE-776
+
+analysis_methodology:
+  plan: |
+    1. Identify the resource being exhausted: CPU, memory, file handles, network connections, or disk space.
+    2. Determine the trigger: what input causes the resource consumption to grow unboundedly.
+    3. For regex: analyze the pattern for catastrophic backtracking (nested quantifiers, overlapping alternatives).
+    4. For loops/recursion: trace the termination condition and identify inputs that prevent termination.
+  analyze: |
+    1. Locate the exact code path that consumes resources without bounds.
+    2. Determine the growth rate: linear, quadratic, or exponential relative to input size.
+    3. For ReDoS: identify the specific regex pattern and the input structure that causes backtracking.
+    4. For memory: check whether allocations are bounded and whether large inputs are rejected.
+    5. Verify whether existing limits (timeouts, size checks) are present and sufficient.
+  verify: |
+    1. Confirm the fix bounds resource consumption to a reasonable maximum.
+    2. For regex: verify the new pattern avoids backtracking (no nested quantifiers, use atomic groups or possessive quantifiers).
+    3. Verify the fix does not reject legitimate inputs that are merely large.
+    4. Check that error handling for limit violations is clean (no resource leaks).
+
+fix_patterns:
+  CWE-400:
+    name: Uncontrolled Resource Consumption
+    common_fixes:
+      - Add input size limits before processing
+      - Implement timeouts for long-running operations
+      - Use streaming/chunked processing instead of loading everything into memory
+      - Add rate limiting for repeated operations
+    anti_patterns:
+      - Limits that are too high to be effective
+      - Timeouts without cleanup of partial state
+  CWE-1333:
+    name: Regular Expression Denial of Service (ReDoS)
+    common_fixes:
+      - Rewrite regex to avoid catastrophic backtracking
+      - Use atomic groups or possessive quantifiers
+      - Replace complex regex with iterative string parsing
+      - Add input length limits before regex matching
+    anti_patterns:
+      - Adding a timeout without fixing the regex
+      - Limiting input length to an unreasonably large value
+  CWE-770:
+    name: Allocation of Resources Without Limits
+    common_fixes:
+      - Add maximum size checks before allocation
+      - Use bounded data structures (fixed-size buffers, capped collections)
+      - Implement resource pools with maximum capacity
+    anti_patterns:
+      - Relying on OS-level limits alone

@@ -1,0 +1,56 @@
+category: traversal
+description: >
+  Path traversal and file inclusion vulnerabilities where attackers
+  can access files outside intended directories.
+cwes:
+  - CWE-22
+  - CWE-23
+  - CWE-73
+  - CWE-36
+  - CWE-59
+
+analysis_methodology:
+  plan: |
+    1. Identify all file system operations that accept user-controlled path components.
+    2. Trace path construction from user input to file system call (open, read, write, include, require, stat).
+    3. Determine whether path normalization or validation is applied before the file operation.
+    4. Check for symlink following, archive extraction (zip slip), or URL-based file access.
+  analyze: |
+    1. Locate the exact file operation and its path argument.
+    2. Determine what path components are user-controlled.
+    3. Check whether path resolution (realpath, resolve, abspath) is applied BEFORE the access check.
+    4. Verify that the resolved path is validated against an allowed base directory.
+    5. Check for null byte injection, URL encoding, or double-encoding bypasses.
+  verify: |
+    1. Confirm the fix canonicalizes the path before checking containment.
+    2. Verify the containment check uses resolved absolute paths (not string prefix matching on raw input).
+    3. Check that symlinks are handled correctly (resolve before check, not after).
+    4. Ensure the fix covers all code paths that reach the file operation.
+
+fix_patterns:
+  CWE-22:
+    name: Path Traversal
+    common_fixes:
+      - Resolve path to absolute form then verify it starts with allowed base directory
+      - Use realpath/resolve before any path comparison
+      - Reject paths containing .. segments after normalization
+      - Use path.join with basename extraction (strip directory components)
+    anti_patterns:
+      - String replacement of ../ (incomplete, encoding-dependent)
+      - Checking raw input for .. without normalization
+      - Prefix matching on unnormalized paths
+  CWE-23:
+    name: Relative Path Traversal
+    common_fixes:
+      - Canonicalize path and verify containment within base directory
+      - Extract basename only when directory components are not needed
+    anti_patterns:
+      - Filtering .. without handling encoded variants
+  CWE-73:
+    name: External Control of File Name or Path
+    common_fixes:
+      - Map user input to allowed filenames via whitelist/lookup table
+      - Validate file extension and path against allowed patterns
+      - Use indirect references (IDs) instead of direct filenames
+    anti_patterns:
+      - Blacklisting dangerous filenames

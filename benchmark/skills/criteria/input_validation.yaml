@@ -1,0 +1,61 @@
+category: input_validation
+description: >
+  Input validation and data handling vulnerabilities including
+  prototype pollution, unsafe deserialization, and type confusion.
+cwes:
+  - CWE-20
+  - CWE-1321
+  - CWE-502
+  - CWE-125
+  - CWE-476
+  - CWE-129
+  - CWE-190
+
+analysis_methodology:
+  plan: |
+    1. Identify the input boundary where untrusted data enters the application.
+    2. Determine what validation is expected vs. what is actually enforced.
+    3. For prototype pollution: trace object merge/extend operations that accept user-controlled keys.
+    4. For deserialization: identify where untrusted data is deserialized into objects.
+  analyze: |
+    1. Locate the exact function that processes untrusted input without adequate validation.
+    2. Determine what input values can trigger the vulnerability (type confusion, special keys, malformed data).
+    3. For prototype pollution: check if __proto__, constructor, or prototype keys are accepted during object merge.
+    4. For deserialization: identify the deserializer and whether it allows arbitrary type instantiation.
+    5. Map the impact: what happens when invalid input reaches downstream code.
+  verify: |
+    1. Confirm the fix validates input at the correct boundary (before processing, not after).
+    2. Verify the validation is whitelist-based (allow known good) rather than blacklist-based (block known bad).
+    3. Check that the fix handles all input paths (not just the most obvious one).
+    4. Ensure error handling for invalid input does not leak sensitive information.
+
+fix_patterns:
+  CWE-20:
+    name: Improper Input Validation
+    common_fixes:
+      - Add type checking and range validation at input boundaries
+      - Use schema validation libraries (JSON Schema, Pydantic, Zod)
+      - Reject unexpected input types early
+      - Whitelist allowed values for enumerated inputs
+    anti_patterns:
+      - Validation only on the client side
+      - Blacklist-based validation (incomplete coverage)
+  CWE-1321:
+    name: Prototype Pollution
+    common_fixes:
+      - Filter or reject __proto__, constructor, and prototype keys during object merge
+      - Use Object.create(null) for dictionary-like objects
+      - Use Map instead of plain objects for user-controlled keys
+      - Freeze Object.prototype
+    anti_patterns:
+      - Blacklisting only __proto__ (missing constructor.prototype)
+      - Filtering after merge instead of before
+  CWE-502:
+    name: Unsafe Deserialization
+    common_fixes:
+      - Use safe deserialization methods (JSON.parse, yaml.safe_load)
+      - Restrict allowed types during deserialization
+      - Validate deserialized data against a schema before use
+    anti_patterns:
+      - Using pickle/marshal/yaml.load with untrusted data
+      - Type restriction that can be bypassed

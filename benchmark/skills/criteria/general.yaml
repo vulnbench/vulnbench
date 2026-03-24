@@ -1,0 +1,26 @@
+category: general
+description: >
+  General security analysis methodology for vulnerability classes
+  not covered by a specific criteria file. Provides a structured
+  reasoning framework applicable to any CWE.
+cwes: []
+
+analysis_methodology:
+  plan: |
+    1. Read the CVE description carefully to understand the vulnerability class and root cause.
+    2. Identify the affected component: what code processes the attacker-controlled input or state.
+    3. Determine the security property being violated: confidentiality, integrity, availability, or authentication/authorization.
+    4. Map the attack surface: what inputs or conditions trigger the vulnerability.
+  analyze: |
+    1. Locate the vulnerable code in the affected files.
+    2. Trace the data or control flow from the attacker-controlled input to the point of exploitation.
+    3. Identify what security check, validation, or encoding is missing or insufficient.
+    4. Determine the minimal change needed to address the root cause without breaking functionality.
+    5. Consider whether the fix needs to handle multiple code paths or only a single location.
+  verify: |
+    1. Confirm the fix addresses the root cause, not just a symptom.
+    2. Verify the fix does not introduce new vulnerabilities or break existing behavior.
+    3. Check that the fix handles edge cases and error conditions cleanly.
+    4. Ensure the fix scope covers all affected locations identified in the analysis.
+
+fix_patterns: {}

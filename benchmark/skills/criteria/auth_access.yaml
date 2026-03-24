@@ -1,0 +1,68 @@
+category: auth_access
+description: >
+  Authentication, authorization, and access control vulnerabilities
+  including CSRF, session management, and privilege escalation.
+cwes:
+  - CWE-287
+  - CWE-862
+  - CWE-863
+  - CWE-285
+  - CWE-352
+  - CWE-384
+  - CWE-639
+  - CWE-306
+
+analysis_methodology:
+  plan: |
+    1. Identify the protected resource or action that lacks proper access control.
+    2. Map the authentication/authorization flow: how is the user identified, what checks gate access.
+    3. Determine whether the vulnerability is missing authentication, missing authorization, or broken logic.
+    4. For CSRF: identify state-changing operations reachable via cross-origin requests.
+  analyze: |
+    1. Locate the endpoint, handler, or function that performs the sensitive operation.
+    2. Trace the request flow to identify where auth checks should occur but are missing.
+    3. For authorization: verify that the check validates the specific user's permission for the specific resource (not just authentication).
+    4. For CSRF: check whether anti-CSRF tokens or SameSite cookies are enforced on state-changing routes.
+    5. Check for parameter tampering (e.g., user ID in request body instead of session).
+  verify: |
+    1. Confirm the fix adds the correct type of check (authn vs authz vs CSRF).
+    2. Verify the check cannot be bypassed through alternative request paths.
+    3. Ensure the check uses server-side session/token data, not client-supplied values.
+    4. Check that error cases return appropriate status codes (401/403) without leaking information.
+
+fix_patterns:
+  CWE-862:
+    name: Missing Authorization
+    common_fixes:
+      - Add authorization check before the protected operation
+      - Verify resource ownership (user_id matches session user)
+      - Use middleware/decorator for consistent enforcement
+    anti_patterns:
+      - Client-side only checks (hidden UI elements)
+      - Checking authentication without authorization
+  CWE-863:
+    name: Incorrect Authorization
+    common_fixes:
+      - Fix authorization logic to check correct permissions
+      - Add resource-level ownership verification
+      - Ensure role checks match the operation's requirements
+    anti_patterns:
+      - Overly broad role checks that grant excessive access
+  CWE-352:
+    name: Cross-Site Request Forgery (CSRF)
+    common_fixes:
+      - Add CSRF token validation on state-changing endpoints
+      - Use SameSite cookie attribute
+      - Verify Origin/Referer headers
+    anti_patterns:
+      - GET requests for state-changing operations
+      - Token validation that accepts missing tokens
+  CWE-287:
+    name: Improper Authentication
+    common_fixes:
+      - Add authentication check before protected resources
+      - Use established authentication middleware
+      - Validate session tokens server-side
+    anti_patterns:
+      - Client-side authentication checks only
+      - Trusting client-supplied identity claims

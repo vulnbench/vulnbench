@@ -1,0 +1,89 @@
+category: injection
+description: >
+  Injection vulnerabilities where untrusted data reaches an interpreter
+  or rendering engine without proper sanitization.
+cwes:
+  - CWE-79
+  - CWE-89
+  - CWE-94
+  - CWE-77
+  - CWE-78
+  - CWE-74
+  - CWE-1336
+
+analysis_methodology:
+  plan: |
+    1. Identify all entry points where user-controlled input enters the system.
+    2. Trace data flow from each input to the vulnerable sink (eval, query builder, HTML renderer, shell command, template engine).
+    3. Classify the injection type: XSS, SQL injection, command injection, code injection, or template injection.
+    4. Determine what sanitization or encoding currently exists and why it is insufficient.
+  analyze: |
+    1. Locate the exact vulnerable sink function/method in each affected file.
+    2. Identify the trust boundary where untrusted data crosses into a trusted context.
+    3. Determine the correct encoding, escaping, or parameterization for the target context.
+    4. Check for bypass vectors in any existing validation (encoding mismatches, double-encoding, nested contexts).
+    5. Verify whether the vulnerability is reachable from external input.
+  verify: |
+    1. Confirm the fix applies encoding/escaping/parameterization at the correct boundary.
+    2. Verify the fix does not break legitimate functionality or data flow.
+    3. Check edge cases: null, empty, unicode, nested contexts, multi-byte characters.
+    4. Ensure no secondary injection paths remain through the same or adjacent code.
+
+fix_patterns:
+  CWE-79:
+    name: Cross-Site Scripting (XSS)
+    common_fixes:
+      - Output encoding/escaping before rendering in HTML context
+      - Use safe template rendering with auto-escaping enabled
+      - Replace innerHTML/dangerouslySetInnerHTML with textContent or safe alternatives
+      - Apply context-appropriate encoding (HTML entity, URL, JavaScript, CSS)
+    anti_patterns:
+      - Blacklist-based filtering of script tags (easily bypassed)
+      - Encoding on input rather than output
+      - Incomplete encoding that misses event handlers or attribute contexts
+  CWE-89:
+    name: SQL Injection
+    common_fixes:
+      - Parameterized queries / prepared statements
+      - ORM-based query building with bound parameters
+      - Input type validation for expected types (numeric IDs)
+    anti_patterns:
+      - String escaping functions (fragile, encoding-dependent)
+      - Blacklist filtering of SQL keywords
+      - String concatenation with manual quoting
+  CWE-94:
+    name: Code Injection
+    common_fixes:
+      - Remove or replace eval/exec with safe alternatives
+      - Use sandboxed execution environments
+      - Whitelist allowed operations instead of executing arbitrary code
+    anti_patterns:
+      - Input filtering before eval (still allows bypass)
+      - Regex-based code sanitization
+  CWE-77:
+    name: Command Injection
+    common_fixes:
+      - Use array-based command execution (subprocess list, execFile)
+      - Avoid shell=True / shell interpolation
+      - Use library APIs instead of shell commands
+    anti_patterns:
+      - Escaping shell metacharacters (incomplete coverage)
+      - Blacklisting dangerous characters
+  CWE-78:
+    name: OS Command Injection
+    common_fixes:
+      - Use array-based subprocess invocation without shell
+      - Use language-native APIs instead of shelling out
+      - Strict whitelist validation of command arguments
+    anti_patterns:
+      - Shell escaping functions
+      - Partial character blacklists
+  CWE-1336:
+    name: Template Injection
+    common_fixes:
+      - Use sandboxed template environments
+      - Separate code templates from user-controlled data
+      - Disable dangerous template features (imports, eval)
+    anti_patterns:
+      - Input filtering before template rendering
+      - Incomplete sandbox configuration
