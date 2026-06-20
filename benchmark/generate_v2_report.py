@@ -65,6 +65,7 @@ DISPLAY_NAMES = {
     "minimax/minimax-m3": "MiniMax M3",
     "qwen/qwen3.7-max": "Qwen 3.7 Max",
     "qwen/qwen3.7-plus": "Qwen 3.7 Plus",
+    "z-ai/glm-5.2": "GLM 5.2",
     "z-ai/glm-5.1": "GLM 5.1",
     "stepfun/step-3.7-flash": "Step 3.7 Flash",
     "nvidia/nemotron-3-ultra-550b-a55b": "Nemotron 3 Ultra 550B",
@@ -439,9 +440,14 @@ def main() -> None:
     if not rows:
         raise SystemExit("No completed best3 results found")
 
-    (DOCS / "v2.html").write_text(render_page(rows, pending, manifest))
+    rendered_page = render_page(rows, pending, manifest)
+    (DOCS / "v2.html").write_text(rendered_page)
+    if manifest:
+        (DOCS / "index.html").write_text(rendered_page)
     (RESULTS / "vulnbench_200_v2_report.md").write_text(render_markdown(rows, pending, manifest))
     print(f"wrote {DOCS / 'v2.html'}")
+    if manifest:
+        print(f"wrote {DOCS / 'index.html'}")
     print(f"wrote {RESULTS / 'vulnbench_200_v2_report.md'}")
     print(f"complete={len(rows)} pending={len(pending)}")
 

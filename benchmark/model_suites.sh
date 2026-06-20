@@ -16,10 +16,12 @@ VULNBENCH_LATEST_MODELS=(
   openrouter/x-ai/grok-4.3
   openrouter/deepseek/deepseek-v4-pro
   openrouter/deepseek/deepseek-v4-flash
+  openrouter/moonshotai/kimi-k2.7-code
   openrouter/moonshotai/kimi-k2.6
   openrouter/minimax/minimax-m3
   openrouter/qwen/qwen3.7-max
   openrouter/qwen/qwen3.7-plus
+  openrouter/z-ai/glm-5.2
   openrouter/z-ai/glm-5.1
   openrouter/stepfun/step-3.7-flash
   openrouter/nvidia/nemotron-3-ultra-550b-a55b
