@@ -502,5 +502,19 @@
     "fixed_score": 0.1651,
     "pass_delta": -7,
     "score_delta": 0.0313
+  },
+  {
+    "model": "openrouter/z-ai/glm-5.2",
+    "decision": "add_new_fixed_harness",
+    "selected_source": "fixed_harness_new_model",
+    "selected_file": "best3_z-ai_glm-5.2.json",
+    "prior_file": null,
+    "fixed_file": "results/best3_z-ai_glm-5.2.json",
+    "prior_passed": null,
+    "fixed_passed": 9,
+    "prior_score": null,
+    "fixed_score": 0.199,
+    "pass_delta": null,
+    "score_delta": null
   }
 ]

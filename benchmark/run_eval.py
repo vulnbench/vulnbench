@@ -8,7 +8,7 @@ Usage:
     # With a LiteLLM model (requires appropriate API key in env)
     python -m benchmark.run_eval \
         --benchmark data/benchmark/vulnbench_mini.json \
-        --model openrouter/openai/gpt-5.4 \
+        --model openrouter/openai/gpt-5.5 \
         --limit 5
 
     # With a custom adapter module
@@ -27,8 +27,11 @@ import argparse
 import importlib
 import json
 import logging
+import multiprocessing
+import queue
 import re
 import time
+import traceback
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Iterable
@@ -62,7 +65,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-JUDGE_MODEL = "openrouter/anthropic/claude-opus-4-6"
+JUDGE_MODEL = "openrouter/anthropic/claude-opus-4.8"
+DEFAULT_JUDGE_MODELS = [
+    JUDGE_MODEL,
+    "openrouter/openai/gpt-5.5",
+]
 
 JUDGE_SYSTEM_PROMPT = """\
 You are a security patch reviewer. You evaluate whether a proposed patch \
@@ -98,9 +105,79 @@ Scoring guide:
 
 SOURCE_CONTEXT_FILE_LIMIT = 3
 SOURCE_CONTEXT_CHAR_LIMIT = 6000
+LITELLM_TIMEOUT_SECONDS = 300.0
+JUDGE_MAX_ATTEMPTS = 3
+JUDGE_MAX_TOKENS = 1024
+JUDGE_RETRY_BACKOFF_SECONDS = 2.0
 DESCRIPTION_FILE_RE = re.compile(
     r"\b([A-Za-z0-9_./-]+\.(?:py|js|ts|tsx|jsx|java|rb|php|rs|swift|go|c|cc|cpp|h|hpp|cs|scala|kt|kts|m|mm|vue|svelte))\b"
 )
+
+
+def _judge_completion_worker(kwargs: dict, result_queue: object) -> None:
+    try:
+        from benchmark.adapters.litellm_adapter import _serialize_completion_response
+
+        response = litellm.completion(**kwargs)
+        result_queue.put(("ok", _serialize_completion_response(response)))
+    except BaseException as exc:
+        result_queue.put(
+            (
+                "error",
+                type(exc).__name__,
+                str(exc),
+                traceback.format_exc(),
+            )
+        )
+
+
+def _judge_multiprocessing_context() -> multiprocessing.context.BaseContext:
+    if "spawn" in multiprocessing.get_all_start_methods():
+        return multiprocessing.get_context("spawn")
+    return multiprocessing.get_context()
+
+
+def _judge_completion_with_process_timeout(kwargs: dict) -> object:
+    """Call LiteLLM judge completion in a child process with a hard timeout."""
+    if LITELLM_TIMEOUT_SECONDS <= 0:
+        return litellm.completion(**kwargs)
+
+    ctx = _judge_multiprocessing_context()
+    result_queue = ctx.Queue(maxsize=1)
+    proc = ctx.Process(
+        target=_judge_completion_worker,
+        args=(kwargs, result_queue),
+        daemon=True,
+    )
+    proc.start()
+    proc.join(LITELLM_TIMEOUT_SECONDS)
+    if proc.is_alive():
+        proc.terminate()
+        proc.join(5)
+        if proc.is_alive():
+            proc.kill()
+            proc.join()
+        raise TimeoutError(
+            f"Judge LiteLLM completion process timeout after "
+            f"{LITELLM_TIMEOUT_SECONDS:.1f}s"
+        )
+
+    try:
+        status, *payload = result_queue.get_nowait()
+    except queue.Empty as exc:
+        raise RuntimeError(
+            f"Judge LiteLLM completion process exited without a result "
+            f"(exitcode={proc.exitcode})"
+        ) from exc
+
+    if status == "ok":
+        return payload[0]
+
+    exc_type, message, child_traceback = payload
+    raise RuntimeError(
+        "Judge LiteLLM completion failed in child process: "
+        f"{exc_type}: {message}\n{child_traceback}"
+    )
 
 
 def render_prompt(
@@ -185,6 +262,25 @@ def parse_diff_from_output(output: str) -> str:
     return output.strip()
 
 
+def _empty_patch_analysis(judge_model: str = "") -> PatchAnalysis:
+    return PatchAnalysis(
+        judge_model=judge_model,
+        judge_score=0.0,
+        judge_reasoning="Empty or no patch produced.",
+        judge_verdict="fail",
+    )
+
+
+def _adapter_error_analysis(error: str, judge_model: str = "") -> PatchAnalysis:
+    return PatchAnalysis(
+        judge_model=judge_model,
+        judge_score=0.0,
+        judge_reasoning=f"Adapter failed after retries: {error}",
+        judge_verdict="fail",
+        raw_judge_verdict="adapter_error",
+    )
+
+
 def judge_patch(
     instance: BenchmarkInstance,
     model_patch: str,
@@ -192,11 +288,7 @@ def judge_patch(
 ) -> PatchAnalysis:
     """Use an LLM judge to evaluate the candidate patch against the gold patch."""
     if not model_patch.strip():
-        return PatchAnalysis(
-            judge_score=0.0,
-            judge_reasoning="Empty or no patch produced.",
-            judge_verdict="fail",
-        )
+        return _empty_patch_analysis(judge_model)
 
     gold_diff = instance.gold_patch.raw_diff
     tp = instance.task_prompt
@@ -223,60 +315,187 @@ def judge_patch(
 
 Judge whether the candidate patch correctly fixes the vulnerability."""
 
-    try:
-        response = litellm.completion(
-            model=judge_model,
-            messages=[
-                {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
-                {"role": "user", "content": judge_user_prompt},
-            ],
-            temperature=0.0,
-            max_tokens=512,
-            num_retries=2,
-        )
+    total_cost_usd = 0.0
+    last_error: Exception | None = None
 
-        raw = response.choices[0].message.content or ""
+    for attempt in range(1, JUDGE_MAX_ATTEMPTS + 1):
+        try:
+            response = _judge_completion_with_process_timeout(
+                {
+                    "model": judge_model,
+                    "messages": [
+                        {"role": "system", "content": JUDGE_SYSTEM_PROMPT},
+                        {"role": "user", "content": judge_user_prompt},
+                    ],
+                    "temperature": 0.0,
+                    "max_tokens": JUDGE_MAX_TOKENS,
+                    "num_retries": 2,
+                    "timeout": LITELLM_TIMEOUT_SECONDS,
+                }
+            )
+            cost_usd = response._hidden_params.get("response_cost", 0.0) or 0.0
+            total_cost_usd += cost_usd
 
-        # Parse JSON from response, handling potential markdown fencing
-        json_text = raw.strip()
-        json_match = re.search(r"\{.*\}", json_text, re.DOTALL)
-        if json_match:
-            json_text = json_match.group(0)
+            raw = response.choices[0].message.content or ""
 
-        result = json.loads(json_text)
+            # Parse JSON from response, handling potential markdown fencing
+            json_text = raw.strip()
+            json_match = re.search(r"\{.*\}", json_text, re.DOTALL)
+            if json_match:
+                json_text = json_match.group(0)
 
-        score = float(result.get("score", 0.0))
-        score = max(0.0, min(1.0, score))
-        raw_verdict = str(result.get("verdict", "fail")).lower()
-        reasoning = result.get("reasoning", "")
-        cost_usd = response._hidden_params.get("response_cost", 0.0) or 0.0
+            result = json.loads(json_text)
 
-        normalized_verdict = "pass" if score >= 0.5 and raw_verdict == "pass" else "fail"
-        consistent = raw_verdict in {"pass", "fail"} and (
-            (raw_verdict == "pass" and score >= 0.5)
-            or (raw_verdict == "fail" and score < 0.5)
-        )
-        if not consistent:
-            reasoning = (
-                f"[judge disagreement normalized to {normalized_verdict}] {reasoning}"
-            ).strip()
+            score = float(result.get("score", 0.0))
+            score = max(0.0, min(1.0, score))
+            raw_verdict = str(result.get("verdict", "fail")).lower()
+            reasoning = result.get("reasoning", "")
 
+            normalized_verdict = "pass" if score >= 0.5 and raw_verdict == "pass" else "fail"
+            consistent = raw_verdict in {"pass", "fail"} and (
+                (raw_verdict == "pass" and score >= 0.5)
+                or (raw_verdict == "fail" and score < 0.5)
+            )
+            if not consistent:
+                reasoning = (
+                    f"[judge disagreement normalized to {normalized_verdict}] {reasoning}"
+                ).strip()
+
+            if attempt > 1:
+                reasoning = f"[judge succeeded after {attempt} attempts] {reasoning}"
+
+            return PatchAnalysis(
+                judge_model=judge_model,
+                judge_score=round(score, 4),
+                judge_reasoning=reasoning,
+                judge_verdict=normalized_verdict,
+                raw_judge_verdict=raw_verdict,
+                judge_consistent=consistent,
+                judge_cost_usd=round(total_cost_usd, 6),
+            )
+
+        except Exception as e:
+            last_error = e
+            if attempt < JUDGE_MAX_ATTEMPTS:
+                logger.warning(
+                    "Judge attempt %d/%d failed for %s with %s: %s",
+                    attempt,
+                    JUDGE_MAX_ATTEMPTS,
+                    instance.instance_id,
+                    judge_model,
+                    e,
+                )
+                time.sleep(JUDGE_RETRY_BACKOFF_SECONDS * attempt)
+                continue
+
+            logger.warning(
+                "Judge failed for %s with %s after %d attempts: %s",
+                instance.instance_id,
+                judge_model,
+                JUDGE_MAX_ATTEMPTS,
+                e,
+            )
+
+    return PatchAnalysis(
+        judge_model=judge_model,
+        judge_score=0.0,
+        judge_reasoning=f"Judge error after retries: {last_error}",
+        judge_verdict="fail",
+        raw_judge_verdict="judge_error",
+        judge_consistent=False,
+        judge_cost_usd=round(total_cost_usd, 6),
+    )
+
+
+def combine_judge_analyses(
+    analyses: dict[str, PatchAnalysis],
+) -> PatchAnalysis:
+    """Combine multiple judge opinions into a consensus analysis."""
+    if not analyses:
         return PatchAnalysis(
-            judge_score=round(score, 4),
-            judge_reasoning=reasoning,
-            judge_verdict=normalized_verdict,
-            raw_judge_verdict=raw_verdict,
-            judge_consistent=consistent,
-            judge_cost_usd=round(cost_usd, 6),
-        )
-
-    except Exception as e:
-        logger.warning("Judge failed for %s: %s", instance.instance_id, e)
-        return PatchAnalysis(
+            judge_model="consensus",
             judge_score=0.0,
-            judge_reasoning=f"Judge error: {e}",
+            judge_reasoning="No judge analyses were produced.",
             judge_verdict="fail",
         )
+
+    voting_analyses = {
+        model: analysis
+        for model, analysis in analyses.items()
+        if analysis.raw_judge_verdict != "judge_error"
+    }
+    if not voting_analyses:
+        total_cost = sum(analysis.judge_cost_usd for analysis in analyses.values())
+        return PatchAnalysis(
+            judge_model="consensus",
+            judge_score=0.0,
+            judge_reasoning="No judge analyses completed successfully.",
+            judge_verdict="fail",
+            raw_judge_verdict="judge_error",
+            judge_consistent=False,
+            judge_cost_usd=round(total_cost, 6),
+        )
+
+    scores = sorted(analysis.judge_score for analysis in voting_analyses.values())
+    midpoint = len(scores) // 2
+    if len(scores) % 2:
+        median_score = scores[midpoint]
+    else:
+        median_score = (scores[midpoint - 1] + scores[midpoint]) / 2
+    pass_votes = sum(
+        1 for analysis in voting_analyses.values() if analysis.judge_verdict == "pass"
+    )
+    fail_votes = len(voting_analyses) - pass_votes
+    abstentions = len(analyses) - len(voting_analyses)
+    consensus_verdict = "pass" if pass_votes > fail_votes else "fail"
+    all_same_verdict = (
+        pass_votes == len(voting_analyses) or fail_votes == len(voting_analyses)
+    )
+    total_cost = sum(analysis.judge_cost_usd for analysis in analyses.values())
+
+    vote_summary = ", ".join(
+        (
+            f"{model}: {analysis.judge_verdict} "
+            f"({analysis.judge_score:.4f})"
+        )
+        for model, analysis in analyses.items()
+    )
+    reasoning = (
+        f"Consensus by majority vote: {consensus_verdict}. "
+        f"Median score: {median_score:.4f}. "
+        f"Abstentions: {abstentions}. Judge votes: {vote_summary}"
+    )
+
+    return PatchAnalysis(
+        judge_model="consensus",
+        judge_score=round(median_score, 4),
+        judge_reasoning=reasoning,
+        judge_verdict=consensus_verdict,
+        raw_judge_verdict=(
+            f"pass:{pass_votes},fail:{fail_votes}"
+            + (f",abstain:{abstentions}" if abstentions else "")
+        ),
+        judge_consistent=all_same_verdict
+        and all(analysis.judge_consistent for analysis in analyses.values()),
+        judge_cost_usd=round(total_cost, 6),
+    )
+
+
+def judge_patch_with_models(
+    instance: BenchmarkInstance,
+    model_patch: str,
+    judge_models: list[str],
+) -> tuple[PatchAnalysis, dict[str, PatchAnalysis]]:
+    """Evaluate a patch with one or more judges and return consensus + details."""
+    if len(judge_models) == 1:
+        analysis = judge_patch(instance, model_patch, judge_model=judge_models[0])
+        return analysis, {judge_models[0]: analysis}
+
+    analyses = {
+        judge_model: judge_patch(instance, model_patch, judge_model=judge_model)
+        for judge_model in judge_models
+    }
+    return combine_judge_analyses(analyses), analyses
 
 
 def _is_litellm_adapter(adapter) -> bool:
@@ -292,6 +511,7 @@ def evaluate_instance(
     instance: BenchmarkInstance,
     adapter,
     judge_model: str = JUDGE_MODEL,
+    judge_models: list[str] | None = None,
     *,
     include_source: bool = True,
     file_hint_mode: str = "description",
@@ -300,8 +520,10 @@ def evaluate_instance(
 ) -> InstanceResult:
     """Evaluate a single benchmark instance."""
     is_litellm = _is_litellm_adapter(adapter)
+    active_judge_models = judge_models or [judge_model]
     include_file_hints = file_hint_mode == "gold"
     source_context = ""
+    generation_error = ""
 
     if include_source:
         source_context = build_source_context(
@@ -329,7 +551,13 @@ def evaluate_instance(
             )
             raw_output = adapter.generate_patch(prompt)
     except Exception as e:
-        logger.warning("Adapter failed for %s: %s", instance.instance_id, e)
+        generation_error = f"{type(e).__name__}: {e}"
+        logger.warning(
+            "Adapter failed for %s after retries: %s",
+            instance.instance_id,
+            e,
+            exc_info=True,
+        )
         raw_output = ""
     gen_time = time.monotonic() - start
 
@@ -337,17 +565,46 @@ def evaluate_instance(
     prompt_tokens = 0
     completion_tokens = 0
     cost_usd = 0.0
+    adapter_attempts = 0
+    empty_response_attempts = 0
+    exception_attempts = 0
+    reasoning_tokens = 0
+    reasoning_effort = ""
+    reasoning_max_tokens = 0
+    reasoning_exclude = False
     if is_litellm:
         meta = adapter.last_response_meta
         prompt_tokens = meta.get("prompt_tokens", 0)
         completion_tokens = meta.get("completion_tokens", 0)
+        reasoning_tokens = meta.get("reasoning_tokens", 0)
         cost_usd = meta.get("cost_usd", 0.0)
+        adapter_attempts = meta.get("attempts", 0)
+        empty_response_attempts = meta.get("empty_response_attempts", 0)
+        exception_attempts = meta.get("exception_attempts", 0)
+        reasoning_effort = meta.get("reasoning_effort", "")
+        reasoning_max_tokens = meta.get("reasoning_max_tokens", 0)
+        reasoning_exclude = meta.get("reasoning_exclude", False)
 
     # Parse diff from output
     model_patch = parse_diff_from_output(raw_output)
 
     # Judge the patch
-    analysis = judge_patch(instance, model_patch, judge_model=judge_model)
+    if generation_error:
+        judge_analyses = {
+            model: _adapter_error_analysis(generation_error, judge_model=model)
+            for model in active_judge_models
+        }
+        analysis = (
+            judge_analyses[active_judge_models[0]]
+            if len(active_judge_models) == 1
+            else combine_judge_analyses(judge_analyses)
+        )
+    else:
+        analysis, judge_analyses = judge_patch_with_models(
+            instance,
+            model_patch,
+            active_judge_models,
+        )
     score = analysis.judge_score
     passed = analysis.judge_verdict == "pass"
 
@@ -359,12 +616,21 @@ def evaluate_instance(
         model_patch=model_patch,
         generation_time_s=round(gen_time, 3),
         patch_analysis=analysis,
+        judge_analyses=judge_analyses,
         score=score,
         passed=passed,
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
         cost_usd=cost_usd,
         judge_cost_usd=analysis.judge_cost_usd,
+        generation_error=generation_error,
+        adapter_attempts=adapter_attempts,
+        empty_response_attempts=empty_response_attempts,
+        exception_attempts=exception_attempts,
+        reasoning_tokens=reasoning_tokens,
+        reasoning_effort=reasoning_effort,
+        reasoning_max_tokens=reasoning_max_tokens,
+        reasoning_exclude=reasoning_exclude,
     )
 
 
@@ -506,6 +772,7 @@ def compute_aggregate(results: list[InstanceResult]) -> AggregateMetrics:
     total_judge_cost = sum(r.judge_cost_usd for r in results)
     total_prompt = sum(r.prompt_tokens for r in results)
     total_completion = sum(r.completion_tokens for r in results)
+    total_reasoning = sum(r.reasoning_tokens for r in results)
 
     return AggregateMetrics(
         total_instances=total,
@@ -519,6 +786,7 @@ def compute_aggregate(results: list[InstanceResult]) -> AggregateMetrics:
         total_judge_cost_usd=round(total_judge_cost, 6),
         total_prompt_tokens=total_prompt,
         total_completion_tokens=total_completion,
+        total_reasoning_tokens=total_reasoning,
     )
 
 
@@ -543,8 +811,16 @@ def build_report(
     model_name: str | None = None,
     adapter_name: str | None = None,
     judge_model: str = JUDGE_MODEL,
+    judge_models: list[str] | None = None,
     include_source: bool = True,
     file_hint_mode: str = "description",
+    max_tokens: int | None = None,
+    reasoning_effort: str | None = None,
+    reasoning_max_tokens: int | None = None,
+    reasoning_exclude: bool | None = None,
+    adapter_max_attempts: int | None = None,
+    retry_empty_responses: bool | None = None,
+    adapter_process_timeout: bool | None = None,
 ) -> EvalReport:
     """Build an EvalReport from results and metadata."""
     aggregate = compute_aggregate(results)
@@ -554,6 +830,7 @@ def build_report(
         "evaluated_at": datetime.now(timezone.utc).isoformat() + "Z",
         "total_instances": len(results),
         "judge_model": judge_model,
+        "judge_models": judge_models or [judge_model],
         "include_source": include_source,
         "file_hint_mode": file_hint_mode,
     }
@@ -561,6 +838,20 @@ def build_report(
         metadata["model"] = model_name
     if adapter_name:
         metadata["adapter"] = adapter_name
+    if max_tokens is not None:
+        metadata["max_tokens"] = max_tokens
+    if reasoning_effort:
+        metadata["reasoning_effort"] = reasoning_effort
+    if reasoning_max_tokens is not None:
+        metadata["reasoning_max_tokens"] = reasoning_max_tokens
+    if reasoning_exclude is not None:
+        metadata["reasoning_exclude"] = reasoning_exclude
+    if adapter_max_attempts is not None:
+        metadata["adapter_max_attempts"] = adapter_max_attempts
+    if retry_empty_responses is not None:
+        metadata["retry_empty_responses"] = retry_empty_responses
+    if adapter_process_timeout is not None:
+        metadata["adapter_process_timeout"] = adapter_process_timeout
 
     return EvalReport(
         metadata=metadata,
@@ -582,10 +873,11 @@ def print_report_summary(aggregate: AggregateMetrics) -> None:
     if aggregate.total_cost_usd > 0:
         print(f"  Model cost:            ${aggregate.total_cost_usd:.4f}")
         print(f"  Judge cost:            ${aggregate.total_judge_cost_usd:.4f}")
-        print(
-            f"  Total tokens:          {aggregate.total_prompt_tokens}p"
-            f" + {aggregate.total_completion_tokens}c"
-        )
+    print(
+        f"  Total tokens:          {aggregate.total_prompt_tokens}p"
+        f" + {aggregate.total_completion_tokens}c"
+        f" ({aggregate.total_reasoning_tokens} reasoning)"
+    )
     print()
     if aggregate.pass_rate_by_tier:
         print("  Pass rate by tier:")
@@ -611,7 +903,7 @@ def main():
     model_group.add_argument(
         "--model",
         type=str,
-        help="LiteLLM model identifier (e.g., openrouter/openai/gpt-5.4)",
+        help="LiteLLM model identifier (e.g., openrouter/openai/gpt-5.5)",
     )
     model_group.add_argument(
         "--adapter",
@@ -632,10 +924,78 @@ def main():
         help="Max response tokens for LiteLLM models (default: 4096)",
     )
     parser.add_argument(
+        "--reasoning-effort",
+        choices=("none", "minimal", "low", "medium", "high", "xhigh", "default"),
+        default=None,
+        help="Optional LiteLLM/OpenAI reasoning effort to pass to the model",
+    )
+    parser.add_argument(
+        "--reasoning-max-tokens",
+        type=int,
+        default=None,
+        help="Optional OpenRouter reasoning.max_tokens value passed via extra_body",
+    )
+    parser.add_argument(
+        "--reasoning-exclude",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Ask OpenRouter to exclude reasoning tokens from the response",
+    )
+    parser.add_argument(
+        "--adapter-max-attempts",
+        type=int,
+        default=3,
+        help="Max adapter-level completion attempts for LiteLLM models (default: 3)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-base-s",
+        type=float,
+        default=2.0,
+        help="Initial adapter retry backoff in seconds (default: 2.0)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-max-s",
+        type=float,
+        default=60.0,
+        help="Maximum adapter retry backoff in seconds (default: 60.0)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-jitter-s",
+        type=float,
+        default=0.5,
+        help="Random adapter retry jitter in seconds (default: 0.5)",
+    )
+    parser.add_argument(
+        "--retry-empty-responses",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Retry empty LiteLLM responses before scoring (default: true)",
+    )
+    parser.add_argument(
+        "--adapter-process-timeout",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Run LiteLLM completions in a child process so blocking provider "
+            "socket reads cannot exceed the adapter timeout (default: true)"
+        ),
+    )
+    parser.add_argument(
         "--judge-model",
         type=str,
         default=JUDGE_MODEL,
         help=f"LiteLLM model ID for the judge (default: {JUDGE_MODEL})",
+    )
+    parser.add_argument(
+        "--judge-models",
+        nargs="+",
+        default=None,
+        help=(
+            "One or more LiteLLM judge model IDs. When multiple are provided, "
+            "VulnBench stores each judge result and scores by consensus. "
+            "Defaults to the standard multi-judge panel unless --judge-model "
+            "is explicitly set."
+        ),
     )
     parser.add_argument(
         "--include-source",
@@ -677,6 +1037,12 @@ def main():
         default=0,
         help="Max instances to evaluate (0=all)",
     )
+    parser.add_argument(
+        "--resume",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Resume from and write per-instance checkpoint at <output>.partial (default: true)",
+    )
 
     args = parser.parse_args()
 
@@ -689,7 +1055,17 @@ def main():
     if args.limit > 0:
         instances = instances[: args.limit]
 
-    logger.info("Evaluating %d instances (judge: %s)", len(instances), args.judge_model)
+    if args.judge_models:
+        active_judge_models = args.judge_models
+    elif args.judge_model != JUDGE_MODEL:
+        active_judge_models = [args.judge_model]
+    else:
+        active_judge_models = DEFAULT_JUDGE_MODELS
+    logger.info(
+        "Evaluating %d instances (judges: %s)",
+        len(instances),
+        ", ".join(active_judge_models),
+    )
 
     # Load adapter
     model_name: str | None = None
@@ -704,20 +1080,49 @@ def main():
             model=args.model,
             temperature=args.temperature,
             max_tokens=args.max_tokens,
+            reasoning_effort=args.reasoning_effort,
+            reasoning_max_tokens=args.reasoning_max_tokens,
+            reasoning_exclude=args.reasoning_exclude,
+            max_attempts=args.adapter_max_attempts,
+            retry_backoff_base_s=args.adapter_retry_backoff_base_s,
+            retry_backoff_max_s=args.adapter_retry_backoff_max_s,
+            retry_backoff_jitter_s=args.adapter_retry_backoff_jitter_s,
+            retry_empty_responses=args.retry_empty_responses,
+            process_timeout=args.adapter_process_timeout,
         )
     else:
         adapter_name = args.adapter
         logger.info("Loading adapter from %s", args.adapter)
         adapter = load_adapter(args.adapter)
 
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    checkpoint_path = output_path.with_name(output_path.name + ".partial")
+
     # Evaluate
     results: list[InstanceResult] = []
-    pbar = tqdm(instances, desc="Evaluating")
+    completed_ids: set[str] = set()
+    if args.resume and checkpoint_path.exists():
+        try:
+            checkpoint = EvalReport(**json.loads(checkpoint_path.read_text()))
+            results = checkpoint.results
+            completed_ids = {r.instance_id for r in results}
+            logger.info(
+                "Resuming from %s with %d completed instances",
+                checkpoint_path,
+                len(results),
+            )
+        except Exception as exc:
+            logger.warning("Ignoring unreadable checkpoint %s: %s", checkpoint_path, exc)
+
+    remaining_instances = [i for i in instances if i.instance_id not in completed_ids]
+    pbar = tqdm(remaining_instances, desc="Evaluating")
     for instance in pbar:
         result = evaluate_instance(
             instance,
             adapter,
             judge_model=args.judge_model,
+            judge_models=active_judge_models,
             include_source=args.include_source,
             file_hint_mode=args.file_hint_mode,
             max_source_files=args.max_source_files,
@@ -728,6 +1133,30 @@ def main():
             passed=sum(1 for r in results if r.passed),
             score=f"{sum(r.score for r in results) / len(results):.3f}",
         )
+        if args.resume:
+            checkpoint_report = build_report(
+                results,
+                benchmark_path=args.benchmark,
+                model_name=model_name,
+                adapter_name=adapter_name,
+                judge_model=args.judge_model,
+                judge_models=active_judge_models,
+                include_source=args.include_source,
+                file_hint_mode=args.file_hint_mode,
+                max_tokens=args.max_tokens if args.model else None,
+                reasoning_effort=args.reasoning_effort,
+                reasoning_max_tokens=args.reasoning_max_tokens,
+                reasoning_exclude=args.reasoning_exclude if args.model else None,
+                adapter_max_attempts=args.adapter_max_attempts if args.model else None,
+                retry_empty_responses=args.retry_empty_responses if args.model else None,
+                adapter_process_timeout=(
+                    args.adapter_process_timeout if args.model else None
+                ),
+            )
+            checkpoint_report.metadata["checkpoint"] = True
+            checkpoint_tmp = checkpoint_path.with_name(checkpoint_path.name + ".tmp")
+            checkpoint_tmp.write_text(json.dumps(checkpoint_report.model_dump(), indent=2))
+            checkpoint_tmp.replace(checkpoint_path)
 
     # Build and write report
     report = build_report(
@@ -736,13 +1165,21 @@ def main():
         model_name=model_name,
         adapter_name=adapter_name,
         judge_model=args.judge_model,
+        judge_models=active_judge_models,
         include_source=args.include_source,
         file_hint_mode=args.file_hint_mode,
+        max_tokens=args.max_tokens if args.model else None,
+        reasoning_effort=args.reasoning_effort,
+        reasoning_max_tokens=args.reasoning_max_tokens,
+        reasoning_exclude=args.reasoning_exclude if args.model else None,
+        adapter_max_attempts=args.adapter_max_attempts if args.model else None,
+        retry_empty_responses=args.retry_empty_responses if args.model else None,
+        adapter_process_timeout=args.adapter_process_timeout if args.model else None,
     )
 
-    output_path = Path(args.output)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(json.dumps(report.model_dump(), indent=2))
+    if args.resume and checkpoint_path.exists():
+        checkpoint_path.unlink()
 
     # Summary
     print_report_summary(report.aggregate)

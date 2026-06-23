@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-20T12:26:19.200651+00:00",
+  "generated_at": "2026-06-23T00:23:01.283016+00:00",
   "prior_source": "results/best3_*.json provider-qualified 200-instance reports",
   "fixed_source": "/Users/gregmartin/dev/vulnbench/results/rerun_fixes_2judge_20260613_232410",
   "output_dir": "/Users/gregmartin/dev/vulnbench/results/merged_harness_fix_20260620",
@@ -8,9 +8,9 @@
     "min_total_passed_delta": 1,
     "requires_both": true
   },
-  "row_count": 36,
+  "row_count": 37,
   "updated_count": 3,
-  "added_count": 3,
+  "added_count": 4,
   "kept_count": 30,
   "rows": [
     {
@@ -744,6 +744,34 @@
       "old_total_passed": 9,
       "pass_delta": 0,
       "score_delta": 0.0
+    },
+    {
+      "model": "openrouter/z-ai/glm-5.2",
+      "display": "GLM 5.2",
+      "org": "Z.AI",
+      "source": "fixed_harness_new_model",
+      "decision": "add_new_fixed_harness",
+      "source_file": "results/best3_z-ai_glm-5.2.json",
+      "selected_file": "best3_z-ai_glm-5.2.json",
+      "pass_rate": 0.045,
+      "mean_score": 0.199,
+      "total_passed": 9,
+      "total_instances": 200,
+      "mean_generation_time_s": 20.599,
+      "total_cost_usd": 0.719838,
+      "total_judge_cost_usd": 10.573271,
+      "best_run": 3,
+      "judge_models": [
+        "openrouter/anthropic/claude-opus-4.8",
+        "openrouter/openai/gpt-5.5"
+      ],
+      "adapter_max_attempts": 3,
+      "retry_empty_responses": true,
+      "old_pass_rate": null,
+      "old_mean_score": null,
+      "old_total_passed": null,
+      "pass_delta": null,
+      "score_delta": null
     },
     {
       "model": "openrouter/qwen/qwen3.5-27b",
@@ -1496,6 +1524,20 @@
       "fixed_score": 0.1651,
       "pass_delta": -7,
       "score_delta": 0.0313
+    },
+    {
+      "model": "openrouter/z-ai/glm-5.2",
+      "decision": "add_new_fixed_harness",
+      "selected_source": "fixed_harness_new_model",
+      "selected_file": "best3_z-ai_glm-5.2.json",
+      "prior_file": null,
+      "fixed_file": "results/best3_z-ai_glm-5.2.json",
+      "prior_passed": null,
+      "fixed_passed": 9,
+      "prior_score": null,
+      "fixed_score": 0.199,
+      "pass_delta": null,
+      "score_delta": null
     }
   ]
 }
