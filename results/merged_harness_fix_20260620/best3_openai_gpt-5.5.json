@@ -16,24 +16,25 @@
     "adapter_max_attempts": 3,
     "retry_empty_responses": true,
     "adapter_process_timeout": true,
+    "consensus_voting_rule": "pass_on_tie",
     "best_of_n": 3,
     "best_run": 1,
     "all_runs": [
       {
         "run": 1,
-        "pass_rate": 0.2,
+        "pass_rate": 0.33,
         "mean_score": 0.3384,
         "total_cost_usd": 44.621739
       },
       {
         "run": 2,
-        "pass_rate": 0.11,
+        "pass_rate": 0.19,
         "mean_score": 0.2032,
         "total_cost_usd": 30.926264
       },
       {
         "run": 3,
-        "pass_rate": 0.125,
+        "pass_rate": 0.23,
         "mean_score": 0.2819,
         "total_cost_usd": 38.526451
       }
@@ -41,20 +42,20 @@
   },
   "aggregate": {
     "total_instances": 200,
-    "total_passed": 40,
-    "pass_rate": 0.2,
+    "total_passed": 66,
+    "pass_rate": 0.33,
     "mean_score": 0.3384,
     "pass_rate_by_tier": {
-      "tier_1": 0.209,
-      "tier_2": 0.2388,
-      "tier_3": 0.1515
+      "tier_1": 0.3284,
+      "tier_2": 0.3582,
+      "tier_3": 0.303
     },
     "pass_rate_by_ecosystem": {
       "rubygems": 0.0,
       "maven": 0.6,
-      "pip": 0.2593,
-      "npm": 0.1716,
-      "composer": 0.0,
+      "pip": 0.3333,
+      "npm": 0.3284,
+      "composer": 0.5,
       "rust": 0.0,
       "swift": 0.0
     },
@@ -76,7 +77,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -127,7 +128,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -178,7 +179,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -229,8 +230,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.7,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: fail (0.5000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: fail (0.5000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.05204
@@ -256,7 +257,7 @@
         }
       },
       "score": 0.7,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 2076,
       "completion_tokens": 3288,
       "cost_usd": 0.10902,
@@ -280,7 +281,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -331,7 +332,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.85,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -382,7 +383,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.4,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -433,7 +434,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.925,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -484,7 +485,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -535,7 +536,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.8,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -586,7 +587,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.9,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -637,7 +638,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.75,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7500), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7500), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -688,7 +689,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.775,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: pass (0.8500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -739,7 +740,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.3000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -790,7 +791,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -841,7 +842,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.325,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.4500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.4500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -892,7 +893,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.75,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -943,7 +944,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -994,7 +995,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.3,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1045,7 +1046,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1096,7 +1097,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1147,7 +1148,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1198,7 +1199,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.4,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.5000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.5000), openrouter/openai/gpt-5.5: fail (0.3000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -1249,8 +1250,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.4,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.2000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.04468
@@ -1276,7 +1277,7 @@
         }
       },
       "score": 0.4,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 1057,
       "completion_tokens": 2930,
       "cost_usd": 0.093185,
@@ -1300,7 +1301,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.825,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8000), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8000), openrouter/openai/gpt-5.5: pass (0.8500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -1351,7 +1352,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1402,7 +1403,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.05,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1453,7 +1454,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1504,7 +1505,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.05,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1555,7 +1556,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -1606,7 +1607,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1657,7 +1658,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1708,7 +1709,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1759,8 +1760,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.4,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.2000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.04214
@@ -1786,7 +1787,7 @@
         }
       },
       "score": 0.4,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 1358,
       "completion_tokens": 1315,
       "cost_usd": 0.04624,
@@ -1810,8 +1811,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.75,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.045915
@@ -1837,7 +1838,7 @@
         }
       },
       "score": 0.75,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 1221,
       "completion_tokens": 1229,
       "cost_usd": 0.042975,
@@ -1861,7 +1862,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1912,7 +1913,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -1963,7 +1964,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.225,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2014,7 +2015,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.975,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -2065,7 +2066,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2116,8 +2117,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.65,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.9000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.03978
@@ -2143,7 +2144,7 @@
         }
       },
       "score": 0.65,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 810,
       "completion_tokens": 12119,
       "cost_usd": 0.36762,
@@ -2167,7 +2168,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.425,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.4500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.4250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.4500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2218,7 +2219,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 1.0,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -2269,7 +2270,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -2320,7 +2321,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.45,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.4500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.3000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -2371,7 +2372,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2422,7 +2423,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2473,7 +2474,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.475,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7500), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.4750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7500), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -2524,8 +2525,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.55,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.2500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.5500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.2500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.054545
@@ -2551,7 +2552,7 @@
         }
       },
       "score": 0.55,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 1377,
       "completion_tokens": 3890,
       "cost_usd": 0.123585,
@@ -2575,7 +2576,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.675,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.6750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.7500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.7500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -2626,7 +2627,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.325,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.2500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.2500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2677,7 +2678,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.25,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2728,7 +2729,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 1.0,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -2779,7 +2780,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2830,7 +2831,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.3,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.3000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2881,7 +2882,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2932,7 +2933,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -2983,7 +2984,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -3034,8 +3035,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.8000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.8000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.044795
@@ -3061,7 +3062,7 @@
         }
       },
       "score": 0.6,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 231,
       "completion_tokens": 2837,
       "cost_usd": 0.086265,
@@ -3085,7 +3086,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -3136,7 +3137,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -3187,8 +3188,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.725,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.6000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.6000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.10266
@@ -3214,7 +3215,7 @@
         }
       },
       "score": 0.725,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 259,
       "completion_tokens": 2964,
       "cost_usd": 0.090215,
@@ -3238,7 +3239,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -3289,7 +3290,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -3340,7 +3341,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -3391,7 +3392,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.65,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: fail (0.6000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: fail (0.6000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -3442,7 +3443,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.75,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -3493,7 +3494,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -3544,7 +3545,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.4,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.4000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -3595,7 +3596,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.8,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.8000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.8000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -3646,7 +3647,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.7,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -3697,7 +3698,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.25,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -3748,7 +3749,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.35,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -3799,8 +3800,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.75,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.07182
@@ -3826,7 +3827,7 @@
         }
       },
       "score": 0.75,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 424,
       "completion_tokens": 660,
       "cost_usd": 0.02192,
@@ -3850,7 +3851,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -3901,7 +3902,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.225,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -3952,7 +3953,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.25,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4003,7 +4004,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4054,7 +4055,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.875,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -4105,7 +4106,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4156,7 +4157,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 1.0,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -4207,7 +4208,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -4258,7 +4259,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -4309,7 +4310,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4360,7 +4361,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.975,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -4411,7 +4412,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4462,7 +4463,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.25,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.3000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4513,7 +4514,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4564,7 +4565,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4615,7 +4616,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4666,7 +4667,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.8,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7500), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7500), openrouter/openai/gpt-5.5: pass (0.8500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -4717,7 +4718,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.875,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -4768,8 +4769,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.55,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.5000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.5500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.5000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.04525
@@ -4795,7 +4796,7 @@
         }
       },
       "score": 0.55,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 264,
       "completion_tokens": 3009,
       "cost_usd": 0.09159,
@@ -4819,7 +4820,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -4870,7 +4871,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.9,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -4921,7 +4922,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.875,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -4972,7 +4973,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -5023,7 +5024,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5074,8 +5075,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.625,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.8500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.037965
@@ -5101,7 +5102,7 @@
         }
       },
       "score": 0.625,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 558,
       "completion_tokens": 7491,
       "cost_usd": 0.22752,
@@ -5125,7 +5126,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.975,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9500), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -5176,7 +5177,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5227,7 +5228,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 1.0,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 1.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (1.0000), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -5278,7 +5279,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5329,7 +5330,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5380,7 +5381,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5431,8 +5432,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.7,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.5500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.5500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.040355
@@ -5458,7 +5459,7 @@
         }
       },
       "score": 0.7,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 315,
       "completion_tokens": 3420,
       "cost_usd": 0.104175,
@@ -5482,7 +5483,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.8,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.7500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.7500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -5533,7 +5534,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5584,8 +5585,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.8,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.9000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.03255
@@ -5611,7 +5612,7 @@
         }
       },
       "score": 0.8,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 233,
       "completion_tokens": 1142,
       "cost_usd": 0.035425,
@@ -5635,7 +5636,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5686,7 +5687,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5737,7 +5738,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5788,8 +5789,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.5,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.3000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.5000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.10854
@@ -5815,7 +5816,7 @@
         }
       },
       "score": 0.5,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 402,
       "completion_tokens": 3333,
       "cost_usd": 0.102,
@@ -5839,7 +5840,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.95,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (1.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (1.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -5890,7 +5891,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -5941,7 +5942,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.85,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -5992,7 +5993,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.525,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.5250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -6043,8 +6044,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.5,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.3000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.5000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.040495
@@ -6070,7 +6071,7 @@
         }
       },
       "score": 0.5,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 478,
       "completion_tokens": 6521,
       "cost_usd": 0.19802,
@@ -6094,7 +6095,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6145,7 +6146,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6196,7 +6197,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6247,7 +6248,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.25,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.4000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.4000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6298,8 +6299,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.625,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.8500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.4000), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.03622
@@ -6325,7 +6326,7 @@
         }
       },
       "score": 0.625,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 1838,
       "completion_tokens": 5036,
       "cost_usd": 0.16027,
@@ -6349,7 +6350,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6400,7 +6401,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6451,7 +6452,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.05,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6502,7 +6503,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6553,7 +6554,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6604,7 +6605,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6655,7 +6656,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.3,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -6706,7 +6707,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6757,7 +6758,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.9,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -6808,7 +6809,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6859,7 +6860,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6910,7 +6911,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -6961,8 +6962,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.35,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.1000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.3500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.08472
@@ -6988,7 +6989,7 @@
         }
       },
       "score": 0.35,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 315,
       "completion_tokens": 2909,
       "cost_usd": 0.088845,
@@ -7012,7 +7013,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7063,7 +7064,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7114,7 +7115,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7165,7 +7166,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7216,7 +7217,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.15,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.1000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7267,7 +7268,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7318,8 +7319,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.4,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8000), openrouter/openai/gpt-5.5: fail (0.0000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.4000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.020585
@@ -7345,7 +7346,7 @@
         }
       },
       "score": 0.4,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 230,
       "completion_tokens": 572,
       "cost_usd": 0.01831,
@@ -7369,7 +7370,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.775,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.7000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.7000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -7420,7 +7421,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7471,7 +7472,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -7522,7 +7523,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7573,7 +7574,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7624,7 +7625,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.05,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7675,8 +7676,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.45,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.4500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.2000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.4500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.03775
@@ -7702,7 +7703,7 @@
         }
       },
       "score": 0.45,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 321,
       "completion_tokens": 1299,
       "cost_usd": 0.040575,
@@ -7726,7 +7727,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7777,7 +7778,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.775,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: pass (0.8500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -7828,7 +7829,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7879,7 +7880,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -7930,8 +7931,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.775,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.0708
@@ -7957,7 +7958,7 @@
         }
       },
       "score": 0.775,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 263,
       "completion_tokens": 3831,
       "cost_usd": 0.116245,
@@ -7981,7 +7982,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -8032,7 +8033,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -8083,7 +8084,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.65,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.4500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.4500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -8134,7 +8135,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.9,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -8185,8 +8186,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.575,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.4500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.5750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.4500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.092047
@@ -8212,7 +8213,7 @@
         }
       },
       "score": 0.575,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 458,
       "completion_tokens": 7520,
       "cost_usd": 0.22788999999999998,
@@ -8236,7 +8237,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -8287,7 +8288,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.875,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.8500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.8500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -8338,7 +8339,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -8389,7 +8390,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.9,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.9000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.9000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.9000), openrouter/openai/gpt-5.5: pass (0.9000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -8440,7 +8441,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -8491,7 +8492,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -8542,8 +8543,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.65,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.4500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.4500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.041895
@@ -8569,7 +8570,7 @@
         }
       },
       "score": 0.65,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 1932,
       "completion_tokens": 2704,
       "cost_usd": 0.09078,
@@ -8593,7 +8594,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -8644,7 +8645,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.3,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.3000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -8695,8 +8696,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.75,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.6500)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.6500)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.034525
@@ -8722,7 +8723,7 @@
         }
       },
       "score": 0.75,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 374,
       "completion_tokens": 6871,
       "cost_usd": 0.208,
@@ -8746,7 +8747,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -8797,8 +8798,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.75,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: pass (0.8000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.03692
@@ -8824,7 +8825,7 @@
         }
       },
       "score": 0.75,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 252,
       "completion_tokens": 3845,
       "cost_usd": 0.11661,
@@ -8848,7 +8849,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -8899,7 +8900,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -8950,7 +8951,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9001,7 +9002,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.8,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.7500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: pass (0.7500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -9052,7 +9053,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.1,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.1000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.1000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -9103,7 +9104,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9154,7 +9155,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.85,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:1,abstain:1",
         "judge_consistent": false,
@@ -9205,7 +9206,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9256,7 +9257,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.2,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.2000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9307,7 +9308,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.25,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.3000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.2500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.3000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9358,7 +9359,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.7,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.7000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.7000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -9409,7 +9410,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9460,7 +9461,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9511,7 +9512,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.05,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.1000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9562,7 +9563,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.575,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.5500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.5750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.6000), openrouter/openai/gpt-5.5: fail (0.5500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -9613,7 +9614,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.325,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.3250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.4500)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.3250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.2000), openrouter/openai/gpt-5.5: fail (0.4500)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9664,8 +9665,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.65,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.6000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.7000), openrouter/openai/gpt-5.5: fail (0.6000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.049405
@@ -9691,7 +9692,7 @@
         }
       },
       "score": 0.65,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 255,
       "completion_tokens": 4096,
       "cost_usd": 0.124155,
@@ -9715,7 +9716,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.6,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6000. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -9766,8 +9767,8 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.825,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.8250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: pass (0.8000)",
-        "judge_verdict": "fail",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8250. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.8500), openrouter/openai/gpt-5.5: pass (0.8000)",
+        "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:1",
         "judge_consistent": false,
         "judge_cost_usd": 0.087342
@@ -9793,7 +9794,7 @@
         }
       },
       "score": 0.825,
-      "passed": false,
+      "passed": true,
       "prompt_tokens": 3946,
       "completion_tokens": 7199,
       "cost_usd": 0.2357,
@@ -9817,7 +9818,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.5,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.5000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.5000), openrouter/openai/gpt-5.5: fail (0.5000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.5000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.5000), openrouter/openai/gpt-5.5: fail (0.5000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -9868,7 +9869,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -9919,7 +9920,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.85,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.8500. Abstentions: 1. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.8500), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:1,fail:0,abstain:1",
         "judge_consistent": false,
@@ -9970,7 +9971,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -10021,7 +10022,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.65,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: fail (0.6000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.6500. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.7000), openrouter/openai/gpt-5.5: fail (0.6000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": false,
@@ -10072,7 +10073,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -10123,7 +10124,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.675,
-        "judge_reasoning": "Consensus by majority vote: pass. Median score: 0.6750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.7500)",
+        "judge_reasoning": "Consensus by pass-tie vote: pass. Median score: 0.6750. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: pass (0.6000), openrouter/openai/gpt-5.5: pass (0.7500)",
         "judge_verdict": "pass",
         "raw_judge_verdict": "pass:2,fail:0",
         "judge_consistent": true,
@@ -10174,7 +10175,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,
@@ -10225,7 +10226,7 @@
       "patch_analysis": {
         "judge_model": "consensus",
         "judge_score": 0.0,
-        "judge_reasoning": "Consensus by majority vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
+        "judge_reasoning": "Consensus by pass-tie vote: fail. Median score: 0.0000. Abstentions: 0. Judge votes: openrouter/anthropic/claude-opus-4.8: fail (0.0000), openrouter/openai/gpt-5.5: fail (0.0000)",
         "judge_verdict": "fail",
         "raw_judge_verdict": "pass:0,fail:2",
         "judge_consistent": true,

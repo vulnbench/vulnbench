@@ -232,22 +232,15 @@ def money(value: float) -> str:
 
 def leaderboard_html(rows: list[Row]) -> str:
     max_rate = max((row.pass_rate for row in rows), default=1)
-    show_source = any(row.source for row in rows)
     out = []
     for idx, row in enumerate(rows, 1):
         first = idx == 1
         width = 100 * row.pass_rate / max_rate if max_rate else 0
-        source_cell = (
-            f'<td class="gs-vb-leaderboard__meta">{html.escape(row.source or "")}</td>'
-            if show_source
-            else ""
-        )
         out.append(
             f'<tr class="{"gs-vb-leaderboard__first-row" if first else ""}">'
             f'<td class="gs-vb-leaderboard__rank {"gs-vb-leaderboard__rank--first" if first else ""}">{idx}</td>'
             f"<td><div class=\"gs-vb-leaderboard__model {'gs-vb-leaderboard__model--first' if first else ''}\">{html.escape(row.display)}</div>"
             f'<div class="gs-vb-leaderboard__org gs-vb-leaderboard__org--{row.org_class}">{html.escape(row.org)}</div></td>'
-            f"{source_cell}"
             f'<td><div class="gs-vb-leaderboard__bar-wrap"><span class="gs-vb-leaderboard__rate">{percent(row.pass_rate)}</span>'
             f'<div class="gs-vb-leaderboard__bar"><div class="gs-vb-leaderboard__bar-fill {"gs-vb-leaderboard__bar-fill--first" if first else ""}" style="width:{width:.1f}%"></div></div></div></td>'
             f'<td class="gs-vb-leaderboard__meta">{row.mean_score:.3f}</td>'
@@ -291,7 +284,6 @@ def render_page(rows: list[Row], pending: list[str], manifest: dict | None = Non
     top_two_gap = top.pass_rate - rows[1].pass_rate if len(rows) > 1 else 0
     top_score = max(rows, key=lambda row: row.mean_score)
     complete_count = len(rows)
-    source_header = "<th>Source</th>" if any(row.source for row in rows) else ""
     pending_note = ""
     if pending:
         pending_note = (
@@ -308,12 +300,12 @@ def render_page(rows: list[Row], pending: list[str], manifest: dict | None = Non
         findings_title = "What Changed After Harness Fixes"
         findings_desc = "The merged leaderboard preserves prior baseline rows unless the fixed harness improved both pass count and mean score. Fixed-harness rows used adapter exception retries, empty-response retries, and two judges."
         result_title = "VulnBench-200 Merged Harness-Fix Leaderboard"
-        result_desc = "Curated 200-instance best-of-3 results. Source indicates whether a row came from the prior baseline, a material fixed-harness update, or a new fixed-harness model."
+        result_desc = "Curated 200-instance best-of-3 results after applying the fixed harness merge rule. Provenance is preserved in the JSON and Markdown artifacts."
         method_title = "Merged Baseline Plus Fixed Harness"
         method_desc = "The report keeps the prior curated benchmark as the baseline, then applies fixed-harness reruns only when the result clears the material improvement rule."
         step3_title = "Material Merge Rule"
         step3_desc = "Rows are replaced only when fixed-harness results improve pass count by at least 1 and mean score by at least 0.02."
-        judge_desc = "Fixed-harness rows use adapter exception retries, empty-response retries, and two judges: Claude Opus 4.8 plus GPT-5.5. Prior rows keep their original judge metadata."
+        judge_desc = "Fixed-harness rows use adapter exception retries, empty-response retries, and two judges: Claude Opus 4.8 plus GPT-5.5. A split two-judge vote passes when either judge votes pass."
         cta_title = "Reproduce The Merged Report"
         cta_desc = "The merged run artifacts are stored under results/merged_harness_fix_20260620 with selected JSON reports and merge decisions."
         terminal_command = "python benchmark/generate_v2_report.py --results-dir results/merged_harness_fix_20260620"
@@ -343,7 +335,7 @@ def render_page(rows: list[Row], pending: list[str], manifest: dict | None = Non
 <section class="gs-vb-hero"><div class="gs-vb-hero__shader" id="gs-vb-hero-shader"></div><div class="gs-vb-hero__inner"><div class="gs-vb-hero__content"><div class="gs-vb-hero__eyebrow"><span>{hero_eyebrow}</span><span class="gs-vb-hero__eyebrow-sep">/</span><span>Ghost Security</span></div><h1 class="gs-vb-hero__title">{hero_title}</h1><p class="gs-vb-hero__desc">{hero_desc}</p></div></div></section>
 <div class="gs-vb-stats"><div class="gs-vb-stats__inner"><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">{complete_count}</div><div class="gs-vb-stats__label">Models Final</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">200</div><div class="gs-vb-stats__label">Curated CVEs</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">3x</div><div class="gs-vb-stats__label">Runs Per Model</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">55</div><div class="gs-vb-stats__label">CWE Types</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">7</div><div class="gs-vb-stats__label">Ecosystems</div></div></div></div>
 <section class="gs-vb-findings" id="findings"><div class="gs-vb-findings__inner"><div class="gs-section-eyebrow">Key Findings</div><h2 class="gs-section-title">{findings_title}</h2><p class="gs-section-desc">{findings_desc}</p><div class="gs-vb-findings__grid">{finding_cards}</div></div></section>
-<section class="gs-vb-leaderboard" id="leaderboard"><div class="gs-vb-leaderboard__inner"><div class="gs-vb-leaderboard__header"><div class="gs-section-eyebrow">Results</div><h2 class="gs-section-title">{result_title}</h2><p class="gs-section-desc">{result_desc}</p>{pending_note}</div><div class="gs-vb-leaderboard__wrap"><table><thead><tr><th style="width:48px">#</th><th>Model</th>{source_header}<th>Pass Rate</th><th>Score</th><th>Passed</th><th>Avg Time</th><th>Cost</th></tr></thead><tbody>{leaderboard_html(rows)}</tbody></table></div></div></section>
+<section class="gs-vb-leaderboard" id="leaderboard"><div class="gs-vb-leaderboard__inner"><div class="gs-vb-leaderboard__header"><div class="gs-section-eyebrow">Results</div><h2 class="gs-section-title">{result_title}</h2><p class="gs-section-desc">{result_desc}</p>{pending_note}</div><div class="gs-vb-leaderboard__wrap"><table><thead><tr><th style="width:48px">#</th><th>Model</th><th>Pass Rate</th><th>Score</th><th>Passed</th><th>Avg Time</th><th>Cost</th></tr></thead><tbody>{leaderboard_html(rows)}</tbody></table></div></div></section>
 <section class="gs-vb-method" id="methodology"><div class="gs-vb-method__inner"><div class="gs-vb-method__grid"><div class="gs-vb-method__left"><div class="gs-section-eyebrow">Methodology</div><h2 class="gs-section-title">{method_title}</h2><p class="gs-section-desc">{method_desc}</p></div><div class="gs-vb-method__timeline"><div class="gs-vb-method__line"></div><div class="gs-vb-method__step"><div class="gs-vb-method__num">1</div><div class="gs-vb-method__step-body"><div class="gs-vb-method__step-title">Curated 200</div><p class="gs-vb-method__step-desc">All models run against the same 200 real CVE instances used in the original curated leaderboard.</p></div></div><div class="gs-vb-method__step"><div class="gs-vb-method__num">2</div><div class="gs-vb-method__step-body"><div class="gs-vb-method__step-title">Source + Hints</div><p class="gs-vb-method__step-desc">Prompts include vulnerable source snippets and description-derived file localization hints, not gold fix locations.</p></div></div><div class="gs-vb-method__step"><div class="gs-vb-method__num">3</div><div class="gs-vb-method__step-body"><div class="gs-vb-method__step-title">{step3_title}</div><p class="gs-vb-method__step-desc">{step3_desc}</p></div></div><div class="gs-vb-method__step"><div class="gs-vb-method__num">4</div><div class="gs-vb-method__step-body"><div class="gs-vb-method__step-title">Judge Patches</div><p class="gs-vb-method__step-desc">{judge_desc}</p></div></div></div></div></div></section>
 <section class="gs-vb-dataset" id="dataset"><div class="gs-vb-dataset__inner"><div class="gs-section-eyebrow">Dataset</div><h2 class="gs-section-title">Same Curated Subset</h2><p class="gs-section-desc">The V2 report keeps the original dataset framing: 200 curated CVEs from 200 repositories, balanced across three difficulty tiers and spanning 55 CWE types.</p><div class="gs-vb-dataset__mini-stats"><div class="gs-vb-dataset__mini-stat"><div class="gs-vb-dataset__mini-val">200</div><div class="gs-vb-dataset__mini-label">Curated Subset</div></div><div class="gs-vb-dataset__mini-stat"><div class="gs-vb-dataset__mini-val">200</div><div class="gs-vb-dataset__mini-label">Repositories</div></div><div class="gs-vb-dataset__mini-stat"><div class="gs-vb-dataset__mini-val">55</div><div class="gs-vb-dataset__mini-label">CWE Types</div></div><div class="gs-vb-dataset__mini-stat"><div class="gs-vb-dataset__mini-val">7</div><div class="gs-vb-dataset__mini-label">Ecosystems</div></div><div class="gs-vb-dataset__mini-stat"><div class="gs-vb-dataset__mini-val">36</div><div class="gs-vb-dataset__mini-label">Mean Lines</div></div><div class="gs-vb-dataset__mini-stat"><div class="gs-vb-dataset__mini-val">1.9</div><div class="gs-vb-dataset__mini-label">Mean Files</div></div></div></div></section>
 <section class="gs-vb-cta"><div class="gs-vb-cta__shader" id="gs-vb-cta-shader"></div><div class="gs-vb-cta__inner"><div class="gs-vb-cta__left"><h2 class="gs-vb-cta__title">{cta_title}</h2><p class="gs-vb-cta__desc">{cta_desc}</p></div><div class="gs-vb-cta__right"><pre class="gs-vb-cta__terminal">$ {terminal_command}
@@ -382,6 +374,7 @@ Merged leaderboard preserving the prior curated-200 best-of-3 baseline and repla
 - New models with no prior 200-instance baseline are added as fixed-harness rows.
 - Regressions and ambiguous changes are kept from the prior baseline, even if one metric improved.
 - Fixed-harness rows used adapter exception retries, empty-response retries, and two judges: Claude Opus 4.8 plus GPT-5.5.
+- Under the current consensus rule, a split two-judge vote passes when either judge votes pass.
 
 ## Leaderboard
 

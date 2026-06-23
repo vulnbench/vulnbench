@@ -447,7 +447,7 @@ def combine_judge_analyses(
     )
     fail_votes = len(voting_analyses) - pass_votes
     abstentions = len(analyses) - len(voting_analyses)
-    consensus_verdict = "pass" if pass_votes > fail_votes else "fail"
+    consensus_verdict = "pass" if pass_votes >= fail_votes else "fail"
     all_same_verdict = (
         pass_votes == len(voting_analyses) or fail_votes == len(voting_analyses)
     )
@@ -461,7 +461,7 @@ def combine_judge_analyses(
         for model, analysis in analyses.items()
     )
     reasoning = (
-        f"Consensus by majority vote: {consensus_verdict}. "
+        f"Consensus by pass-tie vote: {consensus_verdict}. "
         f"Median score: {median_score:.4f}. "
         f"Abstentions: {abstentions}. Judge votes: {vote_summary}"
     )

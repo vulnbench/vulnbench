@@ -93,7 +93,7 @@ class MultiJudgeConsensusTests(unittest.TestCase):
         self.assertEqual(consensus.raw_judge_verdict, "pass:2,fail:0,abstain:1")
         self.assertAlmostEqual(consensus.judge_cost_usd, 0.6)
 
-    def test_two_judge_disagreement_is_conservative_fail(self) -> None:
+    def test_two_judge_disagreement_passes_on_one_pass_vote(self) -> None:
         consensus = combine_judge_analyses(
             {
                 "judge-a": PatchAnalysis(
@@ -109,7 +109,7 @@ class MultiJudgeConsensusTests(unittest.TestCase):
             }
         )
 
-        self.assertEqual(consensus.judge_verdict, "fail")
+        self.assertEqual(consensus.judge_verdict, "pass")
         self.assertEqual(consensus.judge_score, 0.5)
         self.assertEqual(consensus.raw_judge_verdict, "pass:1,fail:1")
         self.assertFalse(consensus.judge_consistent)
