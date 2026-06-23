@@ -63,10 +63,10 @@
     "prior_file": "results/best3_anthropic_claude-sonnet-4.6.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_anthropic_claude-sonnet-4.6.json",
     "prior_passed": 21,
-    "fixed_passed": 23,
+    "fixed_passed": 41,
     "prior_score": 0.322,
     "fixed_score": 0.2917,
-    "pass_delta": 2,
+    "pass_delta": 20,
     "score_delta": -0.0303
   },
   {
@@ -77,10 +77,10 @@
     "prior_file": "results/best3_deepseek_deepseek-v3.2.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_deepseek_deepseek-v3.2.json",
     "prior_passed": 9,
-    "fixed_passed": 15,
+    "fixed_passed": 21,
     "prior_score": 0.2527,
     "fixed_score": 0.1889,
-    "pass_delta": 6,
+    "pass_delta": 12,
     "score_delta": -0.0638
   },
   {
@@ -99,16 +99,16 @@
   },
   {
     "model": "openrouter/deepseek/deepseek-v4-pro",
-    "decision": "keep_prior_no_material_improvement",
-    "selected_source": "prior_baseline",
+    "decision": "update_material_harness_improvement",
+    "selected_source": "fixed_harness",
     "selected_file": "best3_deepseek_deepseek-v4-pro.json",
     "prior_file": "results/best3_deepseek_deepseek-v4-pro.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_deepseek_deepseek-v4-pro.json",
     "prior_passed": 23,
-    "fixed_passed": 12,
+    "fixed_passed": 31,
     "prior_score": 0.2295,
     "fixed_score": 0.2498,
-    "pass_delta": -11,
+    "pass_delta": 8,
     "score_delta": 0.0203
   },
   {
@@ -175,10 +175,10 @@
     "prior_file": "results/best3_minimax_minimax-m2.7.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_minimax_minimax-m2.7.json",
     "prior_passed": 3,
-    "fixed_passed": 10,
+    "fixed_passed": 16,
     "prior_score": 0.0988,
     "fixed_score": 0.1318,
-    "pass_delta": 7,
+    "pass_delta": 13,
     "score_delta": 0.033
   },
   {
@@ -217,24 +217,24 @@
     "prior_file": "results/best3_moonshotai_kimi-k2.5.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_moonshotai_kimi-k2.5.json",
     "prior_passed": 13,
-    "fixed_passed": 20,
+    "fixed_passed": 39,
     "prior_score": 0.2277,
     "fixed_score": 0.3006,
-    "pass_delta": 7,
+    "pass_delta": 26,
     "score_delta": 0.0729
   },
   {
     "model": "openrouter/moonshotai/kimi-k2.6",
-    "decision": "keep_prior_no_material_improvement",
-    "selected_source": "prior_baseline",
+    "decision": "update_material_harness_improvement",
+    "selected_source": "fixed_harness",
     "selected_file": "best3_moonshotai_kimi-k2.6.json",
     "prior_file": "results/best3_moonshotai_kimi-k2.6.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_moonshotai_kimi-k2.6.json",
     "prior_passed": 14,
-    "fixed_passed": 13,
+    "fixed_passed": 22,
     "prior_score": 0.0817,
     "fixed_score": 0.1199,
-    "pass_delta": -1,
+    "pass_delta": 8,
     "score_delta": 0.0382
   },
   {
@@ -245,7 +245,7 @@
     "prior_file": null,
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_moonshotai_kimi-k2.7-code.json",
     "prior_passed": null,
-    "fixed_passed": 8,
+    "fixed_passed": 12,
     "prior_score": null,
     "fixed_score": 0.067,
     "pass_delta": null,
@@ -301,10 +301,10 @@
     "prior_file": "results/best3_openai_gpt-5.3-codex.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_openai_gpt-5.3-codex.json",
     "prior_passed": 45,
-    "fixed_passed": 48,
+    "fixed_passed": 75,
     "prior_score": 0.4675,
     "fixed_score": 0.444,
-    "pass_delta": 3,
+    "pass_delta": 30,
     "score_delta": -0.0235
   },
   {
@@ -343,10 +343,10 @@
     "prior_file": "results/best3_openai_gpt-5.5.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_openai_gpt-5.5.json",
     "prior_passed": 35,
-    "fixed_passed": 40,
+    "fixed_passed": 66,
     "prior_score": 0.214,
     "fixed_score": 0.3384,
-    "pass_delta": 5,
+    "pass_delta": 31,
     "score_delta": 0.1244
   },
   {
@@ -357,9 +357,9 @@
     "prior_file": null,
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_qwen_qwen3.5-27b.json",
     "prior_passed": null,
-    "fixed_passed": 9,
+    "fixed_passed": 19,
     "prior_score": null,
-    "fixed_score": 0.1815,
+    "fixed_score": 0.1776,
     "pass_delta": null,
     "score_delta": null
   },
@@ -371,7 +371,7 @@
     "prior_file": null,
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_qwen_qwen3.5-35b-a3b.json",
     "prior_passed": null,
-    "fixed_passed": 5,
+    "fixed_passed": 20,
     "prior_score": null,
     "fixed_score": 0.168,
     "pass_delta": null,
@@ -385,10 +385,10 @@
     "prior_file": "results/best3_qwen_qwen3.7-max.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_qwen_qwen3.7-max.json",
     "prior_passed": 57,
-    "fixed_passed": 5,
+    "fixed_passed": 8,
     "prior_score": 0.4027,
     "fixed_score": 0.0354,
-    "pass_delta": -52,
+    "pass_delta": -49,
     "score_delta": -0.3673
   },
   {
@@ -399,10 +399,10 @@
     "prior_file": "results/best3_qwen_qwen3.7-plus.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_qwen_qwen3.7-plus.json",
     "prior_passed": 33,
-    "fixed_passed": 20,
+    "fixed_passed": 36,
     "prior_score": 0.2918,
     "fixed_score": 0.2325,
-    "pass_delta": -13,
+    "pass_delta": 3,
     "score_delta": -0.0593
   },
   {
@@ -413,10 +413,10 @@
     "prior_file": "results/best3_stepfun_step-3.5-flash:free.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_stepfun_step-3.5-flash.json",
     "prior_passed": 0,
-    "fixed_passed": 0,
+    "fixed_passed": 1,
     "prior_score": 0.0,
     "fixed_score": 0.0065,
-    "pass_delta": 0,
+    "pass_delta": 1,
     "score_delta": 0.0065
   },
   {
@@ -427,11 +427,11 @@
     "prior_file": "results/best3_stepfun_step-3.7-flash.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_stepfun_step-3.7-flash.json",
     "prior_passed": 3,
-    "fixed_passed": 3,
+    "fixed_passed": 6,
     "prior_score": 0.0178,
-    "fixed_score": 0.0267,
-    "pass_delta": 0,
-    "score_delta": 0.0089
+    "fixed_score": 0.0249,
+    "pass_delta": 3,
+    "score_delta": 0.0071
   },
   {
     "model": "openrouter/x-ai/grok-4.1-fast",
@@ -491,16 +491,16 @@
   },
   {
     "model": "openrouter/z-ai/glm-5.1",
-    "decision": "keep_prior_no_material_improvement",
-    "selected_source": "prior_baseline",
+    "decision": "update_material_harness_improvement",
+    "selected_source": "fixed_harness",
     "selected_file": "best3_z-ai_glm-5.1.json",
     "prior_file": "results/best3_z-ai_glm-5.1.json",
     "fixed_file": "results/rerun_fixes_2judge_20260613_232410/best3_z-ai_glm-5.1.json",
     "prior_passed": 22,
-    "fixed_passed": 15,
+    "fixed_passed": 25,
     "prior_score": 0.1338,
     "fixed_score": 0.1651,
-    "pass_delta": -7,
+    "pass_delta": 3,
     "score_delta": 0.0313
   },
   {
@@ -511,9 +511,9 @@
     "prior_file": null,
     "fixed_file": "results/best3_z-ai_glm-5.2.json",
     "prior_passed": null,
-    "fixed_passed": 9,
+    "fixed_passed": 18,
     "prior_score": null,
-    "fixed_score": 0.199,
+    "fixed_score": 0.1743,
     "pass_delta": null,
     "score_delta": null
   }
