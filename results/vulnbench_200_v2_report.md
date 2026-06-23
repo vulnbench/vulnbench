@@ -4,12 +4,12 @@ Merged leaderboard preserving the prior curated-200 best-of-3 baseline and repla
 
 ## Summary
 
-- Rows included: 36
+- Rows included: 37
 - Updated from fixed harness: 3
-- Added new fixed-harness rows: 3
+- Added new fixed-harness rows: 4
 - Carried forward from prior baseline: 30
 - Leader: Claude Fable 5 at 37.5% (75/200)
-- Median pass rate: 10.0%
+- Median pass rate: 9.5%
 
 ## Merge Rule
 
@@ -49,12 +49,13 @@ Merged leaderboard preserving the prior curated-200 best-of-3 baseline and repla
 | 25 | GPT-5 Mini | OpenAI | prior baseline | 5.0% | 0.275 | 10/200 | 2 | $3.63 |
 | 26 | MiniMax M2.7 | MiniMax | fixed harness | 5.0% | 0.132 | 10/200 | 1 | $9.25 |
 | 27 | DeepSeek V3.2 | DeepSeek | prior baseline | 4.5% | 0.253 | 9/200 | 2 | $3.25 |
-| 28 | Qwen 3.5 27B | Qwen | new fixed harness | 4.5% | 0.181 | 9/200 | 2 | $12.34 |
-| 29 | Gemini 3.5 Flash | Google | prior baseline | 4.5% | 0.047 | 9/200 | 3 | $10.33 |
-| 30 | Kimi K2.7 Code | Moonshot AI | new fixed harness | 4.0% | 0.067 | 8/200 | 3 | $8.33 |
-| 31 | Claude Haiku 4.5 | Anthropic | prior baseline | 3.5% | 0.263 | 7/200 | 3 | $3.95 |
-| 32 | Qwen 3.5 35B A3B | Qwen | new fixed harness | 2.5% | 0.168 | 5/200 | 2 | $9.42 |
-| 33 | Gemini 3.1 Pro | Google | prior baseline | 2.5% | 0.093 | 5/200 | 2 | $9.60 |
-| 34 | MiniMax M2.5 | MiniMax | prior baseline | 1.5% | 0.181 | 3/200 | 2 | $3.25 |
-| 35 | Step 3.7 Flash | StepFun | prior baseline | 1.5% | 0.018 | 3/200 | 3 | $1.12 |
-| 36 | Step 3.5 Flash | StepFun | prior baseline | 0.0% | 0.000 | 0/200 | 1 | $0.00 |
+| 28 | GLM 5.2 | Z.AI | new fixed harness | 4.5% | 0.199 | 9/200 | 3 | $11.29 |
+| 29 | Qwen 3.5 27B | Qwen | new fixed harness | 4.5% | 0.181 | 9/200 | 2 | $12.34 |
+| 30 | Gemini 3.5 Flash | Google | prior baseline | 4.5% | 0.047 | 9/200 | 3 | $10.33 |
+| 31 | Kimi K2.7 Code | Moonshot AI | new fixed harness | 4.0% | 0.067 | 8/200 | 3 | $8.33 |
+| 32 | Claude Haiku 4.5 | Anthropic | prior baseline | 3.5% | 0.263 | 7/200 | 3 | $3.95 |
+| 33 | Qwen 3.5 35B A3B | Qwen | new fixed harness | 2.5% | 0.168 | 5/200 | 2 | $9.42 |
+| 34 | Gemini 3.1 Pro | Google | prior baseline | 2.5% | 0.093 | 5/200 | 2 | $9.60 |
+| 35 | MiniMax M2.5 | MiniMax | prior baseline | 1.5% | 0.181 | 3/200 | 2 | $3.25 |
+| 36 | Step 3.7 Flash | StepFun | prior baseline | 1.5% | 0.018 | 3/200 | 3 | $1.12 |
+| 37 | Step 3.5 Flash | StepFun | prior baseline | 0.0% | 0.000 | 0/200 | 1 | $0.00 |
