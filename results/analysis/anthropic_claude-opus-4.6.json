@@ -1,0 +1,748 @@
+{
+  "model": "openrouter/anthropic/claude-opus-4.6",
+  "display_name": "anthropic/claude-opus-4.6",
+  "metadata": {
+    "runs": 3,
+    "evaluated_at": "2026-03-20T16:35:55.098034+00:00Z",
+    "judge_models": [
+      "openrouter/anthropic/claude-opus-4-6"
+    ],
+    "include_source": true,
+    "file_hint_mode": "description",
+    "max_tokens": 4096,
+    "config_key": "{\"benchmark\": \"vulnbench_200.json\", \"file_hint_mode\": \"description\", \"include_source\": true, \"judges\": [\"openrouter/anthropic/claude-opus-4-6\"], \"voting_rule\": \"score_threshold\"}",
+    "config_warning": ""
+  },
+  "headline": {
+    "instances": 200,
+    "passed": 32,
+    "pass_rate": 0.16,
+    "wilson_95": [
+      0.1157,
+      0.2171
+    ],
+    "mean_score": 0.4038,
+    "answer_rate": 0.98
+  },
+  "runs": {
+    "runs": 3,
+    "common_instances": 200,
+    "dropped_instances": 0,
+    "per_run_pass_rates": [
+      0.12,
+      0.13,
+      0.16
+    ],
+    "mean_pass_rate": 0.1367,
+    "pass_rate_std": 0.0208,
+    "pooled_wilson_95": [
+      0.1115,
+      0.1665
+    ],
+    "pass_at_k": 0.205,
+    "all_runs_pass_rate": 0.07
+  },
+  "failure_modes": {
+    "wrong_file": 67,
+    "near_miss": 49,
+    "insufficient_fix": 33,
+    "off_target": 14,
+    "not_a_diff": 4,
+    "likely_truncated": 1
+  },
+  "infra_failure_count": 0,
+  "judge_reasoning_clusters": {
+    "incomplete-scope": 73,
+    "other": 38,
+    "wrong-location": 38,
+    "root-cause-missed": 12,
+    "regression-risk": 4,
+    "invalid-patch": 3
+  },
+  "breakdowns": {
+    "difficulty_tier": {
+      "tier_1": {
+        "n": 67,
+        "passed": 13,
+        "pass_rate": 0.194,
+        "wilson_95": [
+          0.1171,
+          0.3042
+        ]
+      },
+      "tier_2": {
+        "n": 67,
+        "passed": 9,
+        "pass_rate": 0.1343,
+        "wilson_95": [
+          0.0723,
+          0.236
+        ]
+      },
+      "tier_3": {
+        "n": 66,
+        "passed": 10,
+        "pass_rate": 0.1515,
+        "wilson_95": [
+          0.0844,
+          0.2569
+        ]
+      }
+    },
+    "primary_cwe": {
+      "CWE-125": {
+        "n": 3,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.5615
+        ]
+      },
+      "CWE-1321": {
+        "n": 5,
+        "passed": 3,
+        "pass_rate": 0.6,
+        "wilson_95": [
+          0.2307,
+          0.8824
+        ]
+      },
+      "CWE-1333": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "CWE-20": {
+        "n": 23,
+        "passed": 5,
+        "pass_rate": 0.2174,
+        "wilson_95": [
+          0.0966,
+          0.419
+        ]
+      },
+      "CWE-200": {
+        "n": 4,
+        "passed": 1,
+        "pass_rate": 0.25,
+        "wilson_95": [
+          0.0456,
+          0.6994
+        ]
+      },
+      "CWE-22": {
+        "n": 25,
+        "passed": 7,
+        "pass_rate": 0.28,
+        "wilson_95": [
+          0.1428,
+          0.4758
+        ]
+      },
+      "CWE-23": {
+        "n": 1,
+        "passed": 1,
+        "pass_rate": 1.0,
+        "wilson_95": [
+          0.2065,
+          1.0
+        ]
+      },
+      "CWE-235": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-248": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "CWE-284": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-285": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "CWE-287": {
+        "n": 3,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.5615
+        ]
+      },
+      "CWE-290": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-295": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-325": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-330": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-347": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-352": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-367": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-384": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-400": {
+        "n": 25,
+        "passed": 3,
+        "pass_rate": 0.12,
+        "wilson_95": [
+          0.0417,
+          0.2996
+        ]
+      },
+      "CWE-402": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-434": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-444": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-470": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-476": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-506": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-532": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-601": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "CWE-668": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-670": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-674": {
+        "n": 3,
+        "passed": 1,
+        "pass_rate": 0.3333,
+        "wilson_95": [
+          0.0615,
+          0.7923
+        ]
+      },
+      "CWE-680": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-693": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-696": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-73": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-74": {
+        "n": 3,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.5615
+        ]
+      },
+      "CWE-755": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-77": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "CWE-770": {
+        "n": 2,
+        "passed": 1,
+        "pass_rate": 0.5,
+        "wilson_95": [
+          0.0945,
+          0.9055
+        ]
+      },
+      "CWE-78": {
+        "n": 3,
+        "passed": 2,
+        "pass_rate": 0.6667,
+        "wilson_95": [
+          0.2077,
+          0.9385
+        ]
+      },
+      "CWE-79": {
+        "n": 38,
+        "passed": 5,
+        "pass_rate": 0.1316,
+        "wilson_95": [
+          0.0575,
+          0.2733
+        ]
+      },
+      "CWE-830": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-862": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "CWE-863": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "CWE-89": {
+        "n": 4,
+        "passed": 1,
+        "pass_rate": 0.25,
+        "wilson_95": [
+          0.0456,
+          0.6994
+        ]
+      },
+      "CWE-918": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "CWE-94": {
+        "n": 18,
+        "passed": 2,
+        "pass_rate": 0.1111,
+        "wilson_95": [
+          0.031,
+          0.328
+        ]
+      }
+    },
+    "ecosystem": {
+      "composer": {
+        "n": 2,
+        "passed": 1,
+        "pass_rate": 0.5,
+        "wilson_95": [
+          0.0945,
+          0.9055
+        ]
+      },
+      "maven": {
+        "n": 5,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.4345
+        ]
+      },
+      "npm": {
+        "n": 134,
+        "passed": 25,
+        "pass_rate": 0.1866,
+        "wilson_95": [
+          0.1297,
+          0.2609
+        ]
+      },
+      "pip": {
+        "n": 54,
+        "passed": 6,
+        "pass_rate": 0.1111,
+        "wilson_95": [
+          0.0519,
+          0.2219
+        ]
+      },
+      "rubygems": {
+        "n": 3,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.5615
+        ]
+      },
+      "rust": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      },
+      "swift": {
+        "n": 1,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.7935
+        ]
+      }
+    },
+    "severity": {
+      "critical": {
+        "n": 21,
+        "passed": 5,
+        "pass_rate": 0.2381,
+        "wilson_95": [
+          0.1063,
+          0.4509
+        ]
+      },
+      "high": {
+        "n": 42,
+        "passed": 10,
+        "pass_rate": 0.2381,
+        "wilson_95": [
+          0.1348,
+          0.3853
+        ]
+      },
+      "medium": {
+        "n": 137,
+        "passed": 17,
+        "pass_rate": 0.1241,
+        "wilson_95": [
+          0.0789,
+          0.1897
+        ]
+      }
+    },
+    "cve_year": {
+      "2013": {
+        "n": 1,
+        "passed": 1,
+        "pass_rate": 1.0,
+        "wilson_95": [
+          0.2065,
+          1.0
+        ]
+      },
+      "2016": {
+        "n": 2,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.6576
+        ]
+      },
+      "2017": {
+        "n": 3,
+        "passed": 1,
+        "pass_rate": 0.3333,
+        "wilson_95": [
+          0.0615,
+          0.7923
+        ]
+      },
+      "2018": {
+        "n": 7,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.3543
+        ]
+      },
+      "2019": {
+        "n": 7,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.3543
+        ]
+      },
+      "2020": {
+        "n": 6,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.3903
+        ]
+      },
+      "2021": {
+        "n": 5,
+        "passed": 0,
+        "pass_rate": 0.0,
+        "wilson_95": [
+          0.0,
+          0.4345
+        ]
+      },
+      "2022": {
+        "n": 24,
+        "passed": 6,
+        "pass_rate": 0.25,
+        "wilson_95": [
+          0.12,
+          0.449
+        ]
+      },
+      "2023": {
+        "n": 26,
+        "passed": 3,
+        "pass_rate": 0.1154,
+        "wilson_95": [
+          0.04,
+          0.2898
+        ]
+      },
+      "2024": {
+        "n": 48,
+        "passed": 4,
+        "pass_rate": 0.0833,
+        "wilson_95": [
+          0.0329,
+          0.1955
+        ]
+      },
+      "2025": {
+        "n": 55,
+        "passed": 15,
+        "pass_rate": 0.2727,
+        "wilson_95": [
+          0.1728,
+          0.4023
+        ]
+      },
+      "2026": {
+        "n": 16,
+        "passed": 2,
+        "pass_rate": 0.125,
+        "wilson_95": [
+          0.035,
+          0.3602
+        ]
+      }
+    }
+  },
+  "efficiency": {
+    "total_cost_usd": 6.8606,
+    "cost_per_pass_usd": 0.2144,
+    "median_gen_time_s": 18.7,
+    "p90_gen_time_s": 28.21,
+    "median_completion_tokens": 1187,
+    "total_reasoning_tokens": 0
+  },
+  "narrative": "anthropic/claude-opus-4.6 passed 32/200 instances (16.0%, 95% CI 11.6%\u201321.7%) with a mean judge score of 0.404.\n\nAcross 3 independent runs the pass rate was 12.0%, 13.0%, 16.0% (mean 13.7% \u00b1 2.1%); 20.5% of instances passed in at least one run and 7.0% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 168 failed instances in the reference run: 67 (40%) because the patch modifies files unrelated to the ground-truth fix; 49 (29%) because the judge scored the patch just below the pass threshold; 33 (20%) because the model understood the issue but the fix was judged inadequate.\n\nJudge reasoning on failures clusters on 'incomplete-scope' (73 instances): its patches most often fixed part of the issue but missed other affected paths the gold fix covered.\n\nRelative strengths: primary cwe CWE-1321: 60% vs suite median 20% (n=5); cve year 2022: 25% vs suite median 0% (n=24); severity critical: 24% vs suite median 0% (n=21); severity high: 24% vs suite median 5% (n=42); cve year 2025: 27% vs suite median 9% (n=55).\n\nCost: $6.86 total generation spend, $0.21 per passing patch, median generation time 19s.",
+  "relative_strengths": [
+    "primary cwe CWE-1321: 60% vs suite median 20% (n=5)",
+    "cve year 2022: 25% vs suite median 0% (n=24)",
+    "severity critical: 24% vs suite median 0% (n=21)",
+    "severity high: 24% vs suite median 5% (n=42)",
+    "cve year 2025: 27% vs suite median 9% (n=55)"
+  ],
+  "relative_weaknesses": []
+}

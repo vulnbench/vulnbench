@@ -25,3 +25,17 @@ pipeline.log
 .vscode/
 .idea/
 *.swp
+
+# Pipeline checkpoints contain pre-sanitization instance data (an answer key)
+# and must never ship next to the test set.
+data/benchmark/checkpoints/
+
+# Never push: 56GB of downloaded repo snapshots, runner logs, incomplete runs
+data/benchmark/sources/
+results/logs/
+*.partial
+.wrangler/
+
+# Retired v1/v2 raw runs stay local (audit substantiation; ~511MB)
+results/run[0-9]_openrouter_*.json
+results/rerun_fixes_*/

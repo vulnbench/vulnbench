@@ -134,30 +134,89 @@ class LiteLLMAdapterRetryTests(unittest.TestCase):
                 reasoning_max_tokens=512,
             )
 
-    def test_openrouter_glm52_disables_default_reasoning(self) -> None:
+    def test_no_per_model_special_casing(self) -> None:
+        """Every model must run under the identical default configuration."""
+        for model in (
+            "openrouter/z-ai/glm-5.2",
+            "openrouter/openai/gpt-5.5",
+            "openrouter/anthropic/claude-fable-5",
+        ):
+            adapter = LiteLLMAdapter(
+                model=model,
+                max_attempts=1,
+                retry_backoff_base_s=0,
+                retry_backoff_jitter_s=0,
+            )
+            self.assertIsNone(adapter.reasoning_enabled, model)
+            self.assertFalse(adapter.reasoning_exclude, model)
+            self.assertIsNone(adapter.reasoning_max_tokens, model)
+            self.assertEqual(adapter.max_tokens, 16384, model)
+
+            with patch(
+                "benchmark.adapters.litellm_adapter.litellm.completion",
+                return_value=_response("diff --git a/a.py b/a.py\n"),
+            ) as completion:
+                adapter.generate_patch("fix this")
+
+            self.assertNotIn("extra_body", completion.call_args.kwargs, model)
+
+    def test_budget_exhaustion_escalates_uniformly(self) -> None:
+        """Empty response with exhausted budget: retry bigger, then exclude reasoning."""
         adapter = LiteLLMAdapter(
-            model="openrouter/z-ai/glm-5.2",
-            max_attempts=1,
+            model="openrouter/provider/model",
+            max_attempts=3,
+            max_tokens=1000,
+            escalated_max_tokens=2000,
             retry_backoff_base_s=0,
             retry_backoff_jitter_s=0,
         )
 
         with patch(
             "benchmark.adapters.litellm_adapter.litellm.completion",
-            return_value=_response("diff --git a/a.py b/a.py\n"),
+            side_effect=[
+                _response("", finish_reason="length", completion_tokens=1000),
+                _response("", finish_reason="length", completion_tokens=2000),
+                _response("diff --git a/a.py b/a.py\n", completion_tokens=50),
+            ],
+        ) as completion:
+            output = adapter.generate_patch("fix this")
+
+        self.assertEqual(output, "diff --git a/a.py b/a.py\n")
+        calls = completion.call_args_list
+        self.assertEqual(calls[0].kwargs["max_tokens"], 1000)
+        self.assertEqual(calls[1].kwargs["max_tokens"], 2000)
+        self.assertEqual(calls[2].kwargs["max_tokens"], 2000)
+        self.assertEqual(
+            calls[2].kwargs["extra_body"]["reasoning"], {"exclude": True}
+        )
+        meta = adapter.last_response_meta
+        self.assertEqual(meta["budget_escalations"], 2)
+        self.assertEqual(meta["final_max_tokens"], 2000)
+        self.assertFalse(meta["budget_exhausted"])
+
+    def test_empty_without_exhausted_budget_retries_same_params(self) -> None:
+        adapter = LiteLLMAdapter(
+            model="openrouter/provider/model",
+            max_attempts=2,
+            max_tokens=1000,
+            retry_backoff_base_s=0,
+            retry_backoff_jitter_s=0,
+        )
+
+        with patch(
+            "benchmark.adapters.litellm_adapter.litellm.completion",
+            side_effect=[
+                _response("", completion_tokens=5),
+                _response("diff --git a/a.py b/a.py\n"),
+            ],
         ) as completion:
             adapter.generate_patch("fix this")
 
-        self.assertEqual(
-            completion.call_args.kwargs["extra_body"],
-            {
-                "reasoning": {"enabled": False, "exclude": True},
-                "include_reasoning": False,
-            },
-        )
-        self.assertEqual(adapter.last_response_meta["reasoning_max_tokens"], 0)
-        self.assertEqual(adapter.last_response_meta["reasoning_enabled"], False)
-        self.assertEqual(adapter.last_response_meta["reasoning_exclude"], True)
+        calls = completion.call_args_list
+        self.assertEqual(calls[0].kwargs["max_tokens"], 1000)
+        self.assertEqual(calls[1].kwargs["max_tokens"], 1000)
+        self.assertNotIn("extra_body", calls[1].kwargs)
+        self.assertEqual(adapter.last_response_meta["budget_escalations"], 0)
 
     def test_reasoning_content_patch_fallback(self) -> None:
         adapter = LiteLLMAdapter(

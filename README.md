@@ -2,148 +2,125 @@
 
 **A benchmark for evaluating large language models on open-source security patch generation.**
 
-VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evaluation subset of 200 instances**. All 16 models have been evaluated on both the curated `VulnBench-200` subset (best-of-3) and the full `VulnBench-1650` benchmark (single pass). The evaluation harness can include vulnerable source context at runtime and supports both no-hint and gold-hint localization modes.
+VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evaluation subset of 200 instances**, built from the GitHub Advisory Database and NVD. Models receive a sanitized advisory (and, where localizable, vulnerable source context) and must produce a unified diff; a pinned cross-vendor LLM judge panel scores each patch against the ground-truth fix.
 
 > Presented at **RSA Conference 2026** by [Ghost Security](https://ghost.security)
 
 ---
 
-## Key Findings
+## ⚠ Status: previous results retired (2026-07)
 
-On the curated `VulnBench-200` subset (best-of-3, description-only hints), the best model — **GPT-5.3 Codex** — patches **22.5% of instances**. On the full `VulnBench-1650` benchmark (single pass), **Claude Opus 4.6** leads at **16.6%**, narrowly ahead of GPT-5.3 Codex at 16.4% — a notable ranking reversal. The median model fixes under 4% of the full benchmark, revealing how much room remains for improvement in AI-assisted security remediation.
+A comprehensive internal audit (91-agent adversarial review; see
+[`REVIEW_FINDINGS.md`](REVIEW_FINDINGS.md)) found that all previously
+published VulnBench leaderboards were affected by harness artifacts, the
+largest being a 4,096-token completion budget that reasoning-heavy models
+exhausted on hidden reasoning — returning empty patches scored as failures
+on up to 100% of instances for some models — plus inconsistent judge
+configurations across leaderboard rows and a selection-biased best-of-3
+protocol.
 
-### VulnBench-200 Leaderboard
+**Those numbers are retired and must not be cited.** The harness defects are
+fixed (all fixes are listed in `REVIEW_FINDINGS.md` with tests), the
+evaluation protocol is now specified normatively in
+[`METHODOLOGY.md`](METHODOLOGY.md), and a full re-run under Protocol v2 is
+required before a new leaderboard is published. Until then this repository
+publishes **tooling and methodology, not rankings**.
 
-This leaderboard is for the **curated 200-instance evaluation subset** using **best-of-3** runs with `--file-hint-mode description`. It should not be treated as equivalent to a full-benchmark score or compared directly to single-run gold-hint results.
-
-| Rank | Model | Pass Rate | Mean Score | Passed | Cost (gen+judge) |
-|:----:|-------|:---------:|:----------:|:------:|-----:|
-| 1 | **OpenAI GPT-5.3 Codex** | **22.5%** | 0.468 | 45/200 | $8.74 |
-| 2 | OpenAI GPT-5.4 | 18.5% | 0.407 | 37/200 | $4.81 |
-| 3 | Anthropic Claude Opus 4.6 | 16.0% | 0.404 | 32/200 | $10.17 |
-| 4 | OpenAI GPT-5.2 | 15.0% | 0.322 | 30/200 | $11.30 |
-| 5 | Anthropic Claude Sonnet 4.6 | 10.5% | 0.322 | 21/200 | $6.87 |
-| 6 | Google Gemini 3 Flash | 7.5% | 0.318 | 15/200 | $3.13 |
-| 7 | Zhipu GLM-5 | 7.0% | 0.249 | 14/200 | $4.26 |
-| 8 | Moonshot Kimi K2.5 | 6.5% | 0.228 | 13/200 | $3.47 |
-| 9 | xAI Grok 4.1 Fast | 5.5% | 0.273 | 11/200 | $3.46 |
-| 10 | OpenAI GPT-5 Mini | 5.0% | 0.275 | 10/200 | $3.63 |
-| 11 | DeepSeek V3.2 | 4.5% | 0.253 | 9/200 | $3.25 |
-| 12 | Anthropic Claude Haiku 4.5 | 3.5% | 0.263 | 7/200 | $3.95 |
-| 13 | Google Gemini 3.1 Pro | 2.5% | 0.093 | 5/200 | $9.60 |
-| 14 | MiniMax M2.5 | 1.5% | 0.181 | 3/200 | $3.25 |
-| 14 | MiniMax M2.7 | 1.5% | 0.099 | 3/200 | $1.74 |
-| 16 | StepFun Step 3.5 Flash | 0.0% | 0.000 | 0/200 | $0.00 |
-
-*All models evaluated on identical 200 CVE instances with best-of-3 variance reduction and description-only file hints.*
-
-### VulnBench-1650 Leaderboard (Full Benchmark)
-
-All 16 models evaluated on the full 1,650-instance benchmark (single pass, description-only file hints).
-
-| Rank | Model | Pass Rate | Mean Score | Passed |
-|:----:|-------|:---------:|:----------:|:------:|
-| 1 | **Anthropic Claude Opus 4.6** | **16.6%** | 0.417 | 273/1650 |
-| 2 | OpenAI GPT-5.3 Codex | 16.4% | 0.301 | 271/1650 |
-| 3 | Anthropic Claude Sonnet 4.6 | 12.2% | 0.335 | 201/1650 |
-| 4 | Google Gemini 3 Flash | 9.7% | 0.311 | 160/1650 |
-| 5 | OpenAI GPT-5.2 | 6.7% | 0.129 | 111/1650 |
-| 6 | Zhipu GLM-5 | 5.9% | 0.219 | 98/1650 |
-| 7 | OpenAI GPT-5 Mini | 5.1% | 0.246 | 85/1650 |
-| 8 | Anthropic Claude Haiku 4.5 | 4.9% | 0.259 | 80/1650 |
-| 9 | Google Gemini 3.1 Pro | 3.5% | 0.097 | 58/1650 |
-| 10 | OpenAI GPT-5.4 | 3.4% | 0.092 | 56/1650 |
-| 10 | Moonshot Kimi K2.5 | 3.4% | 0.102 | 56/1650 |
-| 12 | MiniMax M2.7 | 2.2% | 0.114 | 36/1650 |
-| 13 | MiniMax M2.5 | 2.1% | 0.092 | 35/1650 |
-| 14 | xAI Grok 4.1 Fast | 1.9% | 0.108 | 31/1650 |
-| 15 | DeepSeek V3.2 | 1.7% | 0.094 | 28/1650 |
-| 16 | StepFun Step 3.5 Flash | 0.1% | 0.001 | 2/1650 |
-
-**Notable differences from VulnBench-200:** Claude Opus 4.6 overtakes GPT-5.3 Codex at the top. GPT-5.4 drops from 2nd (18.5%) to 10th (3.4%). Anthropic models (Opus, Sonnet, Haiku) all scale well to the harder full benchmark, as does Gemini 3 Flash.
-
-### Best Value Models
-
-| Model | Pass Rate | Total Cost | Cost per Pass |
-|-------|:---------:|:----------:|:-------------:|
-| MiniMax M2.7 | 1.5% | $1.74 | $0.58 |
-| Gemini 3 Flash | 7.5% | $3.13 | $0.21 |
-| GPT-5.4 | 18.5% | $4.81 | $0.13 |
-| GPT-5.3 Codex | 22.5% | $8.74 | $0.19 |
-| Claude Sonnet 4.6 | 10.5% | $6.87 | $0.33 |
+Diagnostic (non-leaderboard) analyses of the retired runs — including
+per-model explanations of *why* each model scored what it scored, with the
+harness artifacts explicitly separated from capability signals — are in
+[`results/analysis/`](results/analysis/README.md).
 
 ---
 
 ## About VulnBench
 
-### Dataset
+### Datasets
 
-VulnBench is constructed from real CVEs sourced from the GitHub Advisory Database, enriched with NVD metadata:
+Two versioned datasets are shipped (sanitizer v2, 2026-07):
 
-| Property | Value |
-|----------|-------|
-| **CVEs in database** | 10,000+ (2013-2026) |
-| **Benchmark instances** | 1,650 (full) / 200 (curated evaluation subset) |
-| **Unique repositories** | 888 (full) / 200 (curated subset) |
-| **Ecosystems** | npm, pip, Maven, RubyGems, Composer, Rust, Swift |
-| **CWE types** | 55 unique |
-| **Severity distribution** | 21 critical, 42 high, 137 medium |
-| **Mean patch size** | 36 lines changed across 1.9 files |
-| **CVE year range** | 2013-2026 (55% from 2024-2026) |
-| **Difficulty tiers** | Balanced: 67 / 67 / 66 |
+| Property | VulnBench-200 (curated) | VulnBench-1650 (full) |
+|----------|------------------------|----------------------|
+| Instances | 200 | 1,650 |
+| Unique repositories | 200 | 888 |
+| Unique primary CWEs | 48 | 207 |
+| Severity (crit / high / med) | 21 / 42 / 137 | 214 / 448 / 988 |
+| Difficulty tiers (1/2/3) | 67 / 67 / 66 | 354 / 1,106 / 190 |
+| Ecosystems | npm 134, pip 54, maven 5, rubygems 3, other 4 | npm 1,163, pip 474, other 13 |
+| Mean gold patch | 36 lines / 1.9 files | 69 lines / 3.2 files |
+| CVE years | 2013–2026 (60% ≥ 2024) | 2013–2026 (59% ≥ 2024) |
 
-### Top CWE Categories
+Top CWE categories (curated set): XSS (CWE-79, 38), Path Traversal (CWE-22,
+25), Resource Consumption (CWE-400, 25), Input Validation (CWE-20, 23),
+Code Injection (CWE-94, 18).
 
-| CWE | Description | Count |
-|-----|------------|:-----:|
-| CWE-79 | Cross-Site Scripting (XSS) | 38 |
-| CWE-22 | Path Traversal | 25 |
-| CWE-400 | Uncontrolled Resource Consumption | 25 |
-| CWE-20 | Improper Input Validation | 23 |
-| CWE-94 | Code Injection | 19 |
-| CWE-1321 | Prototype Pollution | 5 |
-| CWE-1333 | ReDoS | 5 |
-| CWE-89 | SQL Injection | 4 |
-| CWE-200 | Information Disclosure | 4 |
+The full set is more repo-concentrated and tier-imbalanced than the curated
+set (tier 2 is the default bucket for unmapped CWEs); prefer the curated set
+for model comparisons and treat tiers as a browsing aid, not a validated
+difficulty scale.
 
-### Evaluation Methodology
+### Evaluation protocol (v2 summary)
 
-Each model receives:
-1. The CVE description and severity information
-2. CWE-specific guidance for the vulnerability class
-3. Optional vulnerable source context from the affected repository snapshot
-4. Optional file localization hints, configurable at evaluation time
-5. Instructions to generate a minimal unified diff that fixes the vulnerability
+The complete normative specification is [`METHODOLOGY.md`](METHODOLOGY.md).
+Highlights:
 
-Default evaluation settings in this repo are conservative:
+- **Identical treatment for every model.** Same prompts, temperature 0,
+  16,384-token completion budget with a uniform escalation ladder when
+  hidden reasoning exhausts it (retry at 32,768, then with reasoning
+  excluded). No per-model configuration of any kind — enforced by test.
+- **Pinned cross-vendor judge panel** (Claude Opus 4.8 + GPT-5.5): pass
+  requires a strict majority AND median score ≥ 0.5; split votes are
+  adjudicated by a third-vendor tie-breaker judge (Gemini 3.5 Flash).
+  **No model ever judges its own patches** — a candidate appearing on the
+  panel has its seat filled by the adjudicator.
+- **Statistics, not point estimates.** Mean pass rate across 3 independent
+  runs with 95% Wilson intervals; pass@3 reported separately; leaderboard
+  ranks carry statistical tie groups from a paired bootstrap. "Best run of
+  N" is never reported.
+- **Artifact accounting.** Every instance records finish reason, truncation,
+  parse mode, provider, retries, and judge quorum, so harness/provider
+  failures are visible and gated (rows with > 2% artifacts are not
+  publishable).
+- **Provenance.** Every report stamps the harness git commit, dataset
+  SHA-256, and all generation/judge parameters.
 
-- `--include-source` is enabled by default
-- `--file-hint-mode description` derives file localization only from filenames present in the advisory text
-- `--file-hint-mode gold` is still supported for ablations, but should be reported separately because those hints come from the reference fix
-- Benchmark generation scrubs direct patch hashes, commit URLs, exact fix references, and versioned patch hints from advisory text
+### Per-model "why" reports
 
-**Scoring** uses an LLM-as-judge approach (Claude Opus 4.6) that compares each candidate patch against the ground-truth fix commit:
+`benchmark/model_report.py` turns raw results into the benchmark's most
+useful output: for every model, a markdown card and JSON payload explaining
+*why* it performed the way it did — failure-mode taxonomy (budget
+exhaustion, empty response, non-diff output, wrong-file patch, near-miss,
+insufficient fix), judge-reasoning clusters, pass rates by CWE / tier /
+ecosystem / severity / CVE year with confidence intervals and deviations
+from the suite median, run-to-run variance, and cost. The suite index it
+generates is the canonical leaderboard rendering and refuses to rank models
+evaluated under different judge configurations.
 
-- **Root cause**: Does the patch address the underlying vulnerability?
-- **Safety**: Does it avoid introducing new security issues?
-- **Scope**: Does it cover the full extent of the required fix?
-- Score range: 0.0 - 1.0. An instance passes only when the judge returns `verdict="pass"` and `score >= 0.5`
-
-The harness stores normalized and raw judge verdicts, flags score/verdict disagreements, and tracks judge cost separately so judge behavior can be audited directly.
+```bash
+python -m benchmark.model_report \
+    --benchmark data/benchmark/vulnbench_200.json \
+    --reports results/run?_openrouter_*.json \
+    --output-dir results/analysis
+```
 
 ---
 
-## Reproduce the Results
-
-### Security Notice: litellm Supply Chain Attack
-
-> **litellm versions 1.82.7 and 1.82.8 contain a malicious payload** that steals credentials on Python startup. See [BerriAI/litellm#24512](https://github.com/BerriAI/litellm/issues/24512). VulnBench pins its dependency to exclude these versions (`!=1.82.7,!=1.82.8`) and includes a runtime check that halts execution if the malicious `litellm_init.pth` file is detected. If you have previously installed litellm 1.82.7 or 1.82.8, remove it immediately, delete `litellm_init.pth` from your site-packages, and **rotate all credentials** on the affected machine.
+## Running an evaluation
 
 ### Requirements
 
-- Python 3.10+
-- `gh` CLI (authenticated via `gh auth login`)
-- OpenRouter API key (or individual provider keys)
+- Python 3.9+
+- OpenRouter API key (or individual provider keys via LiteLLM)
+- `gh` CLI (only for building datasets from scratch)
+
+### Security notice: litellm supply-chain attack
+
+> **litellm 1.82.7 / 1.82.8 contain a malicious credential-stealing
+> payload** ([BerriAI/litellm#24512](https://github.com/BerriAI/litellm/issues/24512)).
+> VulnBench pins its dependency to exclude these versions and halts at
+> startup if the malicious `litellm_init.pth` is detected. If you ever
+> installed an affected version: remove it, delete the `.pth` file, and
+> rotate all credentials.
 
 ### Setup
 
@@ -151,139 +128,113 @@ The harness stores normalized and raw judge verdicts, flags score/verdict disagr
 git clone https://github.com/vulnbench/vulnbench.git
 cd vulnbench
 pip install -r requirements.txt
-
-# Set your API key
 echo "OPENROUTER_API_KEY=sk-or-..." > .env
 ```
 
-### Run Evaluation
+### Single model, single run
 
 ```bash
-# Single model
 python -m benchmark.run_eval \
     --benchmark data/benchmark/vulnbench_200.json \
-    --model openrouter/openai/gpt-5.4 \
+    --model openrouter/openai/gpt-5.5 \
     --include-source \
     --file-hint-mode description \
     --output results/my_eval.json
+```
 
-# Compare multiple models
-python -m benchmark.compare \
-    --benchmark data/benchmark/vulnbench_200.json \
-    --models openrouter/openai/gpt-5.4 openrouter/anthropic/claude-sonnet-4.6 \
-    --include-source \
-    --file-hint-mode description \
-    --output results/comparison.json
+### Leaderboard row (3 independent runs, mean ± CI)
 
-# Best-of-N runs (report separately from single-run scores)
+```bash
 python -m benchmark.run_best_of_n \
     --benchmark data/benchmark/vulnbench_200.json \
-    --model openrouter/openai/gpt-5.4 \
+    --model openrouter/openai/gpt-5.5 \
     --runs 3 \
     --include-source \
     --file-hint-mode description \
-    --output results/best3_gpt-5.4.json
+    --output results/mean3_gpt-5.5.json
 ```
 
-### Judge Validation
+The summary report's `metadata.across_runs` holds the headline numbers
+(mean pass rate, std, pooled Wilson CI, pass@3). Suite runners:
+`./run_curated_200_best3.sh`, `./run_full_1650.sh` (models in
+`benchmark/model_suites.sh`).
+
+### Re-judging stored patches under a pinned panel
+
+When the judge panel changes, stored patches are re-scored — generation is
+never silently redone and mixed-judge tables are never published:
 
 ```bash
-# Summarize contradictions / near-threshold cases
-python -m benchmark.judge_validation \
-    --report results/my_eval.json
-
-# Export a human review sample
-python -m benchmark.judge_validation \
-    --report results/my_eval.json \
-    --sample-output results/my_eval_review_sample.json \
-    --sample-size 50
-
-# Compare multiple reports (for inter-judge agreement or reruns)
-python -m benchmark.judge_validation \
-    --compare results/eval_judge_a.json results/eval_judge_b.json
-```
-
-### Sanitize Existing Benchmark Files
-
-```bash
-python -m benchmark.sanitize_dataset \
-    data/benchmark/vulnbench_full.json \
-    data/benchmark/vulnbench_200.json \
-    data/benchmark/vulnbench_mini.json
-```
-
-### Build Dataset from Scratch
-
-```bash
-# Full pipeline: collect CVEs -> enrich -> resolve -> version -> validate -> benchmark
-python main.py
-
-# Or run individual stages
-python main.py --stage collect --limit 100
-python main.py --stage benchmark --benchmark-mini-size 200
-```
-
-### Custom Judge Model
-
-The default judge is Claude Opus 4.6 via OpenRouter. Override with any LiteLLM-compatible model:
-
-```bash
-python -m benchmark.run_eval \
+python -m benchmark.rejudge \
     --benchmark data/benchmark/vulnbench_200.json \
-    --model openrouter/openai/gpt-5.4 \
-    --judge-model openrouter/openai/gpt-5.4
+    --reports results/run?_openrouter_*.json \
+    --judge-models openrouter/anthropic/claude-opus-4.8 openrouter/openai/gpt-5.5 \
+    --output-dir results/rejudged \
+    --dry-run   # prints judge-call count and cost estimate first
+```
+
+### Judge validation
+
+```bash
+python -m benchmark.judge_validation --report results/my_eval.json
+python -m benchmark.judge_validation --report results/my_eval.json \
+    --sample-output results/review_sample.json --sample-size 50
+python -m benchmark.judge_validation --compare results/a.json results/b.json
+```
+
+### Sanitize / rebuild datasets
+
+```bash
+python -m benchmark.sanitize_dataset data/benchmark/vulnbench_200.json ...
+python main.py                 # full pipeline: collect → enrich → resolve → version → validate → benchmark
 ```
 
 ---
 
-## Architecture
+## Limitations
 
-### Data Pipeline
+Read before citing any VulnBench number:
 
-Six sequential stages with checkpoint persistence (safe to interrupt and resume):
-
-1. **Collect** — Fetch advisories from GitHub Advisory Database via `gh` CLI
-2. **Enrich** — Add CVSS scores and CWE IDs from NVD API
-3. **Resolve** — Map packages to GitHub repo URLs via registry lookups
-4. **Version** — Find vulnerable versions, construct download URLs, extract fix commits
-5. **Validate** — Deduplicate, filter incomplete records
-6. **Benchmark** — Generate VulnBench instances with quality scoring and difficulty tiers
-
-### Evaluation Harness
-
-- `benchmark/run_eval.py` — Single-model evaluation with LLM judge
-- `benchmark/run_eval_skills.py` — Skills-augmented evaluation (injects SAST analysis criteria into prompts)
-- `benchmark/compare.py` — Multi-model comparison with summary tables
-- `benchmark/run_best_of_n.py` — Best-of-N runner for variance reduction
-- `benchmark/skills/` — Security analysis criteria adapted from [Ghost Security scan-code](https://github.com/ghostsecurity/skills)
-- `benchmark/adapters/` — Protocol-based model adapters (LiteLLM supports 100+ providers)
-
-### Difficulty Tiers
-
-| Tier | Category | CWE Examples | Description |
-|:----:|----------|-------------|-------------|
-| 1 | Pattern | CWE-79, CWE-89, CWE-22 | Well-known fix patterns (escape output, parameterize queries, sanitize paths) |
-| 2 | Logic | CWE-862, CWE-352, CWE-200 | Requires understanding application logic (add auth checks, CSRF tokens) |
-| 3 | Deep | CWE-94, CWE-400, CWE-20 | Requires deep reasoning about code execution, resource limits, input validation |
+- **LLM-as-judge.** Patches are scored by LLMs against the gold fix, not by
+  executing tests. Judges are imperfect; the cross-vendor panel, third-vendor
+  adjudication, self-judging exclusion, and stored per-judge artifacts
+  mitigate but do not eliminate this. A mechanical apply-check and human
+  calibration study are on the roadmap.
+- **Contamination.** CVEs and their fixes are public and may appear in
+  training data. Pass rates by CVE year are reported per model so readers
+  can weight post-cutoff instances; contamination-freedom is not claimed.
+- **Source context is partial.** With description-derived localization,
+  most instances carry no source snippet (the advisory names no files);
+  this is uniform across models and recorded per instance
+  (`source_context_present`). Gold-hint mode requires a hints-retained
+  dataset variant and is currently inert on the shipped datasets.
+- **Dataset noise.** Known issues queued for the next dataset release:
+  some source snapshots are not the exact pre-fix revision, some gold
+  patches are release commits rather than code fixes, and the full set
+  contains duplicate gold diffs and repo concentration. See
+  `REVIEW_FINDINGS.md` for quantification.
+- **Tiers are heuristic.** CWE-based tiers do not empirically order
+  difficulty; rankings never depend on them.
 
 ---
 
-## Data Outputs
+## Repository layout
 
-| File | Description |
-|------|-------------|
-| `data/cve_database.json` | Full CVE database (10,000+ records) |
-| `data/benchmark/vulnbench_full.json` | Full benchmark (1,650 instances) |
-| `data/benchmark/vulnbench_200.json` | Curated 200-instance evaluation subset |
-| `results/best3_*.json` | VulnBench-200 best-of-3 reports per model |
-| `results/full_*.json` | VulnBench-1650 single-pass reports per model |
-| `results/skills/` | Skills-augmented evaluation reports (experimental) |
-
----
+| Path | Purpose |
+|------|---------|
+| `benchmark/run_eval.py` | Core evaluation harness (prompt → patch → judge panel) |
+| `benchmark/run_best_of_n.py` | Multi-run evaluation with mean ± CI reporting |
+| `benchmark/rejudge.py` | Re-score stored patches under a pinned judge panel |
+| `benchmark/model_report.py` | Per-model "why" cards + comparability-guarded leaderboard |
+| `benchmark/stats.py` | Wilson CIs, paired bootstrap, tie groups |
+| `benchmark/judge_validation.py` | Judge agreement / human-review sampling |
+| `benchmark/sanitize_dataset.py` | Advisory leakage scrubbing (v2) |
+| `benchmark/provenance.py` | Harness/dataset version stamping |
+| `src/` | Dataset construction pipeline (GHSA → NVD → repo → instance) |
+| `METHODOLOGY.md` | Normative evaluation protocol (v2) |
+| `REVIEW_FINDINGS.md` | 2026-07 audit: 81 verified findings + remediation status |
 
 ## Citation
-
-If you use VulnBench in your research, please cite:
 
 ```
 @misc{vulnbench2026,
@@ -296,4 +247,8 @@ If you use VulnBench in your research, please cite:
 
 ## License
 
-This project is provided for research purposes. The CVE data is sourced from public databases (GitHub Advisory Database, NVD). Benchmark instances reference publicly available open-source repositories.
+**Not yet licensed** — a license grant (code + dataset) is pending; the CVE
+metadata derives from the GitHub Advisory Database (CC-BY 4.0, attribution
+being added) and NVD, and benchmark instances reference publicly available
+open-source repositories whose individual licenses apply to quoted patch
+content. Do not redistribute until this section is resolved.

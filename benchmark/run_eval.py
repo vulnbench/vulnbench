@@ -70,6 +70,10 @@ DEFAULT_JUDGE_MODELS = [
     JUDGE_MODEL,
     "openrouter/openai/gpt-5.5",
 ]
+# Cross-vendor adjudicator: breaks split panel votes and fills the seat of any
+# panel judge that would otherwise be scoring its own patches.
+DEFAULT_TIE_BREAKER_JUDGE = "openrouter/google/gemini-3.5-flash"
+CONSENSUS_VOTING_RULE = "majority_median_adjudicated"
 
 JUDGE_SYSTEM_PROMPT = """\
 You are a security patch reviewer. You evaluate whether a proposed patch \
@@ -107,8 +111,11 @@ SOURCE_CONTEXT_FILE_LIMIT = 3
 SOURCE_CONTEXT_CHAR_LIMIT = 6000
 LITELLM_TIMEOUT_SECONDS = 300.0
 JUDGE_MAX_ATTEMPTS = 3
-JUDGE_MAX_TOKENS = 1024
+# Shared with hidden judge reasoning on some providers; 1024 caused silent
+# judge truncation/abstention for reasoning-heavy judges.
+JUDGE_MAX_TOKENS = 4096
 JUDGE_RETRY_BACKOFF_SECONDS = 2.0
+DEFAULT_MAX_TOKENS = 16384
 DESCRIPTION_FILE_RE = re.compile(
     r"\b([A-Za-z0-9_./-]+\.(?:py|js|ts|tsx|jsx|java|rb|php|rs|swift|go|c|cc|cpp|h|hpp|cs|scala|kt|kts|m|mm|vue|svelte))\b"
 )
@@ -230,36 +237,53 @@ def render_prompt_parts(
     return system_msg, user_msg
 
 
-def parse_diff_from_output(output: str) -> str:
-    """Extract a unified diff from model output."""
-    # Try fenced code block first
-    fence_match = re.search(
-        r"```(?:diff|patch)?\s*\n(.*?)```",
-        output,
-        re.DOTALL,
-    )
-    if fence_match:
-        return fence_match.group(1).strip()
+_DIFF_MARKER_RE = re.compile(r"(?m)^(diff --git|--- |\+\+\+ |@@ )")
 
-    # Try raw diff
-    diff_match = re.search(
-        r"(diff --git.*)",
+
+def parse_diff_with_mode(output: str) -> tuple[str, str]:
+    """Extract a unified diff from model output.
+
+    Returns (patch, parse_mode). parse_mode records HOW the patch was
+    obtained so downstream analysis can distinguish clean diffs from
+    fallback text that reached the judge:
+      fenced       — a ``` block containing diff markers
+      raw_diff     — a bare "diff --git" section
+      hunk         — a bare ---/+++/@@ section
+      fallback_raw — no diff structure found; raw output returned as-is
+      empty        — no output at all
+    """
+    if not output.strip():
+        return "", "empty"
+
+    # Prefer the first fenced block that actually contains diff markers —
+    # reasoning models often emit explanatory fenced code before the patch.
+    for fence_match in re.finditer(
+        r"```(?:diff|patch|[a-zA-Z0-9_+-]*)?\s*\n(.*?)```",
         output,
         re.DOTALL,
-    )
+    ):
+        block = fence_match.group(1).strip()
+        if _DIFF_MARKER_RE.search(block):
+            return block, "fenced"
+
+    diff_match = re.search(r"(diff --git.*)", output, re.DOTALL)
     if diff_match:
-        return diff_match.group(1).strip()
+        return diff_match.group(1).strip(), "raw_diff"
 
-    # Try --- / +++ block
     patch_match = re.search(
         r"(---\s+\S+.*?\n\+\+\+\s+\S+.*?\n@@.*)",
         output,
         re.DOTALL,
     )
     if patch_match:
-        return patch_match.group(1).strip()
+        return patch_match.group(1).strip(), "hunk"
 
-    return output.strip()
+    return output.strip(), "fallback_raw"
+
+
+def parse_diff_from_output(output: str) -> str:
+    """Extract a unified diff from model output (mode discarded)."""
+    return parse_diff_with_mode(output)[0]
 
 
 def _empty_patch_analysis(judge_model: str = "") -> PatchAnalysis:
@@ -447,7 +471,13 @@ def combine_judge_analyses(
     )
     fail_votes = len(voting_analyses) - pass_votes
     abstentions = len(analyses) - len(voting_analyses)
-    consensus_verdict = "pass" if pass_votes >= fail_votes else "fail"
+    # A patch passes only on a strict majority of completed judges AND a
+    # median score at or above the documented 0.5 threshold. Split votes are
+    # resolved by the adjudicator BEFORE this function runs (making the
+    # effective panel odd); an unresolved tie fails.
+    consensus_verdict = (
+        "pass" if pass_votes > fail_votes and median_score >= 0.5 else "fail"
+    )
     all_same_verdict = (
         pass_votes == len(voting_analyses) or fail_votes == len(voting_analyses)
     )
@@ -461,7 +491,7 @@ def combine_judge_analyses(
         for model, analysis in analyses.items()
     )
     reasoning = (
-        f"Consensus by pass-tie vote: {consensus_verdict}. "
+        f"Consensus ({CONSENSUS_VOTING_RULE}): {consensus_verdict}. "
         f"Median score: {median_score:.4f}. "
         f"Abstentions: {abstentions}. Judge votes: {vote_summary}"
     )
@@ -481,12 +511,55 @@ def combine_judge_analyses(
     )
 
 
+def resolve_judge_panel(
+    candidate_model: str | None,
+    judge_models: list[str],
+    alternate_judge: str | None,
+) -> list[str]:
+    """No model may vote on its own patches.
+
+    If the candidate model sits on the judge panel, its seat is filled by the
+    alternate (adjudicator) judge instead. Falls back to simply dropping the
+    seat if no alternate is available or the alternate is the candidate too.
+    """
+    if not candidate_model:
+        return list(judge_models)
+
+    resolved: list[str] = []
+    for judge in judge_models:
+        if judge != candidate_model:
+            resolved.append(judge)
+        elif (
+            alternate_judge
+            and alternate_judge != candidate_model
+            and alternate_judge not in judge_models
+        ):
+            logger.info(
+                "Judge %s is the candidate model; seat filled by %s",
+                judge,
+                alternate_judge,
+            )
+            resolved.append(alternate_judge)
+        else:
+            logger.warning(
+                "Judge %s is the candidate model and no alternate is available; "
+                "dropping the seat",
+                judge,
+            )
+    return resolved or list(judge_models)
+
+
 def judge_patch_with_models(
     instance: BenchmarkInstance,
     model_patch: str,
     judge_models: list[str],
+    tie_breaker_judge: str | None = DEFAULT_TIE_BREAKER_JUDGE,
 ) -> tuple[PatchAnalysis, dict[str, PatchAnalysis]]:
-    """Evaluate a patch with one or more judges and return consensus + details."""
+    """Evaluate a patch with one or more judges and return consensus + details.
+
+    An even split among completed panel judges is adjudicated by
+    ``tie_breaker_judge`` (a third vote), making the effective panel odd.
+    """
     if len(judge_models) == 1:
         analysis = judge_patch(instance, model_patch, judge_model=judge_models[0])
         return analysis, {judge_models[0]: analysis}
@@ -495,6 +568,22 @@ def judge_patch_with_models(
         judge_model: judge_patch(instance, model_patch, judge_model=judge_model)
         for judge_model in judge_models
     }
+
+    voting = [
+        a for a in analyses.values() if a.raw_judge_verdict != "judge_error"
+    ]
+    pass_votes = sum(1 for a in voting if a.judge_verdict == "pass")
+    fail_votes = len(voting) - pass_votes
+    if (
+        pass_votes == fail_votes
+        and voting
+        and tie_breaker_judge
+        and tie_breaker_judge not in analyses
+    ):
+        analyses[tie_breaker_judge] = judge_patch(
+            instance, model_patch, judge_model=tie_breaker_judge
+        )
+
     return combine_judge_analyses(analyses), analyses
 
 
@@ -517,10 +606,18 @@ def evaluate_instance(
     file_hint_mode: str = "description",
     max_source_files: int = SOURCE_CONTEXT_FILE_LIMIT,
     max_source_chars: int = SOURCE_CONTEXT_CHAR_LIMIT,
+    candidate_model: str | None = None,
+    tie_breaker_judge: str | None = DEFAULT_TIE_BREAKER_JUDGE,
 ) -> InstanceResult:
     """Evaluate a single benchmark instance."""
     is_litellm = _is_litellm_adapter(adapter)
-    active_judge_models = judge_models or [judge_model]
+    if candidate_model is None and is_litellm:
+        candidate_model = getattr(adapter, "model", None)
+    active_judge_models = resolve_judge_panel(
+        candidate_model,
+        judge_models or [judge_model],
+        tie_breaker_judge,
+    )
     include_file_hints = file_hint_mode == "gold"
     source_context = ""
     generation_error = ""
@@ -572,6 +669,11 @@ def evaluate_instance(
     reasoning_effort = ""
     reasoning_max_tokens = 0
     reasoning_exclude = False
+    finish_reason = ""
+    truncated = False
+    budget_escalations = 0
+    used_reasoning_content = False
+    provider = ""
     if is_litellm:
         meta = adapter.last_response_meta
         prompt_tokens = meta.get("prompt_tokens", 0)
@@ -584,9 +686,14 @@ def evaluate_instance(
         reasoning_effort = meta.get("reasoning_effort", "")
         reasoning_max_tokens = meta.get("reasoning_max_tokens", 0)
         reasoning_exclude = meta.get("reasoning_exclude", False)
+        finish_reason = meta.get("finish_reason", "")
+        truncated = bool(meta.get("budget_exhausted", False))
+        budget_escalations = meta.get("budget_escalations", 0)
+        used_reasoning_content = meta.get("used_reasoning_content", False)
+        provider = meta.get("provider", "")
 
     # Parse diff from output
-    model_patch = parse_diff_from_output(raw_output)
+    model_patch, patch_parse_mode = parse_diff_with_mode(raw_output)
 
     # Judge the patch
     if generation_error:
@@ -604,9 +711,13 @@ def evaluate_instance(
             instance,
             model_patch,
             active_judge_models,
+            tie_breaker_judge=tie_breaker_judge,
         )
     score = analysis.judge_score
     passed = analysis.judge_verdict == "pass"
+    judge_quorum_met = all(
+        a.raw_judge_verdict != "judge_error" for a in judge_analyses.values()
+    )
 
     return InstanceResult(
         instance_id=instance.instance_id,
@@ -631,6 +742,14 @@ def evaluate_instance(
         reasoning_effort=reasoning_effort,
         reasoning_max_tokens=reasoning_max_tokens,
         reasoning_exclude=reasoning_exclude,
+        finish_reason=finish_reason,
+        truncated=truncated,
+        budget_escalations=budget_escalations,
+        used_reasoning_content=used_reasoning_content,
+        patch_parse_mode=patch_parse_mode,
+        source_context_present=bool(source_context),
+        provider=provider,
+        judge_quorum_met=judge_quorum_met,
     )
 
 
@@ -815,6 +934,8 @@ def build_report(
     include_source: bool = True,
     file_hint_mode: str = "description",
     max_tokens: int | None = None,
+    temperature: float | None = None,
+    tie_breaker_judge: str | None = None,
     reasoning_effort: str | None = None,
     reasoning_max_tokens: int | None = None,
     reasoning_exclude: bool | None = None,
@@ -823,17 +944,24 @@ def build_report(
     adapter_process_timeout: bool | None = None,
 ) -> EvalReport:
     """Build an EvalReport from results and metadata."""
+    from benchmark.provenance import provenance_metadata
+
     aggregate = compute_aggregate(results)
 
     metadata: dict = {
         "benchmark": benchmark_path,
-        "evaluated_at": datetime.now(timezone.utc).isoformat() + "Z",
+        "evaluated_at": datetime.now(timezone.utc).isoformat(),
         "total_instances": len(results),
         "judge_model": judge_model,
         "judge_models": judge_models or [judge_model],
+        "consensus_voting_rule": CONSENSUS_VOTING_RULE,
+        "tie_breaker_judge": tie_breaker_judge,
         "include_source": include_source,
         "file_hint_mode": file_hint_mode,
+        **provenance_metadata(benchmark_path),
     }
+    if temperature is not None:
+        metadata["temperature"] = temperature
     if model_name:
         metadata["model"] = model_name
     if adapter_name:
@@ -920,8 +1048,13 @@ def main():
     parser.add_argument(
         "--max-tokens",
         type=int,
-        default=4096,
-        help="Max response tokens for LiteLLM models (default: 4096)",
+        default=DEFAULT_MAX_TOKENS,
+        help=(
+            "Max response tokens for LiteLLM models, shared with provider "
+            f"reasoning (default: {DEFAULT_MAX_TOKENS}; empty responses that "
+            "exhaust it are retried at double the budget, then with "
+            "reasoning excluded — uniformly for every model)"
+        ),
     )
     parser.add_argument(
         "--reasoning-effort",
@@ -983,8 +1116,11 @@ def main():
     parser.add_argument(
         "--judge-model",
         type=str,
-        default=JUDGE_MODEL,
-        help=f"LiteLLM model ID for the judge (default: {JUDGE_MODEL})",
+        default=None,
+        help=(
+            "Single LiteLLM judge model ID; overrides the default panel. "
+            f"(panel default: {', '.join(DEFAULT_JUDGE_MODELS)})"
+        ),
     )
     parser.add_argument(
         "--judge-models",
@@ -992,9 +1128,19 @@ def main():
         default=None,
         help=(
             "One or more LiteLLM judge model IDs. When multiple are provided, "
-            "VulnBench stores each judge result and scores by consensus. "
-            "Defaults to the standard multi-judge panel unless --judge-model "
-            "is explicitly set."
+            "VulnBench stores each judge result and scores by consensus "
+            "(strict majority + median >= 0.5; split votes adjudicated by "
+            "--tie-breaker-judge). Defaults to the standard panel."
+        ),
+    )
+    parser.add_argument(
+        "--tie-breaker-judge",
+        type=str,
+        default=DEFAULT_TIE_BREAKER_JUDGE,
+        help=(
+            "Cross-vendor adjudicator that breaks split panel votes and "
+            "fills the seat of a judge that would score its own patches "
+            f"(default: {DEFAULT_TIE_BREAKER_JUDGE}; pass 'none' to disable)"
         ),
     )
     parser.add_argument(
@@ -1057,14 +1203,20 @@ def main():
 
     if args.judge_models:
         active_judge_models = args.judge_models
-    elif args.judge_model != JUDGE_MODEL:
+    elif args.judge_model:
         active_judge_models = [args.judge_model]
     else:
         active_judge_models = DEFAULT_JUDGE_MODELS
+    tie_breaker_judge = (
+        None
+        if (args.tie_breaker_judge or "").lower() in ("", "none")
+        else args.tie_breaker_judge
+    )
     logger.info(
-        "Evaluating %d instances (judges: %s)",
+        "Evaluating %d instances (judges: %s; tie-breaker: %s)",
         len(instances),
         ", ".join(active_judge_models),
+        tie_breaker_judge or "disabled",
     )
 
     # Load adapter
@@ -1105,13 +1257,30 @@ def main():
     if args.resume and checkpoint_path.exists():
         try:
             checkpoint = EvalReport(**json.loads(checkpoint_path.read_text()))
-            results = checkpoint.results
-            completed_ids = {r.instance_id for r in results}
-            logger.info(
-                "Resuming from %s with %d completed instances",
-                checkpoint_path,
-                len(results),
+            cp_meta = checkpoint.metadata
+            compatible = (
+                cp_meta.get("model") == model_name
+                and cp_meta.get("adapter") == adapter_name
+                and cp_meta.get("judge_models") == active_judge_models
+                and cp_meta.get("include_source") == args.include_source
+                and cp_meta.get("file_hint_mode") == args.file_hint_mode
+                and cp_meta.get("max_tokens") in (None, args.max_tokens)
+                and cp_meta.get("benchmark") == args.benchmark
             )
+            if compatible:
+                results = checkpoint.results
+                completed_ids = {r.instance_id for r in results}
+                logger.info(
+                    "Resuming from %s with %d completed instances",
+                    checkpoint_path,
+                    len(results),
+                )
+            else:
+                logger.warning(
+                    "Checkpoint %s was produced under a different configuration; "
+                    "starting fresh so one report never mixes settings",
+                    checkpoint_path,
+                )
         except Exception as exc:
             logger.warning("Ignoring unreadable checkpoint %s: %s", checkpoint_path, exc)
 
@@ -1121,12 +1290,14 @@ def main():
         result = evaluate_instance(
             instance,
             adapter,
-            judge_model=args.judge_model,
+            judge_model=active_judge_models[0],
             judge_models=active_judge_models,
             include_source=args.include_source,
             file_hint_mode=args.file_hint_mode,
             max_source_files=args.max_source_files,
             max_source_chars=args.max_source_chars,
+            candidate_model=model_name,
+            tie_breaker_judge=tie_breaker_judge,
         )
         results.append(result)
         pbar.set_postfix(
@@ -1139,11 +1310,13 @@ def main():
                 benchmark_path=args.benchmark,
                 model_name=model_name,
                 adapter_name=adapter_name,
-                judge_model=args.judge_model,
+                judge_model=active_judge_models[0],
                 judge_models=active_judge_models,
                 include_source=args.include_source,
                 file_hint_mode=args.file_hint_mode,
                 max_tokens=args.max_tokens if args.model else None,
+                temperature=args.temperature if args.model else None,
+                tie_breaker_judge=tie_breaker_judge,
                 reasoning_effort=args.reasoning_effort,
                 reasoning_max_tokens=args.reasoning_max_tokens,
                 reasoning_exclude=args.reasoning_exclude if args.model else None,
@@ -1164,11 +1337,13 @@ def main():
         benchmark_path=args.benchmark,
         model_name=model_name,
         adapter_name=adapter_name,
-        judge_model=args.judge_model,
+        judge_model=active_judge_models[0],
         judge_models=active_judge_models,
         include_source=args.include_source,
         file_hint_mode=args.file_hint_mode,
         max_tokens=args.max_tokens if args.model else None,
+        temperature=args.temperature if args.model else None,
+        tie_breaker_judge=tie_breaker_judge,
         reasoning_effort=args.reasoning_effort,
         reasoning_max_tokens=args.reasoning_max_tokens,
         reasoning_exclude=args.reasoning_exclude if args.model else None,

@@ -7,7 +7,12 @@ import unittest
 from unittest.mock import patch
 
 from benchmark.eval_models import PatchAnalysis
-from benchmark.run_eval import combine_judge_analyses, judge_patch
+from benchmark.run_eval import (
+    combine_judge_analyses,
+    judge_patch,
+    judge_patch_with_models,
+    resolve_judge_panel,
+)
 
 
 def _instance() -> SimpleNamespace:
@@ -93,7 +98,8 @@ class MultiJudgeConsensusTests(unittest.TestCase):
         self.assertEqual(consensus.raw_judge_verdict, "pass:2,fail:0,abstain:1")
         self.assertAlmostEqual(consensus.judge_cost_usd, 0.6)
 
-    def test_two_judge_disagreement_passes_on_one_pass_vote(self) -> None:
+    def test_two_judge_split_without_adjudicator_fails(self) -> None:
+        """An unresolved 1-1 split must fail — a tie is not a majority."""
         consensus = combine_judge_analyses(
             {
                 "judge-a": PatchAnalysis(
@@ -109,10 +115,115 @@ class MultiJudgeConsensusTests(unittest.TestCase):
             }
         )
 
-        self.assertEqual(consensus.judge_verdict, "pass")
+        self.assertEqual(consensus.judge_verdict, "fail")
         self.assertEqual(consensus.judge_score, 0.5)
         self.assertEqual(consensus.raw_judge_verdict, "pass:1,fail:1")
         self.assertFalse(consensus.judge_consistent)
+
+    def test_majority_pass_with_low_median_fails(self) -> None:
+        """Documented rule: pass requires median score >= 0.5, not just votes."""
+        consensus = combine_judge_analyses(
+            {
+                "judge-a": PatchAnalysis(
+                    judge_model="judge-a", judge_score=0.4, judge_verdict="pass"
+                ),
+                "judge-b": PatchAnalysis(
+                    judge_model="judge-b", judge_score=0.45, judge_verdict="pass"
+                ),
+                "judge-c": PatchAnalysis(
+                    judge_model="judge-c", judge_score=0.1, judge_verdict="fail"
+                ),
+            }
+        )
+        self.assertEqual(consensus.judge_verdict, "fail")
+
+    def test_split_panel_is_adjudicated_by_tie_breaker(self) -> None:
+        analyses = {
+            "judge-a": PatchAnalysis(
+                judge_model="judge-a", judge_score=0.8, judge_verdict="pass"
+            ),
+            "judge-b": PatchAnalysis(
+                judge_model="judge-b", judge_score=0.2, judge_verdict="fail"
+            ),
+            "adjudicator": PatchAnalysis(
+                judge_model="adjudicator", judge_score=0.7, judge_verdict="pass"
+            ),
+        }
+
+        def fake_judge(instance, model_patch, judge_model):
+            return analyses[judge_model]
+
+        with patch("benchmark.run_eval.judge_patch", side_effect=fake_judge):
+            consensus, detail = judge_patch_with_models(
+                _instance(),
+                "diff --git a/src/app.js b/src/app.js\n",
+                ["judge-a", "judge-b"],
+                tie_breaker_judge="adjudicator",
+            )
+
+        self.assertIn("adjudicator", detail)
+        self.assertEqual(consensus.judge_verdict, "pass")
+        self.assertEqual(consensus.raw_judge_verdict, "pass:2,fail:1")
+
+    def test_unanimous_panel_skips_tie_breaker(self) -> None:
+        analyses = {
+            "judge-a": PatchAnalysis(
+                judge_model="judge-a", judge_score=0.8, judge_verdict="pass"
+            ),
+            "judge-b": PatchAnalysis(
+                judge_model="judge-b", judge_score=0.9, judge_verdict="pass"
+            ),
+        }
+
+        def fake_judge(instance, model_patch, judge_model):
+            return analyses[judge_model]
+
+        with patch("benchmark.run_eval.judge_patch", side_effect=fake_judge) as jp:
+            consensus, detail = judge_patch_with_models(
+                _instance(),
+                "diff --git a/src/app.js b/src/app.js\n",
+                ["judge-a", "judge-b"],
+                tie_breaker_judge="adjudicator",
+            )
+
+        self.assertEqual(jp.call_count, 2)
+        self.assertNotIn("adjudicator", detail)
+        self.assertEqual(consensus.judge_verdict, "pass")
+
+
+class ResolveJudgePanelTests(unittest.TestCase):
+    def test_candidate_on_panel_is_replaced_by_alternate(self) -> None:
+        panel = resolve_judge_panel(
+            "openrouter/openai/gpt-5.5",
+            ["openrouter/anthropic/claude-opus-4.8", "openrouter/openai/gpt-5.5"],
+            "openrouter/google/gemini-3.5-flash",
+        )
+        self.assertEqual(
+            panel,
+            [
+                "openrouter/anthropic/claude-opus-4.8",
+                "openrouter/google/gemini-3.5-flash",
+            ],
+        )
+
+    def test_candidate_not_on_panel_is_untouched(self) -> None:
+        panel = resolve_judge_panel(
+            "openrouter/z-ai/glm-5.2",
+            ["openrouter/anthropic/claude-opus-4.8", "openrouter/openai/gpt-5.5"],
+            "openrouter/google/gemini-3.5-flash",
+        )
+        self.assertEqual(
+            panel,
+            ["openrouter/anthropic/claude-opus-4.8", "openrouter/openai/gpt-5.5"],
+        )
+
+    def test_candidate_seat_dropped_without_alternate(self) -> None:
+        panel = resolve_judge_panel(
+            "openrouter/openai/gpt-5.5",
+            ["openrouter/anthropic/claude-opus-4.8", "openrouter/openai/gpt-5.5"],
+            None,
+        )
+        self.assertEqual(panel, ["openrouter/anthropic/claude-opus-4.8"])
 
     @unittest.skipUnless(
         "fork" in multiprocessing.get_all_start_methods(),

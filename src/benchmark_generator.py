@@ -39,7 +39,7 @@ SCRUB_LINE_PATTERNS = [
     re.compile(r"\bupgrade to\b", re.IGNORECASE),
 ]
 
-COMMIT_HASH_RE = re.compile(r"\b[0-9a-f]{7,40}\b")
+COMMIT_HASH_RE = re.compile(r"\b(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}\b")
 SCRUB_REPLACEMENTS = [
     (
         re.compile(r"\b(?:identifier|name) of the patch is\b.*?(?:\.|$)", re.IGNORECASE),

@@ -19,20 +19,19 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from benchmark.adapters.litellm_adapter import (
-    LiteLLMAdapter,
-    default_reasoning_disabled_for_model,
-    default_reasoning_max_tokens_for_model,
-)
+from benchmark.adapters.litellm_adapter import LiteLLMAdapter
 from benchmark.eval_models import EvalReport, InstanceResult
 from benchmark.run_eval import (
     DEFAULT_JUDGE_MODELS,
+    DEFAULT_MAX_TOKENS,
+    DEFAULT_TIE_BREAKER_JUDGE,
     JUDGE_MODEL,
     build_report,
     compute_aggregate,
     evaluate_instance,
     print_report_summary,
 )
+from benchmark.stats import extract_passed_map, multi_run_pass_summary
 from src.benchmark_models import BenchmarkDatabase
 
 from tqdm import tqdm
@@ -92,11 +91,13 @@ def _build_run_report(
         results,
         benchmark_path=args.benchmark,
         model_name=args.model,
-        judge_model=args.judge_model,
+        judge_model=active_judge_models[0],
         judge_models=active_judge_models,
         include_source=args.include_source,
         file_hint_mode=args.file_hint_mode,
         max_tokens=args.max_tokens,
+        temperature=args.temperature,
+        tie_breaker_judge=getattr(args, "tie_breaker_judge", None),
         reasoning_effort=args.reasoning_effort,
         reasoning_max_tokens=args.reasoning_max_tokens,
         reasoning_exclude=args.reasoning_exclude,
@@ -113,7 +114,7 @@ def main():
     parser.add_argument("--model", type=str, required=True)
     parser.add_argument("--runs", type=int, default=3, help="Number of runs (default: 3)")
     parser.add_argument("--temperature", type=float, default=0.0)
-    parser.add_argument("--max-tokens", type=int, default=4096)
+    parser.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS)
     parser.add_argument(
         "--reasoning-effort",
         choices=("none", "minimal", "low", "medium", "high", "xhigh", "default"),
@@ -171,7 +172,10 @@ def main():
             "socket reads cannot exceed the adapter timeout (default: true)"
         ),
     )
-    parser.add_argument("--judge-model", type=str, default=JUDGE_MODEL)
+    parser.add_argument("--judge-model", type=str, default=None)
+    parser.add_argument(
+        "--tie-breaker-judge", type=str, default=DEFAULT_TIE_BREAKER_JUDGE
+    )
     parser.add_argument(
         "--judge-models",
         nargs="+",
@@ -205,10 +209,6 @@ def main():
     )
 
     args = parser.parse_args()
-    if args.reasoning_effort is None and args.reasoning_max_tokens is None:
-        args.reasoning_max_tokens = default_reasoning_max_tokens_for_model(args.model)
-        if not args.reasoning_exclude:
-            args.reasoning_exclude = default_reasoning_disabled_for_model(args.model)
 
     # Load benchmark
     bench_data = json.loads(Path(args.benchmark).read_text())
@@ -218,10 +218,15 @@ def main():
         instances = instances[: args.limit]
     if args.judge_models:
         active_judge_models = args.judge_models
-    elif args.judge_model != JUDGE_MODEL:
+    elif args.judge_model:
         active_judge_models = [args.judge_model]
     else:
         active_judge_models = DEFAULT_JUDGE_MODELS
+    tie_breaker_judge = (
+        None
+        if (args.tie_breaker_judge or "").lower() in ("", "none")
+        else args.tie_breaker_judge
+    )
 
     logger.info(
         "Best-of-%d: model=%s, instances=%d, judges=%s",
@@ -312,12 +317,14 @@ def main():
             result = evaluate_instance(
                 instance,
                 adapter,
-                judge_model=args.judge_model,
+                judge_model=active_judge_models[0],
                 judge_models=active_judge_models,
                 include_source=args.include_source,
                 file_hint_mode=args.file_hint_mode,
                 max_source_files=args.max_source_files,
                 max_source_chars=args.max_source_chars,
+                candidate_model=args.model,
+                tie_breaker_judge=tie_breaker_judge,
             )
             results.append(result)
             pbar.set_postfix(
@@ -349,41 +356,52 @@ def main():
         print(f"\n  Run {run_idx}: pass_rate={report.aggregate.pass_rate:.1%}, "
               f"mean_score={report.aggregate.mean_score:.3f}")
 
-    # Pick best run by pass_rate, then mean_score as tiebreaker
-    best_report = max(
-        all_run_reports,
-        key=lambda r: (r.aggregate.pass_rate, r.aggregate.mean_score),
+    # Headline metric: mean pass rate across runs (with pooled Wilson CI).
+    # The historical "best run" selection is an upward-biased order statistic
+    # and is retained only as metadata, never as the reported number.
+    across = multi_run_pass_summary(
+        [extract_passed_map([res.model_dump() for res in r.results]) for r in all_run_reports]
     )
-    best_idx = all_run_reports.index(best_report) + 1
-
-    # Add best-of-N metadata
-    best_report.metadata["best_of_n"] = args.runs
-    best_report.metadata["best_run"] = best_idx
-    best_report.metadata["all_runs"] = [
+    # The written report carries the most recent run's per-instance results;
+    # the cross-run metrics live in metadata.across_runs.
+    summary_report = all_run_reports[-1]
+    summary_report.metadata["runs"] = args.runs
+    summary_report.metadata["primary_metric"] = "mean_pass_rate_across_runs"
+    summary_report.metadata["across_runs"] = across
+    summary_report.metadata["all_runs"] = [
         {
             "run": i + 1,
             "pass_rate": r.aggregate.pass_rate,
             "mean_score": r.aggregate.mean_score,
             "total_cost_usd": r.aggregate.total_cost_usd,
+            "total_judge_cost_usd": r.aggregate.total_judge_cost_usd,
         }
         for i, r in enumerate(all_run_reports)
     ]
+    summary_report.metadata["total_cost_usd_all_runs"] = round(
+        sum(r.aggregate.total_cost_usd for r in all_run_reports), 6
+    )
 
-    # Write best report
-    best_path = Path(args.output)
-    best_path.write_text(json.dumps(best_report.model_dump(), indent=2))
+    summary_path = Path(args.output)
+    summary_path.write_text(json.dumps(summary_report.model_dump(), indent=2))
 
+    low, high = across["pooled_wilson_95"]
     print(f"\n{'=' * 60}")
-    print(f"  Best of {args.runs} runs: Run {best_idx}")
+    print(f"  {args.runs} independent runs of {args.model}")
     print(f"{'=' * 60}")
     for i, r in enumerate(all_run_reports):
-        marker = " ← BEST" if i + 1 == best_idx else ""
         print(f"  Run {i+1}: pass_rate={r.aggregate.pass_rate:.1%}, "
               f"mean_score={r.aggregate.mean_score:.3f}, "
-              f"cost=${r.aggregate.total_cost_usd:.4f}{marker}")
+              f"cost=${r.aggregate.total_cost_usd:.4f}")
+    print(
+        f"\n  Mean pass rate: {across['mean_pass_rate']:.1%} "
+        f"± {across['pass_rate_std']:.1%} (95% CI {low:.1%}–{high:.1%})"
+    )
+    print(f"  pass@{args.runs} (any run): {across['pass_at_k']:.1%}")
+    print(f"  passed in every run: {across['all_runs_pass_rate']:.1%}")
 
-    print_report_summary(best_report.aggregate)
-    print(f"  Best report written to: {best_path}")
+    print_report_summary(summary_report.aggregate)
+    print(f"  Summary report written to: {summary_path}")
 
 
 if __name__ == "__main__":

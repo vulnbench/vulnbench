@@ -410,11 +410,30 @@ def main() -> None:
         default=RESULTS,
         help="Directory containing result artifacts. If merged_leaderboard.json is present, it is used as the source of truth.",
     )
+    parser.add_argument(
+        "--allow-legacy-merged-manifest",
+        action="store_true",
+        help=(
+            "Render from a merged_leaderboard.json manifest despite its known "
+            "defects. Retired by the 2026-07 audit; see REVIEW_FINDINGS.md."
+        ),
+    )
     args = parser.parse_args()
 
     results_dir = args.results_dir
     manifest = None
     if (results_dir / "merged_leaderboard.json").exists():
+        if not args.allow_legacy_merged_manifest:
+            raise SystemExit(
+                "REFUSING to render from merged_leaderboard.json: the merged "
+                "manifest mixes three incompatible judge regimes and applies a "
+                "one-way keep-if-improved merge rule (selection bias), so its "
+                "rankings are not defensible. Re-judge or re-run the suite "
+                "under one pinned protocol (see METHODOLOGY.md), then build "
+                "the leaderboard with `python -m benchmark.model_report`. "
+                "Pass --allow-legacy-merged-manifest only to reproduce the "
+                "retired page for reference."
+            )
         rows, manifest = load_merged_rows(results_dir)
         pending = []
     else:

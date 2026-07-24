@@ -7,10 +7,10 @@ framework derived from Ghost Security's SAST analysis methodology.
 Usage:
     python -m benchmark.run_eval_skills \
         --benchmark data/benchmark/vulnbench_200.json \
-        --model openrouter/openai/gpt-5.4 \
+        --model openrouter/openai/gpt-5.5 \
         --include-source \
         --file-hint-mode description \
-        --output results/skills/eval_gpt-5.4.json
+        --output results/skills/eval_gpt-5.5.json
 """
 
 from __future__ import annotations
@@ -28,16 +28,23 @@ from pathlib import Path
 from tqdm import tqdm
 
 from benchmark.adapters.litellm_adapter import LiteLLMAdapter
-from benchmark.eval_models import EvalReport, InstanceResult
+from benchmark.eval_models import EvalReport, InstanceResult, PatchAnalysis
 from benchmark.run_eval import (
+    DEFAULT_JUDGE_MODELS,
+    DEFAULT_MAX_TOKENS,
+    DEFAULT_TIE_BREAKER_JUDGE,
     JUDGE_MODEL,
     build_report,
     build_source_context,
+    combine_judge_analyses,
+    _adapter_error_analysis,
     judge_patch,
+    judge_patch_with_models,
     parse_diff_from_output,
     print_report_summary,
     render_prompt,
     render_prompt_parts,
+    resolve_judge_panel,
     _is_litellm_adapter,
 )
 from benchmark.skills.prompt_builder import build_skills_prompt_section
@@ -124,17 +131,26 @@ def evaluate_instance_with_skills(
     instance: BenchmarkInstance,
     adapter,
     judge_model: str = JUDGE_MODEL,
+    judge_models: list[str] | None = None,
     *,
     include_source: bool = True,
     file_hint_mode: str = "description",
     max_source_files: int = 3,
     max_source_chars: int = 6000,
     criteria_dir: str | None = None,
+    candidate_model: str | None = None,
+    tie_breaker_judge: str | None = DEFAULT_TIE_BREAKER_JUDGE,
 ) -> InstanceResult:
     """Evaluate a single instance with skills-augmented prompts."""
     is_litellm = _is_litellm_adapter(adapter)
+    if candidate_model is None and is_litellm:
+        candidate_model = getattr(adapter, "model", None)
+    active_judge_models = resolve_judge_panel(
+        candidate_model, judge_models or [judge_model], tie_breaker_judge
+    )
     include_file_hints = file_hint_mode == "gold"
     source_context = ""
+    generation_error = ""
 
     if include_source:
         source_context = build_source_context(
@@ -164,7 +180,13 @@ def evaluate_instance_with_skills(
             )
             raw_output = adapter.generate_patch(prompt)
     except Exception as e:
-        logger.warning("Adapter failed for %s: %s", instance.instance_id, e)
+        generation_error = f"{type(e).__name__}: {e}"
+        logger.warning(
+            "Adapter failed for %s after retries: %s",
+            instance.instance_id,
+            e,
+            exc_info=True,
+        )
         raw_output = ""
     gen_time = time.monotonic() - start
 
@@ -172,15 +194,45 @@ def evaluate_instance_with_skills(
     prompt_tokens = 0
     completion_tokens = 0
     cost_usd = 0.0
+    adapter_attempts = 0
+    empty_response_attempts = 0
+    exception_attempts = 0
+    reasoning_tokens = 0
+    reasoning_effort = ""
+    reasoning_max_tokens = 0
+    reasoning_exclude = False
     if is_litellm:
         meta = adapter.last_response_meta
         prompt_tokens = meta.get("prompt_tokens", 0)
         completion_tokens = meta.get("completion_tokens", 0)
+        reasoning_tokens = meta.get("reasoning_tokens", 0)
         cost_usd = meta.get("cost_usd", 0.0)
+        adapter_attempts = meta.get("attempts", 0)
+        empty_response_attempts = meta.get("empty_response_attempts", 0)
+        exception_attempts = meta.get("exception_attempts", 0)
+        reasoning_effort = meta.get("reasoning_effort", "")
+        reasoning_max_tokens = meta.get("reasoning_max_tokens", 0)
+        reasoning_exclude = meta.get("reasoning_exclude", False)
 
     # Parse diff and judge
     model_patch = parse_diff_from_output(raw_output)
-    analysis = judge_patch(instance, model_patch, judge_model=judge_model)
+    if generation_error:
+        judge_analyses = {
+            model: _adapter_error_analysis(generation_error, judge_model=model)
+            for model in active_judge_models
+        }
+        analysis = (
+            judge_analyses[active_judge_models[0]]
+            if len(active_judge_models) == 1
+            else combine_judge_analyses(judge_analyses)
+        )
+    else:
+        analysis, judge_analyses = judge_patch_with_models(
+            instance,
+            model_patch,
+            active_judge_models,
+            tie_breaker_judge=tie_breaker_judge,
+        )
     score = analysis.judge_score
     passed = analysis.judge_verdict == "pass"
 
@@ -192,12 +244,21 @@ def evaluate_instance_with_skills(
         model_patch=model_patch,
         generation_time_s=round(gen_time, 3),
         patch_analysis=analysis,
+        judge_analyses=judge_analyses,
         score=score,
         passed=passed,
         prompt_tokens=prompt_tokens,
         completion_tokens=completion_tokens,
         cost_usd=cost_usd,
         judge_cost_usd=analysis.judge_cost_usd,
+        generation_error=generation_error,
+        adapter_attempts=adapter_attempts,
+        empty_response_attempts=empty_response_attempts,
+        exception_attempts=exception_attempts,
+        reasoning_tokens=reasoning_tokens,
+        reasoning_effort=reasoning_effort,
+        reasoning_max_tokens=reasoning_max_tokens,
+        reasoning_exclude=reasoning_exclude,
     )
 
 
@@ -212,8 +273,79 @@ def main():
     parser.add_argument("--benchmark", type=str, required=True)
     parser.add_argument("--model", type=str, required=True)
     parser.add_argument("--temperature", type=float, default=0.0)
-    parser.add_argument("--max-tokens", type=int, default=4096)
-    parser.add_argument("--judge-model", type=str, default=JUDGE_MODEL)
+    parser.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS)
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=("none", "minimal", "low", "medium", "high", "xhigh", "default"),
+        default=None,
+        help="Optional LiteLLM/OpenAI reasoning effort to pass to the model",
+    )
+    parser.add_argument(
+        "--reasoning-max-tokens",
+        type=int,
+        default=None,
+        help="Optional OpenRouter reasoning.max_tokens value passed via extra_body",
+    )
+    parser.add_argument(
+        "--reasoning-exclude",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Ask OpenRouter to exclude reasoning tokens from the response",
+    )
+    parser.add_argument(
+        "--adapter-max-attempts",
+        type=int,
+        default=3,
+        help="Max adapter-level completion attempts for LiteLLM models (default: 3)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-base-s",
+        type=float,
+        default=2.0,
+        help="Initial adapter retry backoff in seconds (default: 2.0)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-max-s",
+        type=float,
+        default=60.0,
+        help="Maximum adapter retry backoff in seconds (default: 60.0)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-jitter-s",
+        type=float,
+        default=0.5,
+        help="Random adapter retry jitter in seconds (default: 0.5)",
+    )
+    parser.add_argument(
+        "--retry-empty-responses",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Retry empty LiteLLM responses before scoring (default: true)",
+    )
+    parser.add_argument(
+        "--adapter-process-timeout",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help=(
+            "Run LiteLLM completions in a child process so blocking provider "
+            "socket reads cannot exceed the adapter timeout (default: true)"
+        ),
+    )
+    parser.add_argument("--judge-model", type=str, default=None)
+    parser.add_argument(
+        "--tie-breaker-judge", type=str, default=DEFAULT_TIE_BREAKER_JUDGE
+    )
+    parser.add_argument(
+        "--judge-models",
+        nargs="+",
+        default=None,
+        help=(
+            "One or more LiteLLM judge model IDs. When multiple are provided, "
+            "VulnBench stores each judge result and scores by consensus. "
+            "Defaults to the standard multi-judge panel unless --judge-model "
+            "is explicitly set."
+        ),
+    )
     parser.add_argument(
         "--include-source",
         action=argparse.BooleanOptionalAction,
@@ -243,16 +375,31 @@ def main():
     instances = benchmark.instances
     if args.limit > 0:
         instances = instances[: args.limit]
+    if args.judge_models:
+        active_judge_models = args.judge_models
+    elif args.judge_model:
+        active_judge_models = [args.judge_model]
+    else:
+        active_judge_models = DEFAULT_JUDGE_MODELS
 
     adapter = LiteLLMAdapter(
         model=args.model,
         temperature=args.temperature,
         max_tokens=args.max_tokens,
+        reasoning_effort=args.reasoning_effort,
+        reasoning_max_tokens=args.reasoning_max_tokens,
+        reasoning_exclude=args.reasoning_exclude,
+        max_attempts=args.adapter_max_attempts,
+        retry_backoff_base_s=args.adapter_retry_backoff_base_s,
+        retry_backoff_max_s=args.adapter_retry_backoff_max_s,
+        retry_backoff_jitter_s=args.adapter_retry_backoff_jitter_s,
+        retry_empty_responses=args.retry_empty_responses,
+        process_timeout=args.adapter_process_timeout,
     )
 
     logger.info(
-        "Skills-augmented eval: model=%s, instances=%d, judge=%s",
-        args.model, len(instances), args.judge_model,
+        "Skills-augmented eval: model=%s, instances=%d, judges=%s",
+        args.model, len(instances), ", ".join(active_judge_models),
     )
 
     results: list[InstanceResult] = []
@@ -262,6 +409,7 @@ def main():
             instance,
             adapter,
             judge_model=args.judge_model,
+            judge_models=active_judge_models,
             include_source=args.include_source,
             file_hint_mode=args.file_hint_mode,
             max_source_files=args.max_source_files,
@@ -279,8 +427,16 @@ def main():
         benchmark_path=args.benchmark,
         model_name=args.model,
         judge_model=args.judge_model,
+        judge_models=active_judge_models,
         include_source=args.include_source,
         file_hint_mode=args.file_hint_mode,
+        max_tokens=args.max_tokens,
+        reasoning_effort=args.reasoning_effort,
+        reasoning_max_tokens=args.reasoning_max_tokens,
+        reasoning_exclude=args.reasoning_exclude,
+        adapter_max_attempts=args.adapter_max_attempts,
+        retry_empty_responses=args.retry_empty_responses,
+        adapter_process_timeout=args.adapter_process_timeout,
     )
 
     # Add skills metadata
