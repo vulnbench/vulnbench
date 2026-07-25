@@ -5,7 +5,10 @@
 set -euo pipefail
 
 MAX_PARALLEL="${VULNBENCH_MAX_PARALLEL:-10}"
-MODEL_TIMEOUT_SECONDS="${VULNBENCH_MODEL_TIMEOUT_SECONDS:-43200}"
+# Per-model wall-clock guard. Protocol v2's 16k reasoning budgets run
+# ~50-140s/instance, so 600 instances can legitimately take ~20h+ for slow
+# models; 12h (the old default) killed healthy first-wave runs mid-flight.
+MODEL_TIMEOUT_SECONDS="${VULNBENCH_MODEL_TIMEOUT_SECONDS:-129600}"
 # Full-suite estimate is ~$1,700; refuse to start a run that will 402 midway.
 MIN_CREDITS="${VULNBENCH_MIN_CREDITS:-1700}"
 
@@ -49,15 +52,24 @@ run_model() {
 
   echo "[START] $model → $logfile"
 
-  # 5 attempts with a 5s backoff base ride out ~1-minute local DNS/network
-  # blips that would otherwise become artifact rows (connection errors cost
-  # no tokens, so extra attempts are free insurance).
+  # Ride out multi-minute local network/DNS outages: 10 attempts with a 10s
+  # base and 90s cap ≈ 10+ min of coverage. Connection errors cost no tokens,
+  # so extra attempts are free insurance; genuine model failures still record
+  # as artifact rows. Any outage longer than this aborts the model, but its
+  # checkpoint is preserved and the supervisor loop re-runs it.
+  # 600s per-request timeout: fast models never approach it, but slow
+  # reasoning models (e.g. some Moonshot endpoints average ~9 min/patch)
+  # succeed on the first attempt instead of hitting the old 300s cap and
+  # triggering kill/retry storms that leak child-process semaphores and
+  # abort the whole model. Uniform for every model — no special-casing.
   local command=(python -m benchmark.run_best_of_n
     --benchmark data/benchmark/vulnbench_200.json
     --model "$model"
     --runs 3
-    --adapter-max-attempts 5
-    --adapter-retry-backoff-base-s 5
+    --completion-timeout 600
+    --adapter-max-attempts 10
+    --adapter-retry-backoff-base-s 10
+    --adapter-retry-backoff-max-s 90
     --include-source
     --file-hint-mode description
     --output "$outfile")

@@ -116,6 +116,17 @@ def main():
     parser.add_argument("--temperature", type=float, default=0.0)
     parser.add_argument("--max-tokens", type=int, default=DEFAULT_MAX_TOKENS)
     parser.add_argument(
+        "--completion-timeout",
+        type=float,
+        default=300.0,
+        help=(
+            "Per-request completion timeout in seconds (default: 300). Raise "
+            "for models whose median latency approaches the limit, so a slow "
+            "response succeeds on the first attempt instead of being killed "
+            "and retried (retry storms leak child-process semaphores)."
+        ),
+    )
+    parser.add_argument(
         "--reasoning-effort",
         choices=("none", "minimal", "low", "medium", "high", "xhigh", "default"),
         default=None,
@@ -273,6 +284,7 @@ def main():
             model=args.model,
             temperature=args.temperature,
             max_tokens=args.max_tokens,
+            timeout=args.completion_timeout,
             reasoning_effort=args.reasoning_effort,
             reasoning_max_tokens=args.reasoning_max_tokens,
             reasoning_exclude=args.reasoning_exclude,
