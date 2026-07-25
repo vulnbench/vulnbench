@@ -10,6 +10,7 @@ VULNBENCH_LATEST_MODELS=(
   openrouter/openai/gpt-5.4-mini
   openrouter/openai/gpt-5.3-codex
   openrouter/anthropic/claude-fable-5
+  openrouter/anthropic/claude-opus-5
   openrouter/anthropic/claude-sonnet-5
   openrouter/anthropic/claude-opus-4.8
   openrouter/anthropic/claude-sonnet-4.6
