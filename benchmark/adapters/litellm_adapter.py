@@ -412,7 +412,12 @@ class LiteLLMAdapter:
 
     def _complete_with_hard_timeout(self, kwargs: dict) -> object:
         """Call LiteLLM with a process-level timeout for blocking socket reads."""
-        if self.process_timeout:
+        # Global override: long suites can wedge the OS multiprocessing
+        # subsystem (child/semaphore leaks) until new spawns hang. In-process
+        # mode avoids child spawning entirely, relying on the SIGALRM path
+        # below plus LiteLLM's own timeout kwarg.
+        import os as _os
+        if self.process_timeout and not _os.environ.get("VULNBENCH_INPROCESS_LLM"):
             return self._complete_with_process_timeout(kwargs)
 
         if self.timeout <= 0 or threading.current_thread() is not threading.main_thread():

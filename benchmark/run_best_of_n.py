@@ -64,6 +64,14 @@ def _report_matches_run(
     else:
         valid_size = total_instances == expected_instances
 
+    # Only SEMANTIC parameters gate run reuse. At temperature 0 the patch a
+    # successful generation produces is independent of operational resilience
+    # settings (adapter_max_attempts, retry/backoff, completion timeout,
+    # process-timeout mechanism), so runs that differ only in those may be
+    # reused across a resumed suite. Gating on them would force every
+    # already-completed run to be recomputed whenever the retry policy is
+    # tuned mid-suite — wasting spend and, worse, mixing configs across a
+    # leaderboard when some models are re-run and others are not.
     return (
         valid_size
         and metadata.get("model") == args.model
@@ -71,13 +79,10 @@ def _report_matches_run(
         and metadata.get("include_source") is args.include_source
         and metadata.get("file_hint_mode") == args.file_hint_mode
         and metadata.get("max_tokens") == args.max_tokens
+        and metadata.get("temperature", args.temperature) == args.temperature
         and metadata.get("reasoning_effort") == args.reasoning_effort
         and metadata.get("reasoning_max_tokens") == args.reasoning_max_tokens
         and metadata.get("reasoning_exclude") is args.reasoning_exclude
-        and metadata.get("adapter_max_attempts") == args.adapter_max_attempts
-        and metadata.get("retry_empty_responses") is args.retry_empty_responses
-        and metadata.get("adapter_process_timeout", args.adapter_process_timeout)
-        is args.adapter_process_timeout
     )
 
 

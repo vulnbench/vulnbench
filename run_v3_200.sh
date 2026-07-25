@@ -22,6 +22,12 @@ fi
 source .venv/bin/activate
 source "$ROOT_DIR/benchmark/model_suites.sh"
 
+# Run LiteLLM generation + judging in-process (no per-completion child spawn).
+# Over a multi-day suite the process-timeout child mechanism accumulates
+# leaked semaphores/children until new spawns hang; in-process avoids that.
+# LiteLLM's own timeout kwarg + the adapter SIGALRM path still bound runtime.
+export VULNBENCH_INPROCESS_LLM=1
+
 if [[ ! -f ".env" ]]; then
   echo "Missing .env with OPENROUTER_API_KEY" >&2
   exit 1

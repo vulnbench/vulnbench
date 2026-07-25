@@ -28,6 +28,7 @@ import importlib
 import json
 import logging
 import multiprocessing
+import os
 import queue
 import re
 import time
@@ -145,8 +146,15 @@ def _judge_multiprocessing_context() -> multiprocessing.context.BaseContext:
 
 
 def _judge_completion_with_process_timeout(kwargs: dict) -> object:
-    """Call LiteLLM judge completion in a child process with a hard timeout."""
-    if LITELLM_TIMEOUT_SECONDS <= 0:
+    """Call LiteLLM judge completion in a child process with a hard timeout.
+
+    Set VULNBENCH_INPROCESS_LLM=1 to skip child-process spawning and call
+    LiteLLM directly (relying on its own ``timeout`` kwarg). Long-running
+    suites that spawn a child per completion can wedge the OS multiprocessing
+    subsystem (accumulated semaphore/child leaks), after which new spawns
+    hang; the in-process path avoids that entirely.
+    """
+    if LITELLM_TIMEOUT_SECONDS <= 0 or os.environ.get("VULNBENCH_INPROCESS_LLM"):
         return litellm.completion(**kwargs)
 
     ctx = _judge_multiprocessing_context()
