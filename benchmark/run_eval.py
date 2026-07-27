@@ -145,6 +145,39 @@ def _judge_multiprocessing_context() -> multiprocessing.context.BaseContext:
     return multiprocessing.get_context()
 
 
+def _judge_completion_with_thread_timeout(kwargs: dict) -> object:
+    """Judge completion in a daemon thread with a hard join timeout.
+
+    Frees the caller even if the underlying socket read hangs (which SIGALRM
+    and LiteLLM's own timeout do not reliably prevent), without spawning a
+    child process per call.
+    """
+    import threading
+
+    if LITELLM_TIMEOUT_SECONDS <= 0:
+        return litellm.completion(**kwargs)
+
+    box: dict = {}
+
+    def _worker() -> None:
+        try:
+            box["result"] = litellm.completion(**kwargs)
+        except BaseException as exc:  # noqa: BLE001 - propagated to caller
+            box["error"] = exc
+
+    thread = threading.Thread(target=_worker, daemon=True)
+    thread.start()
+    thread.join(LITELLM_TIMEOUT_SECONDS)
+    if thread.is_alive():
+        raise TimeoutError(
+            f"Judge LiteLLM completion thread timeout after "
+            f"{LITELLM_TIMEOUT_SECONDS:.1f}s"
+        )
+    if "error" in box:
+        raise box["error"]
+    return box["result"]
+
+
 def _judge_completion_with_process_timeout(kwargs: dict) -> object:
     """Call LiteLLM judge completion in a child process with a hard timeout.
 
@@ -154,7 +187,9 @@ def _judge_completion_with_process_timeout(kwargs: dict) -> object:
     subsystem (accumulated semaphore/child leaks), after which new spawns
     hang; the in-process path avoids that entirely.
     """
-    if LITELLM_TIMEOUT_SECONDS <= 0 or os.environ.get("VULNBENCH_INPROCESS_LLM"):
+    if os.environ.get("VULNBENCH_INPROCESS_LLM"):
+        return _judge_completion_with_thread_timeout(kwargs)
+    if LITELLM_TIMEOUT_SECONDS <= 0:
         return litellm.completion(**kwargs)
 
     ctx = _judge_multiprocessing_context()

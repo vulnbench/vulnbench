@@ -411,13 +411,25 @@ class LiteLLMAdapter:
         return self._complete_with_hard_timeout(kwargs)
 
     def _complete_with_hard_timeout(self, kwargs: dict) -> object:
-        """Call LiteLLM with a process-level timeout for blocking socket reads."""
-        # Global override: long suites can wedge the OS multiprocessing
-        # subsystem (child/semaphore leaks) until new spawns hang. In-process
-        # mode avoids child spawning entirely, relying on the SIGALRM path
-        # below plus LiteLLM's own timeout kwarg.
+        """Call LiteLLM with a hard timeout that survives blocking socket reads.
+
+        Three mechanisms, in order of robustness for a multi-day suite:
+        - VULNBENCH_INPROCESS_LLM: a watchdog THREAD runs the completion and
+          the caller joins with a timeout. join() returns regardless of what
+          the worker thread is stuck on (even an uninterruptible C-level
+          socket read), and threads don't leak OS semaphores. This is the
+          only mode that neither wedges the multiprocessing subsystem over
+          time (child-spawn) nor hangs forever (SIGALRM can't preempt a C
+          call). Preferred for long runs.
+        - process_timeout: child process per call — reliably killable but
+          leaks semaphores/children over ~a day until new spawns hang.
+        - SIGALRM: in-thread itimer — cannot preempt a blocking C socket read.
+        """
         import os as _os
-        if self.process_timeout and not _os.environ.get("VULNBENCH_INPROCESS_LLM"):
+        if _os.environ.get("VULNBENCH_INPROCESS_LLM"):
+            return self._complete_with_thread_timeout(kwargs)
+
+        if self.process_timeout:
             return self._complete_with_process_timeout(kwargs)
 
         if self.timeout <= 0 or threading.current_thread() is not threading.main_thread():
@@ -447,6 +459,35 @@ class LiteLLMAdapter:
                     max(0.001, previous_remaining - elapsed),
                     previous_interval,
                 )
+
+    def _complete_with_thread_timeout(self, kwargs: dict) -> object:
+        """Run the completion in a daemon thread; return control after timeout.
+
+        A hung request leaves its daemon thread stuck (bounded by LiteLLM's
+        own timeout kwarg), but the caller is freed immediately and the model
+        run continues — no forever-hang, no per-call child process.
+        """
+        if self.timeout <= 0:
+            return litellm.completion(**kwargs)
+
+        box: dict = {}
+
+        def _worker() -> None:
+            try:
+                box["result"] = litellm.completion(**kwargs)
+            except BaseException as exc:  # noqa: BLE001 - propagated to caller
+                box["error"] = exc
+
+        thread = threading.Thread(target=_worker, daemon=True)
+        thread.start()
+        thread.join(self.timeout)
+        if thread.is_alive():
+            raise TimeoutError(
+                f"LiteLLM completion thread timeout after {self.timeout:.1f}s"
+            )
+        if "error" in box:
+            raise box["error"]
+        return box["result"]
 
     def _complete_with_process_timeout(self, kwargs: dict) -> object:
         if self.timeout <= 0:
