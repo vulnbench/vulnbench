@@ -24,11 +24,7 @@ VULNBENCH_LATEST_MODELS=(
   openrouter/x-ai/grok-4.3
   openrouter/deepseek/deepseek-v4-pro
   openrouter/deepseek/deepseek-v4-flash
-  openrouter/moonshotai/kimi-k3
-  openrouter/moonshotai/kimi-k2.7-code
-  openrouter/moonshotai/kimi-k2.6
   openrouter/minimax/minimax-m3
-  openrouter/qwen/qwen3.7-max
   openrouter/qwen/qwen3.7-plus
   openrouter/z-ai/glm-5.2
   openrouter/z-ai/glm-5.1
@@ -36,6 +32,17 @@ VULNBENCH_LATEST_MODELS=(
   openrouter/nvidia/nemotron-3-ultra-550b-a55b
   openrouter/mistralai/mistral-medium-3-5
   openrouter/tencent/hy3
+)
+
+# Latency outliers: 5-16 min per patch (measured), so best-of-3 would take
+# days-to-a-week each. Run SEPARATELY (run_v3_slow.sh) so they do not block
+# the main leaderboard; reported separately with their measured pace and
+# folded in later if/when they complete. Not part of VULNBENCH_LATEST_MODELS.
+VULNBENCH_SLOW_MODELS=(
+  openrouter/moonshotai/kimi-k3
+  openrouter/moonshotai/kimi-k2.7-code
+  openrouter/moonshotai/kimi-k2.6
+  openrouter/qwen/qwen3.7-max
 )
 
 # High-cost variants. Keep separate so accidental full-suite runs do not silently

@@ -8,28 +8,38 @@ VulnBench contains a **full benchmark of 1,650 real CVEs** and a **curated evalu
 
 ---
 
-## ⚠ Status: previous results retired (2026-07)
+## Results (v3 — Protocol v2)
 
-A comprehensive internal audit (91-agent adversarial review; see
-[`REVIEW_FINDINGS.md`](REVIEW_FINDINGS.md)) found that all previously
-published VulnBench leaderboards were affected by harness artifacts, the
-largest being a 4,096-token completion budget that reasoning-heavy models
-exhausted on hidden reasoning — returning empty patches scored as failures
-on up to 100% of instances for some models — plus inconsistent judge
-configurations across leaderboard rows and a selection-biased best-of-3
-protocol.
+The current leaderboard is [**`RESULTS_V3.md`**](RESULTS_V3.md), produced
+under the audited Protocol v2 harness (uniform token budget, pinned
+cross-vendor judge panel, mean-of-3-runs with confidence intervals, no
+model judging its own patches). Top of the board on the curated
+200-instance benchmark:
 
-**Those numbers are retired and must not be cited.** The harness defects are
-fixed (all fixes are listed in `REVIEW_FINDINGS.md` with tests), the
-evaluation protocol is now specified normatively in
-[`METHODOLOGY.md`](METHODOLOGY.md), and a full re-run under Protocol v2 is
-required before a new leaderboard is published. Until then this repository
-publishes **tooling and methodology, not rankings**.
+| Rank | Model | Pass rate | 95% CI | pass@3 |
+|---:|---|---:|:---:|---:|
+| 1 | **anthropic/claude-opus-5** | 64.3% | 60.4–68.1% | 80.5% |
+| 2 | openai/gpt-5.6-sol | 42.2% | 38.3–46.2% | 56.5% |
+| 3 | openai/gpt-5.3-codex | 35.7% | 31.9–39.6% | 50.5% |
 
-Diagnostic (non-leaderboard) analyses of the retired runs — including
-per-model explanations of *why* each model scored what it scored, with the
-harness artifacts explicitly separated from capability signals — are in
-[`results/analysis/`](results/analysis/README.md).
+**Claude Opus 5 leads decisively** — roughly double the next-best model,
+with non-overlapping intervals. Full 24-model table, tie groups, and
+per-model "why" cards ([`results/v3/analysis/`](results/v3/analysis/README.md))
+in `RESULTS_V3.md`. Five mid-tier models were still completing at
+publication and are added in a follow-up; four latency-outlier models
+(5–16 min/patch) are reported separately.
+
+### Why the earlier numbers were retired
+
+A 91-agent adversarial audit (see [`REVIEW_FINDINGS.md`](REVIEW_FINDINGS.md))
+found the pre-v3 leaderboards were dominated by harness artifacts — chiefly a
+4,096-token budget that reasoning models exhausted on hidden reasoning
+(empty patches scored as failures on up to 100% of instances), plus
+inconsistent judges across rows and a selection-biased best-of-3. Those
+numbers are retired; all 81 findings and their fixes are in
+`REVIEW_FINDINGS.md`, and the v3 results above supersede them. Gemini 3.1 Pro
+is the clearest example of the fix: it sat near the bottom (~2%) in the old
+leaderboard and lands at 31.2% (#6) under v3.
 
 ---
 
