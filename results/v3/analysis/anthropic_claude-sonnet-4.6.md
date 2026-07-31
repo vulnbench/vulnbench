@@ -1,0 +1,132 @@
+# anthropic/claude-sonnet-4.6 — VulnBench performance analysis
+
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+
+## Why this model performed the way it did
+
+anthropic/claude-sonnet-4.6 passed 32/200 instances (16.0%, 95% CI 11.6%–21.7%) with a mean judge score of 0.315.
+
+Across 3 independent runs the pass rate was 16.5%, 19.0%, 16.0% (mean 17.2% ± 1.6%); 29.0% of instances passed in at least one run and 7.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
+Of the 168 failed instances in the reference run: 81 (48%) because the patch modifies files unrelated to the ground-truth fix; 42 (25%) because the patch was judged irrelevant to the vulnerability; 27 (16%) because the model understood the issue but the fix was judged inadequate.
+
+Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); cve year 2018: 0% vs suite median 14% (n=7); cve year 2019: 0% vs suite median 14% (n=7).
+
+Cost: $4.16 total generation spend, $0.13 per passing patch, median generation time 17s.
+
+## Failure modes
+
+| Mode | Count | Meaning |
+|---|---:|---|
+| wrong_file | 81 | the patch modifies files unrelated to the ground-truth fix |
+| off_target | 42 | the patch was judged irrelevant to the vulnerability |
+| insufficient_fix | 27 | the model understood the issue but the fix was judged inadequate |
+| near_miss | 17 | the judge scored the patch just below the pass threshold |
+| likely_truncated | 1 | the diff appears cut off by the completion token limit |
+
+## Judge reasoning clusters (failures)
+
+| Cluster | Count |
+|---|---:|
+| other | 168 |
+
+## By difficulty tier
+
+| Value | n | Passed | Pass rate | 95% CI |
+|---|---:|---:|---:|---|
+| tier_1 | 67 | 10 | 14.9% | 8.3%–25.3% |
+| tier_2 | 67 | 10 | 14.9% | 8.3%–25.3% |
+| tier_3 | 66 | 12 | 18.2% | 10.7%–29.1% |
+
+## By CWE
+
+| Value | n | Passed | Pass rate | 95% CI |
+|---|---:|---:|---:|---|
+| CWE-125 | 3 | 0 | 0.0% | 0.0%–56.1% |
+| CWE-1321 | 5 | 2 | 40.0% | 11.8%–76.9% |
+| CWE-1333 | 2 | 1 | 50.0% | 9.4%–90.5% |
+| CWE-20 | 23 | 5 | 21.7% | 9.7%–41.9% |
+| CWE-200 | 4 | 0 | 0.0% | 0.0%–49.0% |
+| CWE-22 | 25 | 7 | 28.0% | 14.3%–47.6% |
+| CWE-23 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-235 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-248 | 2 | 0 | 0.0% | 0.0%–65.8% |
+| CWE-284 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-285 | 2 | 1 | 50.0% | 9.4%–90.5% |
+| CWE-287 | 3 | 1 | 33.3% | 6.2%–79.2% |
+| CWE-290 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-295 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-325 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-330 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-347 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-352 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-367 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-384 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-400 | 25 | 2 | 8.0% | 2.2%–25.0% |
+| CWE-402 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-434 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-444 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-470 | 1 | 1 | 100.0% | 20.6%–100.0% |
+| CWE-476 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-506 | 1 | 1 | 100.0% | 20.6%–100.0% |
+| CWE-532 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-601 | 2 | 0 | 0.0% | 0.0%–65.8% |
+| CWE-668 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-670 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-674 | 3 | 0 | 0.0% | 0.0%–56.1% |
+| CWE-680 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-693 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-696 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-73 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-74 | 3 | 0 | 0.0% | 0.0%–56.1% |
+| CWE-755 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-77 | 2 | 0 | 0.0% | 0.0%–65.8% |
+| CWE-770 | 2 | 0 | 0.0% | 0.0%–65.8% |
+| CWE-78 | 3 | 2 | 66.7% | 20.8%–93.8% |
+| CWE-79 | 38 | 3 | 7.9% | 2.7%–20.8% |
+| CWE-830 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-862 | 1 | 0 | 0.0% | 0.0%–79.3% |
+| CWE-863 | 2 | 0 | 0.0% | 0.0%–65.8% |
+| CWE-89 | 4 | 0 | 0.0% | 0.0%–49.0% |
+| CWE-918 | 2 | 1 | 50.0% | 9.4%–90.5% |
+| CWE-94 | 18 | 5 | 27.8% | 12.5%–50.9% |
+
+## By ecosystem
+
+| Value | n | Passed | Pass rate | 95% CI |
+|---|---:|---:|---:|---|
+| composer | 2 | 0 | 0.0% | 0.0%–65.8% |
+| maven | 5 | 1 | 20.0% | 3.6%–62.5% |
+| npm | 134 | 24 | 17.9% | 12.3%–25.3% |
+| pip | 54 | 6 | 11.1% | 5.2%–22.2% |
+| rubygems | 3 | 1 | 33.3% | 6.2%–79.2% |
+| rust | 1 | 0 | 0.0% | 0.0%–79.3% |
+| swift | 1 | 0 | 0.0% | 0.0%–79.3% |
+
+## By severity
+
+| Value | n | Passed | Pass rate | 95% CI |
+|---|---:|---:|---:|---|
+| critical | 21 | 5 | 23.8% | 10.6%–45.1% |
+| high | 42 | 9 | 21.4% | 11.7%–35.9% |
+| medium | 137 | 18 | 13.1% | 8.5%–19.8% |
+
+## By CVE year
+
+| Value | n | Passed | Pass rate | 95% CI |
+|---|---:|---:|---:|---|
+| 2013 | 1 | 1 | 100.0% | 20.6%–100.0% |
+| 2016 | 2 | 0 | 0.0% | 0.0%–65.8% |
+| 2017 | 3 | 1 | 33.3% | 6.2%–79.2% |
+| 2018 | 7 | 0 | 0.0% | 0.0%–35.4% |
+| 2019 | 7 | 0 | 0.0% | 0.0%–35.4% |
+| 2020 | 6 | 1 | 16.7% | 3.0%–56.4% |
+| 2021 | 5 | 1 | 20.0% | 3.6%–62.5% |
+| 2022 | 24 | 1 | 4.2% | 0.7%–20.2% |
+| 2023 | 26 | 4 | 15.4% | 6.2%–33.5% |
+| 2024 | 48 | 9 | 18.8% | 10.2%–31.9% |
+| 2025 | 55 | 10 | 18.2% | 10.2%–30.3% |
+| 2026 | 16 | 4 | 25.0% | 10.2%–49.5% |
+
+---
+*Generated by `benchmark.model_report` from stored evaluation results; no additional model calls were made. Wilson intervals; failure modes assigned by the first matching rule in the taxonomy.*

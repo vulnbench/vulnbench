@@ -25,13 +25,13 @@ import litellm
 logger = logging.getLogger(__name__)
 
 
+# Per-model configuration is intentionally not supported: every model must run
+# under the identical policy or leaderboard rows stop being comparable. Models
+# whose hidden reasoning exhausts the completion budget are handled by the
+# uniform escalation in generate_patch (larger budget, then reasoning excluded).
 DEFAULT_REASONING_MAX_TOKENS_BY_MODEL: dict[str, int] = {}
 
-DEFAULT_REASONING_DISABLED_BY_MODEL = {
-    # GLM 5.2 defaults to hidden reasoning on OpenRouter. In this patch-generation
-    # harness that can consume the whole response budget and leave content empty.
-    "openrouter/z-ai/glm-5.2",
-}
+DEFAULT_REASONING_DISABLED_BY_MODEL: set[str] = set()
 
 _PATCH_LIKE_PATTERNS = (
     re.compile(r"diff --git\s+a/"),
@@ -165,7 +165,8 @@ class LiteLLMAdapter:
 
     model: str
     temperature: float = 0.0
-    max_tokens: int = 4096
+    max_tokens: int = 16384
+    escalated_max_tokens: int = 32768
     num_retries: int = 2
     timeout: float = 300.0
     max_attempts: int = 3
@@ -245,15 +246,30 @@ class LiteLLMAdapter:
         attempt_metas: list[dict] = []
         empty_response_attempts = 0
         exception_attempts = 0
+        budget_escalations = 0
         last_error: Exception | None = None
+        # Uniform escalation ladder for every model: normal budget, then a
+        # larger budget, then the larger budget with provider reasoning
+        # excluded. Prevents hidden reasoning from consuming the entire
+        # completion budget and scoring as an empty patch.
+        attempt_max_tokens = self.max_tokens
+        attempt_exclude_reasoning = self.reasoning_exclude
 
         for attempt in range(1, self.max_attempts + 1):
             try:
-                response = self._complete(messages)
+                response = self._complete(
+                    messages,
+                    max_tokens_override=attempt_max_tokens,
+                    exclude_reasoning_override=attempt_exclude_reasoning,
+                )
                 text, used_reasoning_content = self._response_text(response)
                 attempt_meta = self._response_meta(response)
                 attempt_meta["attempt"] = attempt
                 attempt_meta["used_reasoning_content"] = used_reasoning_content
+                attempt_meta["max_tokens"] = attempt_max_tokens
+                attempt_meta["budget_exhausted"] = self._budget_exhausted(
+                    attempt_meta, attempt_max_tokens
+                )
                 attempt_metas.append(attempt_meta)
                 logger.info(
                     (
@@ -275,16 +291,34 @@ class LiteLLMAdapter:
                         attempts=attempt,
                         empty_response_attempts=empty_response_attempts,
                         exception_attempts=exception_attempts,
+                        budget_escalations=budget_escalations,
                     )
                     self._log_response_meta()
                     return text
 
                 empty_response_attempts += 1
+                retry_reason = "empty response"
+                if attempt_meta["budget_exhausted"]:
+                    if attempt_max_tokens < self.escalated_max_tokens:
+                        attempt_max_tokens = self.escalated_max_tokens
+                        budget_escalations += 1
+                        retry_reason = (
+                            "empty response with exhausted budget; "
+                            f"escalating max_tokens to {attempt_max_tokens}"
+                        )
+                    elif not attempt_exclude_reasoning:
+                        attempt_exclude_reasoning = True
+                        budget_escalations += 1
+                        retry_reason = (
+                            "empty response with exhausted escalated budget; "
+                            "excluding provider reasoning"
+                        )
                 self._last_response_meta = self._aggregate_response_meta(
                     attempt_metas,
                     attempts=attempt,
                     empty_response_attempts=empty_response_attempts,
                     exception_attempts=exception_attempts,
+                    budget_escalations=budget_escalations,
                     last_error="empty response",
                 )
                 if attempt == self.max_attempts:
@@ -295,10 +329,7 @@ class LiteLLMAdapter:
                     self._log_response_meta()
                     return text
 
-                self._sleep_before_retry(
-                    attempt,
-                    "empty response",
-                )
+                self._sleep_before_retry(attempt, retry_reason)
             except Exception as exc:
                 last_error = exc
                 exception_attempts += 1
@@ -307,6 +338,7 @@ class LiteLLMAdapter:
                     attempts=attempt,
                     empty_response_attempts=empty_response_attempts,
                     exception_attempts=exception_attempts,
+                    budget_escalations=budget_escalations,
                     last_error=f"{type(exc).__name__}: {exc}",
                 )
                 if attempt == self.max_attempts:
@@ -323,12 +355,28 @@ class LiteLLMAdapter:
             raise last_error
         return ""
 
-    def _complete(self, messages: list[dict]) -> object:
+    def _budget_exhausted(self, attempt_meta: dict, max_tokens: int) -> bool:
+        if attempt_meta.get("finish_reason") == "length":
+            return True
+        completion = attempt_meta.get("completion_tokens", 0) or 0
+        return bool(max_tokens) and completion >= int(0.98 * max_tokens)
+
+    def _complete(
+        self,
+        messages: list[dict],
+        max_tokens_override: int | None = None,
+        exclude_reasoning_override: bool | None = None,
+    ) -> object:
+        exclude_reasoning = (
+            self.reasoning_exclude
+            if exclude_reasoning_override is None
+            else exclude_reasoning_override
+        )
         kwargs = {
             "model": self.model,
             "messages": messages,
             "temperature": self.temperature,
-            "max_tokens": self.max_tokens,
+            "max_tokens": max_tokens_override or self.max_tokens,
             "num_retries": self.num_retries,
             "timeout": self.timeout,
         }
@@ -340,12 +388,12 @@ class LiteLLMAdapter:
             reasoning["max_tokens"] = self.reasoning_max_tokens
         if self.reasoning_enabled is not None:
             reasoning["enabled"] = self.reasoning_enabled
-        if self.reasoning_exclude:
+        if exclude_reasoning:
             reasoning["exclude"] = True
 
         if self.reasoning_effort and not openrouter_model:
             kwargs["reasoning_effort"] = self.reasoning_effort
-        if reasoning and (openrouter_model or self.reasoning_max_tokens is not None or self.reasoning_exclude):
+        if reasoning and (openrouter_model or self.reasoning_max_tokens is not None or exclude_reasoning):
             kwargs["extra_body"] = {"reasoning": reasoning}
             if self.reasoning_enabled is False:
                 kwargs["extra_body"]["include_reasoning"] = False
@@ -363,7 +411,24 @@ class LiteLLMAdapter:
         return self._complete_with_hard_timeout(kwargs)
 
     def _complete_with_hard_timeout(self, kwargs: dict) -> object:
-        """Call LiteLLM with a process-level timeout for blocking socket reads."""
+        """Call LiteLLM with a hard timeout that survives blocking socket reads.
+
+        Three mechanisms, in order of robustness for a multi-day suite:
+        - VULNBENCH_INPROCESS_LLM: a watchdog THREAD runs the completion and
+          the caller joins with a timeout. join() returns regardless of what
+          the worker thread is stuck on (even an uninterruptible C-level
+          socket read), and threads don't leak OS semaphores. This is the
+          only mode that neither wedges the multiprocessing subsystem over
+          time (child-spawn) nor hangs forever (SIGALRM can't preempt a C
+          call). Preferred for long runs.
+        - process_timeout: child process per call — reliably killable but
+          leaks semaphores/children over ~a day until new spawns hang.
+        - SIGALRM: in-thread itimer — cannot preempt a blocking C socket read.
+        """
+        import os as _os
+        if _os.environ.get("VULNBENCH_INPROCESS_LLM"):
+            return self._complete_with_thread_timeout(kwargs)
+
         if self.process_timeout:
             return self._complete_with_process_timeout(kwargs)
 
@@ -394,6 +459,35 @@ class LiteLLMAdapter:
                     max(0.001, previous_remaining - elapsed),
                     previous_interval,
                 )
+
+    def _complete_with_thread_timeout(self, kwargs: dict) -> object:
+        """Run the completion in a daemon thread; return control after timeout.
+
+        A hung request leaves its daemon thread stuck (bounded by LiteLLM's
+        own timeout kwarg), but the caller is freed immediately and the model
+        run continues — no forever-hang, no per-call child process.
+        """
+        if self.timeout <= 0:
+            return litellm.completion(**kwargs)
+
+        box: dict = {}
+
+        def _worker() -> None:
+            try:
+                box["result"] = litellm.completion(**kwargs)
+            except BaseException as exc:  # noqa: BLE001 - propagated to caller
+                box["error"] = exc
+
+        thread = threading.Thread(target=_worker, daemon=True)
+        thread.start()
+        thread.join(self.timeout)
+        if thread.is_alive():
+            raise TimeoutError(
+                f"LiteLLM completion thread timeout after {self.timeout:.1f}s"
+            )
+        if "error" in box:
+            raise box["error"]
+        return box["result"]
 
     def _complete_with_process_timeout(self, kwargs: dict) -> object:
         if self.timeout <= 0:
@@ -449,6 +543,9 @@ class LiteLLMAdapter:
             "reasoning_tokens": getattr(completion_details, "reasoning_tokens", 0) or 0,
             "cost_usd": hidden_params.get("response_cost", 0.0) or 0.0,
             "model": getattr(response, "model", None) or self.model,
+            "provider": getattr(response, "provider", "")
+            or hidden_params.get("custom_llm_provider", "")
+            or "",
             "finish_reason": getattr(choice, "finish_reason", "") or "",
             "content_chars": len(content),
             "reasoning_content_chars": len(reasoning_content),
@@ -478,10 +575,19 @@ class LiteLLMAdapter:
         attempts: int,
         empty_response_attempts: int,
         exception_attempts: int,
+        budget_escalations: int = 0,
         last_error: str = "",
     ) -> dict:
         model = attempt_metas[-1]["model"] if attempt_metas else self.model
         return {
+            "budget_escalations": budget_escalations,
+            "final_max_tokens": attempt_metas[-1].get("max_tokens", self.max_tokens)
+            if attempt_metas
+            else self.max_tokens,
+            "budget_exhausted": attempt_metas[-1].get("budget_exhausted", False)
+            if attempt_metas
+            else False,
+            "provider": attempt_metas[-1].get("provider", "") if attempt_metas else "",
             "prompt_tokens": sum(m.get("prompt_tokens", 0) for m in attempt_metas),
             "completion_tokens": sum(m.get("completion_tokens", 0) for m in attempt_metas),
             "reasoning_tokens": sum(m.get("reasoning_tokens", 0) for m in attempt_metas),

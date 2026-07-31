@@ -3,7 +3,7 @@
 Usage:
     python -m benchmark.compare \
         --benchmark data/benchmark/vulnbench_mini.json \
-        --models openrouter/openai/gpt-5.4 openrouter/anthropic/claude-sonnet-4.6 \
+        --models openrouter/openai/gpt-5.5 openrouter/anthropic/claude-opus-4.8 \
         --output results/comparison.json \
         --limit 20
 """
@@ -25,6 +25,9 @@ from tqdm import tqdm
 from benchmark.adapters.litellm_adapter import LiteLLMAdapter
 from benchmark.eval_models import EvalReport, InstanceResult
 from benchmark.run_eval import (
+    DEFAULT_JUDGE_MODELS,
+    DEFAULT_MAX_TOKENS,
+    DEFAULT_TIE_BREAKER_JUDGE,
     JUDGE_MODEL,
     build_report,
     evaluate_instance,
@@ -133,14 +136,79 @@ def main():
     parser.add_argument(
         "--max-tokens",
         type=int,
-        default=4096,
-        help="Max response tokens (default: 4096)",
+        default=DEFAULT_MAX_TOKENS,
+        help=f"Max response tokens (default: {DEFAULT_MAX_TOKENS})",
+    )
+    parser.add_argument(
+        "--reasoning-effort",
+        choices=("none", "minimal", "low", "medium", "high", "xhigh", "default"),
+        default=None,
+        help="Optional LiteLLM/OpenAI reasoning effort to pass to each model",
+    )
+    parser.add_argument(
+        "--reasoning-max-tokens",
+        type=int,
+        default=None,
+        help="Optional OpenRouter reasoning.max_tokens value passed via extra_body",
+    )
+    parser.add_argument(
+        "--reasoning-exclude",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Ask OpenRouter to exclude reasoning tokens from the response",
+    )
+    parser.add_argument(
+        "--adapter-max-attempts",
+        type=int,
+        default=3,
+        help="Max adapter-level completion attempts for LiteLLM models (default: 3)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-base-s",
+        type=float,
+        default=2.0,
+        help="Initial adapter retry backoff in seconds (default: 2.0)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-max-s",
+        type=float,
+        default=60.0,
+        help="Maximum adapter retry backoff in seconds (default: 60.0)",
+    )
+    parser.add_argument(
+        "--adapter-retry-backoff-jitter-s",
+        type=float,
+        default=0.5,
+        help="Random adapter retry jitter in seconds (default: 0.5)",
+    )
+    parser.add_argument(
+        "--retry-empty-responses",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Retry empty LiteLLM responses before scoring (default: true)",
     )
     parser.add_argument(
         "--judge-model",
         type=str,
-        default=JUDGE_MODEL,
-        help=f"LiteLLM model ID for the judge (default: {JUDGE_MODEL})",
+        default=None,
+        help=(
+            "Single LiteLLM judge model ID; overrides the default panel "
+            f"(panel default: {', '.join(DEFAULT_JUDGE_MODELS)})"
+        ),
+    )
+    parser.add_argument(
+        "--tie-breaker-judge", type=str, default=DEFAULT_TIE_BREAKER_JUDGE
+    )
+    parser.add_argument(
+        "--judge-models",
+        nargs="+",
+        default=None,
+        help=(
+            "One or more LiteLLM judge model IDs. When multiple are provided, "
+            "VulnBench stores each judge result and scores by consensus. "
+            "Defaults to the standard multi-judge panel unless --judge-model "
+            "is explicitly set."
+        ),
     )
     parser.add_argument(
         "--include-source",
@@ -189,10 +257,21 @@ def main():
 
     if args.limit > 0:
         instances = instances[: args.limit]
+    if args.judge_models:
+        active_judge_models = args.judge_models
+    elif args.judge_model:
+        active_judge_models = [args.judge_model]
+    else:
+        active_judge_models = DEFAULT_JUDGE_MODELS
+    tie_breaker_judge = (
+        None
+        if (args.tie_breaker_judge or "").lower() in ("", "none")
+        else args.tie_breaker_judge
+    )
 
     logger.info(
-        "Comparing %d models on %d instances (judge: %s)",
-        len(args.models), len(instances), args.judge_model,
+        "Comparing %d models on %d instances (judges: %s)",
+        len(args.models), len(instances), ", ".join(active_judge_models),
     )
 
     # Evaluate each model
@@ -206,6 +285,14 @@ def main():
             model=model_name,
             temperature=args.temperature,
             max_tokens=args.max_tokens,
+            reasoning_effort=args.reasoning_effort,
+            reasoning_max_tokens=args.reasoning_max_tokens,
+            reasoning_exclude=args.reasoning_exclude,
+            max_attempts=args.adapter_max_attempts,
+            retry_backoff_base_s=args.adapter_retry_backoff_base_s,
+            retry_backoff_max_s=args.adapter_retry_backoff_max_s,
+            retry_backoff_jitter_s=args.adapter_retry_backoff_jitter_s,
+            retry_empty_responses=args.retry_empty_responses,
         )
 
         results: list[InstanceResult] = []
@@ -214,11 +301,14 @@ def main():
             result = evaluate_instance(
                 instance,
                 adapter,
-                judge_model=args.judge_model,
+                judge_model=active_judge_models[0],
+                judge_models=active_judge_models,
                 include_source=args.include_source,
                 file_hint_mode=args.file_hint_mode,
                 max_source_files=args.max_source_files,
                 max_source_chars=args.max_source_chars,
+                candidate_model=model_name,
+                tie_breaker_judge=tie_breaker_judge,
             )
             results.append(result)
             pbar.set_postfix(
@@ -231,8 +321,15 @@ def main():
             benchmark_path=args.benchmark,
             model_name=model_name,
             judge_model=args.judge_model,
+            judge_models=active_judge_models,
             include_source=args.include_source,
             file_hint_mode=args.file_hint_mode,
+            max_tokens=args.max_tokens,
+            reasoning_effort=args.reasoning_effort,
+            reasoning_max_tokens=args.reasoning_max_tokens,
+            reasoning_exclude=args.reasoning_exclude,
+            adapter_max_attempts=args.adapter_max_attempts,
+            retry_empty_responses=args.retry_empty_responses,
         )
         reports[model_name] = report
 
@@ -240,6 +337,10 @@ def main():
         safe_name = model_name.replace("/", "_")
         ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
         per_model_path = output_dir / f"eval_report_{safe_name}_{ts}.json"
+        if args.reasoning_effort:
+            per_model_path = output_dir / (
+                f"eval_report_{safe_name}_effort-{args.reasoning_effort}_{ts}.json"
+            )
         per_model_path.write_text(json.dumps(report.model_dump(), indent=2))
         logger.info("Per-model report written to %s", per_model_path)
 
@@ -255,8 +356,14 @@ def main():
             "total_instances": len(instances),
             "models": args.models,
             "judge_model": args.judge_model,
+            "judge_models": active_judge_models,
             "temperature": args.temperature,
             "max_tokens": args.max_tokens,
+            "reasoning_effort": args.reasoning_effort,
+            "reasoning_max_tokens": args.reasoning_max_tokens,
+            "reasoning_exclude": args.reasoning_exclude,
+            "adapter_max_attempts": args.adapter_max_attempts,
+            "retry_empty_responses": args.retry_empty_responses,
             "include_source": args.include_source,
             "file_hint_mode": args.file_hint_mode,
         },

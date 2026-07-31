@@ -7,29 +7,14 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
 source .venv/bin/activate
+source "$ROOT_DIR/benchmark/model_suites.sh"
 
 if [[ ! -f ".env" ]]; then
   echo "Missing .env"; exit 1
 fi
+vulnbench_require_openrouter_auth
 
-models=(
-  openrouter/openai/gpt-5-mini
-  openrouter/openai/gpt-5.2
-  openrouter/openai/gpt-5.3-codex
-  openrouter/openai/gpt-5.4
-  openrouter/x-ai/grok-4.1-fast
-  openrouter/minimax/minimax-m2.5
-  openrouter/minimax/minimax-m2.7
-  openrouter/google/gemini-3-flash-preview
-  openrouter/deepseek/deepseek-v3.2
-  openrouter/moonshotai/kimi-k2.5
-  openrouter/anthropic/claude-opus-4.6
-  openrouter/anthropic/claude-sonnet-4.6
-  openrouter/anthropic/claude-haiku-4.5
-  openrouter/stepfun/step-3.5-flash:free
-  openrouter/google/gemini-3.1-pro-preview
-  openrouter/z-ai/glm-5
-)
+models=("${VULNBENCH_LATEST_MODELS[@]}")
 
 LOGDIR="$ROOT_DIR/results/skills/logs"
 mkdir -p "$LOGDIR"

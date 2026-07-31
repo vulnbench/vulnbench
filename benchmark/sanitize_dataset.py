@@ -7,26 +7,30 @@ import json
 import re
 from pathlib import Path
 
-SCRUB_SECTION_HEADERS = {
-    "patch",
-    "patches",
-    "references",
-    "workarounds",
-    "workaround",
-    "recommended fix",
-    "fix",
-    "solution",
-    "mitigation",
-}
+# A section is scrubbed when its header BEGINS with any of these words —
+# advisories use many variants ("Fix Commit(s)", "Remediation Advice",
+# "Patches and Workarounds", "References and Prior work").
+SCRUB_HEADER_PREFIX_RE = re.compile(
+    r"^(?:recommended\s+)?"
+    r"(?:patch(?:es)?|fix(?:es)?|remediation|references?|resources?|"
+    r"resolution|workarounds?|solutions?|mitigations?)\b",
+    re.IGNORECASE,
+)
+
+# Markdown headers at any level (#..######), e.g. "## Patches", "### Remediation"
+SECTION_HEADER_RE = re.compile(r"^(#{1,6})\s*(.+?)\s*:?\s*$")
 
 SCRUB_LINE_PATTERNS = [
     re.compile(r"https?://\S*(?:/commit/|\.patch\b)\S*", re.IGNORECASE),
-    re.compile(r"\b(?:fixed|patched|addressed) in version\b", re.IGNORECASE),
-    re.compile(r"\b(?:fixed|patched|addressed) in\b", re.IGNORECASE),
-    re.compile(r"\bupgrade to\b", re.IGNORECASE),
+    re.compile(r"\b(?:fixed|patched|addressed)\s+in\s+version\b", re.IGNORECASE),
+    re.compile(r"\b(?:fixed|patched|addressed)\s+in\b", re.IGNORECASE),
+    re.compile(r"\bupgrad(?:e|ing)\s+to\b", re.IGNORECASE),
 ]
 
-COMMIT_HASH_RE = re.compile(r"\b[0-9a-f]{7,40}\b")
+# A commit hash needs at least one a-f letter; otherwise 7+ digit decimal
+# tokens (legacy CVE suffixes like CVE-2017-1000220, issue numbers,
+# timestamps) get mangled into [redacted].
+COMMIT_HASH_RE = re.compile(r"\b(?=[0-9a-f]*[a-f])[0-9a-f]{7,40}\b")
 SCRUB_REPLACEMENTS = [
     (
         re.compile(r"\b(?:identifier|name) of the patch is\b.*?(?:\.|$)", re.IGNORECASE),
@@ -42,6 +46,22 @@ SCRUB_REPLACEMENTS = [
     ),
     (
         re.compile(r"\b(?:recommended|best|only) course of action is to apply the provided patch.*?(?:\.|$)", re.IGNORECASE),
+        "",
+    ),
+    (
+        re.compile(
+            r"\b(?:this (?:issue|vulnerability|problem) )?(?:was|is|has been|can be)\s+"
+            r"(?:fixed|resolved|patched|addressed)\s+by\b.*?(?:\.|$)",
+            re.IGNORECASE,
+        ),
+        "",
+    ),
+    (
+        re.compile(
+            r"\bupgrad(?:e|ing)\s+to\s+(?:version\s+)?[A-Za-z0-9._,\s-]+"
+            r"(?:can|will|to)?\s*(?:resolve|fix|address|mitigate)[^.]*\.?",
+            re.IGNORECASE,
+        ),
         "",
     ),
 ]
@@ -67,11 +87,11 @@ def _scrub_advisory_lines(text: str, *, strict: bool) -> str:
     for raw_line in text.splitlines():
         line = raw_line.rstrip()
         stripped = line.strip()
-        lowered = stripped.lower().rstrip(":")
 
-        if stripped.startswith("### "):
-            header = lowered[4:].strip()
-            skip_section = header in SCRUB_SECTION_HEADERS
+        header_match = SECTION_HEADER_RE.match(stripped)
+        if header_match:
+            header = header_match.group(2).strip()
+            skip_section = bool(SCRUB_HEADER_PREFIX_RE.match(header))
             if skip_section:
                 continue
 

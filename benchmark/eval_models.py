@@ -10,6 +10,7 @@ from pydantic import BaseModel, Field
 class PatchAnalysis(BaseModel):
     """Analysis of a model-generated patch by the LLM judge."""
 
+    judge_model: str = ""
     judge_score: float = 0.0  # 0.0-1.0 from judge
     judge_reasoning: str = ""  # Judge's explanation
     judge_verdict: str = ""  # normalized "pass" or "fail"
@@ -28,12 +29,29 @@ class InstanceResult(BaseModel):
     model_patch: str = ""
     generation_time_s: float = 0.0
     patch_analysis: PatchAnalysis = Field(default_factory=PatchAnalysis)
+    judge_analyses: dict[str, PatchAnalysis] = Field(default_factory=dict)
     score: float = 0.0  # 0.0-1.0
-    passed: bool = False  # score >= 0.5
+    passed: bool = False  # normalized judge verdict == "pass"
     prompt_tokens: int = 0
     completion_tokens: int = 0
     cost_usd: float = 0.0
     judge_cost_usd: float = 0.0
+    generation_error: str = ""
+    adapter_attempts: int = 0
+    empty_response_attempts: int = 0
+    exception_attempts: int = 0
+    reasoning_tokens: int = 0
+    reasoning_effort: str = ""
+    reasoning_max_tokens: int = 0
+    reasoning_exclude: bool = False
+    finish_reason: str = ""
+    truncated: bool = False  # final attempt exhausted the completion budget
+    budget_escalations: int = 0  # uniform retries with a larger budget
+    used_reasoning_content: bool = False  # patch came from reasoning stream
+    patch_parse_mode: str = ""  # fenced | raw_diff | hunk | fallback_raw | empty
+    source_context_present: bool = False
+    provider: str = ""  # upstream serving provider, when reported
+    judge_quorum_met: bool = True  # every panel judge returned a usable verdict
 
 
 class AggregateMetrics(BaseModel):
@@ -50,6 +68,7 @@ class AggregateMetrics(BaseModel):
     total_judge_cost_usd: float = 0.0
     total_prompt_tokens: int = 0
     total_completion_tokens: int = 0
+    total_reasoning_tokens: int = 0
 
 
 class EvalReport(BaseModel):

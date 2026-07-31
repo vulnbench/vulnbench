@@ -2,6 +2,7 @@
 set -euo pipefail
 
 MAX_PARALLEL=10
+MODEL_TIMEOUT_SECONDS="${VULNBENCH_MODEL_TIMEOUT_SECONDS:-43200}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
@@ -13,33 +14,16 @@ if [[ ! -d ".venv" ]]; then
 fi
 
 source .venv/bin/activate
+source "$ROOT_DIR/benchmark/model_suites.sh"
 
 if [[ ! -f ".env" ]]; then
   echo "Missing .env in $ROOT_DIR"
   echo "Add OPENROUTER_API_KEY before running."
   exit 1
 fi
+vulnbench_require_openrouter_auth
 
-models=(
-  openrouter/openai/gpt-5-mini
-  openrouter/openai/gpt-5.2
-  openrouter/openai/gpt-5.3-codex
-  openrouter/openai/gpt-5.4
-  openrouter/x-ai/grok-4.1-fast
-  openrouter/minimax/minimax-m2.5
-  openrouter/minimax/minimax-m2.7
-  openrouter/google/gemini-3-flash-preview
-  openrouter/deepseek/deepseek-v3.2
-  openrouter/moonshotai/kimi-k2.5
-  openrouter/anthropic/claude-opus-4.6
-  openrouter/anthropic/claude-sonnet-4.6
-  openrouter/anthropic/claude-haiku-4.5
-  openrouter/stepfun/step-3.5-flash:free
-
-
-  openrouter/google/gemini-3.1-pro-preview
-  openrouter/z-ai/glm-5
-)
+models=("${VULNBENCH_LATEST_MODELS[@]}")
 
 LOGDIR="$ROOT_DIR/results/logs"
 mkdir -p "$LOGDIR"
@@ -59,14 +43,42 @@ run_model() {
 
   echo "[START] $model → $logfile"
 
-  if python -m benchmark.run_best_of_n \
+  local command=(python -m benchmark.run_best_of_n
     --benchmark data/benchmark/vulnbench_200.json \
     --model "$model" \
     --runs 3 \
     --include-source \
     --file-hint-mode description \
-    --output "$outfile" \
-    > "$logfile" 2>&1; then
+    --output "$outfile")
+
+  "${command[@]}" > "$logfile" 2>&1 &
+  local cmd_pid=$!
+  local start_ts
+  start_ts="$(date +%s)"
+  local rc=0
+
+  while kill -0 "$cmd_pid" 2>/dev/null; do
+    if (( $(date +%s) - start_ts > MODEL_TIMEOUT_SECONDS )); then
+      echo "[TIMEOUT] $model exceeded ${MODEL_TIMEOUT_SECONDS}s" >> "$logfile"
+      kill -TERM "$cmd_pid" 2>/dev/null || true
+      sleep 10
+      kill -KILL "$cmd_pid" 2>/dev/null || true
+      wait "$cmd_pid" 2>/dev/null || true
+      rc=124
+      break
+    fi
+    sleep 5
+  done
+
+  if (( rc == 0 )); then
+    if wait "$cmd_pid"; then
+      rc=0
+    else
+      rc=$?
+    fi
+  fi
+
+  if (( rc == 0 )); then
     echo "[DONE] $model ✓"
   else
     echo "[FAIL] $model ✗  (see $logfile)"
