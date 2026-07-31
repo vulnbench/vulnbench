@@ -1,16 +1,18 @@
 # anthropic/claude-opus-5 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 anthropic/claude-opus-5 passed 121/200 instances (60.5%, 95% CI 53.6%–67.0%) with a mean judge score of 0.638.
 
+Across 3 independent runs the pass rate was 64.5%, 68.0%, 60.5% (mean 64.3% ± 3.8%); 80.5% of instances passed in at least one run and 45.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 79 failed instances in the reference run: 29 (37%) because the patch modifies files unrelated to the ground-truth fix; 16 (20%) because the judge scored the patch just below the pass threshold; 13 (16%) because the model understood the issue but the fix was judged inadequate.
 
 In total, 6 failures (3%) were harness or provider artifacts (API errors, empty responses, exhausted budgets) rather than judged model mistakes. Under the v2 quality gate, rows above 2% artifacts are not publishable.
 
-Relative strengths: cve year 2018: 86% vs suite median 14% (n=7); ecosystem maven: 80% vs suite median 20% (n=5); ecosystem pip: 70% vs suite median 20% (n=54); cve year 2024: 67% vs suite median 19% (n=48); primary cwe CWE-20: 70% vs suite median 22% (n=23).
+Relative strengths: cve year 2018: 86% vs suite median 14% (n=7); ecosystem maven: 80% vs suite median 20% (n=5); primary cwe CWE-20: 70% vs suite median 17% (n=23); ecosystem pip: 70% vs suite median 20% (n=54); cve year 2024: 67% vs suite median 17% (n=48).
 
 Cost: $42.87 total generation spend, $0.35 per passing patch, median generation time 62s.
 

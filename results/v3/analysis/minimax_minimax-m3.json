@@ -2,7 +2,7 @@
   "model": "openrouter/minimax/minimax-m3",
   "display_name": "minimax/minimax-m3",
   "metadata": {
-    "runs": 1,
+    "runs": 3,
     "evaluated_at": "2026-07-26T08:25:54.194879+00:00",
     "judge_models": [
       "openrouter/anthropic/claude-opus-4.8",
@@ -26,20 +26,22 @@
     "answer_rate": 0.98
   },
   "runs": {
-    "runs": 1,
+    "runs": 3,
     "common_instances": 200,
     "dropped_instances": 0,
     "per_run_pass_rates": [
+      0.125,
+      0.125,
       0.12
     ],
-    "mean_pass_rate": 0.12,
-    "pass_rate_std": 0.0,
+    "mean_pass_rate": 0.1233,
+    "pass_rate_std": 0.0029,
     "pooled_wilson_95": [
-      0.082,
-      0.1723
+      0.0994,
+      0.1521
     ],
-    "pass_at_k": 0.12,
-    "all_runs_pass_rate": 0.12
+    "pass_at_k": 0.21,
+    "all_runs_pass_rate": 0.045
   },
   "failure_modes": {
     "wrong_file": 92,
@@ -730,13 +732,13 @@
     "median_completion_tokens": 2301,
     "total_reasoning_tokens": 864364
   },
-  "narrative": "minimax/minimax-m3 passed 24/200 instances (12.0%, 95% CI 8.2%\u201317.2%) with a mean judge score of 0.229.\n\nOf the 176 failed instances in the reference run: 92 (52%) because the patch modifies files unrelated to the ground-truth fix; 32 (18%) because the patch was judged irrelevant to the vulnerability; 23 (13%) because the diff appears cut off by the completion token limit.\n\nRelative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); cve year 2018: 0% vs suite median 14% (n=7); cve year 2019: 0% vs suite median 14% (n=7); primary cwe CWE-20: 9% vs suite median 22% (n=23); severity medium: 9% vs suite median 22% (n=137).\n\nCost: $1.23 total generation spend, $0.05 per passing patch, median generation time 23s.",
+  "narrative": "minimax/minimax-m3 passed 24/200 instances (12.0%, 95% CI 8.2%\u201317.2%) with a mean judge score of 0.229.\n\nAcross 3 independent runs the pass rate was 12.5%, 12.5%, 12.0% (mean 12.3% \u00b1 0.3%); 21.0% of instances passed in at least one run and 4.5% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 176 failed instances in the reference run: 92 (52%) because the patch modifies files unrelated to the ground-truth fix; 32 (18%) because the patch was judged irrelevant to the vulnerability; 23 (13%) because the diff appears cut off by the completion token limit.\n\nRelative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); cve year 2018: 0% vs suite median 14% (n=7); cve year 2019: 0% vs suite median 14% (n=7); cve year 2023: 4% vs suite median 15% (n=26); ecosystem pip: 9% vs suite median 20% (n=54).\n\nCost: $1.23 total generation spend, $0.05 per passing patch, median generation time 23s.",
   "relative_strengths": [],
   "relative_weaknesses": [
     "cve year 2021: 20% vs suite median 40% (n=5)",
     "cve year 2018: 0% vs suite median 14% (n=7)",
     "cve year 2019: 0% vs suite median 14% (n=7)",
-    "primary cwe CWE-20: 9% vs suite median 22% (n=23)",
-    "severity medium: 9% vs suite median 22% (n=137)"
+    "cve year 2023: 4% vs suite median 15% (n=26)",
+    "ecosystem pip: 9% vs suite median 20% (n=54)"
   ]
 }

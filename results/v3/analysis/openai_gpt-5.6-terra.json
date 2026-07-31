@@ -2,7 +2,7 @@
   "model": "openrouter/openai/gpt-5.6-terra",
   "display_name": "openai/gpt-5.6-terra",
   "metadata": {
-    "runs": 1,
+    "runs": 3,
     "evaluated_at": "2026-07-25T16:45:01.688787+00:00",
     "judge_models": [
       "openrouter/anthropic/claude-opus-4.8",
@@ -26,20 +26,22 @@
     "answer_rate": 0.995
   },
   "runs": {
-    "runs": 1,
+    "runs": 3,
     "common_instances": 200,
     "dropped_instances": 0,
     "per_run_pass_rates": [
+      0.355,
+      0.315,
       0.33
     ],
-    "mean_pass_rate": 0.33,
-    "pass_rate_std": 0.0,
+    "mean_pass_rate": 0.3333,
+    "pass_rate_std": 0.0202,
     "pooled_wilson_95": [
-      0.2686,
-      0.3978
+      0.2968,
+      0.372
     ],
-    "pass_at_k": 0.33,
-    "all_runs_pass_rate": 0.33
+    "pass_at_k": 0.475,
+    "all_runs_pass_rate": 0.215
   },
   "failure_modes": {
     "wrong_file": 71,
@@ -729,13 +731,13 @@
     "median_completion_tokens": 3186,
     "total_reasoning_tokens": 596691
   },
-  "narrative": "openai/gpt-5.6-terra passed 66/200 instances (33.0%, 95% CI 26.9%\u201339.8%) with a mean judge score of 0.457.\n\nOf the 134 failed instances in the reference run: 71 (53%) because the patch modifies files unrelated to the ground-truth fix; 34 (25%) because the model understood the issue but the fix was judged inadequate; 17 (13%) because the judge scored the patch just below the pass threshold.\n\nRelative strengths: cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-94: 61% vs suite median 28% (n=18); cve year 2018: 43% vs suite median 14% (n=7); severity critical: 38% vs suite median 19% (n=21); cve year 2026: 38% vs suite median 19% (n=16).\n\nRelative weaknesses: primary cwe CWE-1321: 20% vs suite median 40% (n=5).\n\nCost: $10.03 total generation spend, $0.15 per passing patch, median generation time 35s.",
+  "narrative": "openai/gpt-5.6-terra passed 66/200 instances (33.0%, 95% CI 26.9%\u201339.8%) with a mean judge score of 0.457.\n\nAcross 3 independent runs the pass rate was 35.5%, 31.5%, 33.0% (mean 33.3% \u00b1 2.0%); 47.5% of instances passed in at least one run and 21.5% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 134 failed instances in the reference run: 71 (53%) because the patch modifies files unrelated to the ground-truth fix; 34 (25%) because the model understood the issue but the fix was judged inadequate; 17 (13%) because the judge scored the patch just below the pass threshold.\n\nRelative strengths: cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-94: 61% vs suite median 22% (n=18); cve year 2018: 43% vs suite median 14% (n=7); primary cwe CWE-20: 39% vs suite median 17% (n=23); cve year 2025: 45% vs suite median 25% (n=55).\n\nRelative weaknesses: primary cwe CWE-1321: 20% vs suite median 40% (n=5).\n\nCost: $10.03 total generation spend, $0.15 per passing patch, median generation time 35s.",
   "relative_strengths": [
     "cve year 2021: 80% vs suite median 40% (n=5)",
-    "primary cwe CWE-94: 61% vs suite median 28% (n=18)",
+    "primary cwe CWE-94: 61% vs suite median 22% (n=18)",
     "cve year 2018: 43% vs suite median 14% (n=7)",
-    "severity critical: 38% vs suite median 19% (n=21)",
-    "cve year 2026: 38% vs suite median 19% (n=16)"
+    "primary cwe CWE-20: 39% vs suite median 17% (n=23)",
+    "cve year 2025: 45% vs suite median 25% (n=55)"
   ],
   "relative_weaknesses": [
     "primary cwe CWE-1321: 20% vs suite median 40% (n=5)"

@@ -1,14 +1,16 @@
 # openai/gpt-5.6-terra — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 openai/gpt-5.6-terra passed 66/200 instances (33.0%, 95% CI 26.9%–39.8%) with a mean judge score of 0.457.
 
+Across 3 independent runs the pass rate was 35.5%, 31.5%, 33.0% (mean 33.3% ± 2.0%); 47.5% of instances passed in at least one run and 21.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 134 failed instances in the reference run: 71 (53%) because the patch modifies files unrelated to the ground-truth fix; 34 (25%) because the model understood the issue but the fix was judged inadequate; 17 (13%) because the judge scored the patch just below the pass threshold.
 
-Relative strengths: cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-94: 61% vs suite median 28% (n=18); cve year 2018: 43% vs suite median 14% (n=7); severity critical: 38% vs suite median 19% (n=21); cve year 2026: 38% vs suite median 19% (n=16).
+Relative strengths: cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-94: 61% vs suite median 22% (n=18); cve year 2018: 43% vs suite median 14% (n=7); primary cwe CWE-20: 39% vs suite median 17% (n=23); cve year 2025: 45% vs suite median 25% (n=55).
 
 Relative weaknesses: primary cwe CWE-1321: 20% vs suite median 40% (n=5).
 

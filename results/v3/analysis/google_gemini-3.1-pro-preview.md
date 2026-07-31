@@ -1,14 +1,16 @@
 # google/gemini-3.1-pro-preview — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 google/gemini-3.1-pro-preview passed 67/200 instances (33.5%, 95% CI 27.3%–40.3%) with a mean judge score of 0.430.
 
+Across 3 independent runs the pass rate was 29.0%, 31.0%, 33.5% (mean 31.2% ± 2.2%); 45.0% of instances passed in at least one run and 17.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 133 failed instances in the reference run: 44 (33%) because the diff appears cut off by the completion token limit; 25 (19%) because the model understood the issue but the fix was judged inadequate; 22 (17%) because the patch modifies files unrelated to the ground-truth fix.
 
-Relative strengths: primary cwe CWE-1321: 80% vs suite median 40% (n=5); cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-20: 43% vs suite median 22% (n=23); cve year 2022: 33% vs suite median 12% (n=24); primary cwe CWE-79: 37% vs suite median 18% (n=38).
+Relative strengths: primary cwe CWE-1321: 80% vs suite median 40% (n=5); cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-20: 43% vs suite median 17% (n=23); primary cwe CWE-79: 37% vs suite median 16% (n=38); cve year 2022: 33% vs suite median 12% (n=24).
 
 Cost: $36.13 total generation spend, $0.54 per passing patch, median generation time 74s.
 

@@ -1,16 +1,18 @@
 # x-ai/grok-4.5 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 x-ai/grok-4.5 passed 48/200 instances (24.0%, 95% CI 18.6%–30.4%) with a mean judge score of 0.296.
 
+Across 3 independent runs the pass rate was 23.5%, 18.0%, 24.0% (mean 21.8% ± 3.3%); 40.0% of instances passed in at least one run and 6.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 152 failed instances in the reference run: 88 (58%) because the model responded with prose or code instead of a unified diff; 23 (15%) because the patch modifies files unrelated to the ground-truth fix; 18 (12%) because the model understood the issue but the fix was judged inadequate.
 
 The model produced a parseable diff on only 56% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.
 
-Relative strengths: severity critical: 52% vs suite median 19% (n=21); primary cwe CWE-94: 50% vs suite median 28% (n=18); ecosystem maven: 40% vs suite median 20% (n=5); cve year 2023: 35% vs suite median 15% (n=26); cve year 2019: 29% vs suite median 14% (n=7).
+Relative strengths: severity critical: 52% vs suite median 19% (n=21); primary cwe CWE-94: 50% vs suite median 22% (n=18); ecosystem maven: 40% vs suite median 20% (n=5); cve year 2023: 35% vs suite median 15% (n=26); primary cwe CWE-20: 35% vs suite median 17% (n=23).
 
 Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5).
 

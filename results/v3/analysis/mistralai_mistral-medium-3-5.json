@@ -2,7 +2,7 @@
   "model": "openrouter/mistralai/mistral-medium-3-5",
   "display_name": "mistralai/mistral-medium-3-5",
   "metadata": {
-    "runs": 1,
+    "runs": 3,
     "evaluated_at": "2026-07-25T04:03:38.539293+00:00",
     "judge_models": [
       "openrouter/anthropic/claude-opus-4.8",
@@ -26,20 +26,22 @@
     "answer_rate": 0.995
   },
   "runs": {
-    "runs": 1,
+    "runs": 3,
     "common_instances": 200,
     "dropped_instances": 0,
     "per_run_pass_rates": [
+      0.06,
+      0.06,
       0.055
     ],
-    "mean_pass_rate": 0.055,
-    "pass_rate_std": 0.0,
+    "mean_pass_rate": 0.0583,
+    "pass_rate_std": 0.0029,
     "pooled_wilson_95": [
-      0.031,
-      0.0958
+      0.0422,
+      0.08
     ],
-    "pass_at_k": 0.055,
-    "all_runs_pass_rate": 0.055
+    "pass_at_k": 0.09,
+    "all_runs_pass_rate": 0.015
   },
   "failure_modes": {
     "wrong_file": 131,
@@ -729,13 +731,13 @@
     "median_completion_tokens": 577,
     "total_reasoning_tokens": 0
   },
-  "narrative": "mistralai/mistral-medium-3-5 passed 11/200 instances (5.5%, 95% CI 3.1%\u20139.6%) with a mean judge score of 0.164.\n\nOf the 189 failed instances in the reference run: 131 (69%) because the patch modifies files unrelated to the ground-truth fix; 34 (18%) because the patch was judged irrelevant to the vulnerability; 19 (10%) because the model understood the issue but the fix was judged inadequate.\n\nRelative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); primary cwe CWE-94: 6% vs suite median 28% (n=18); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); difficulty tier tier_3: 3% vs suite median 23% (n=66).\n\nCost: $1.14 total generation spend, $0.10 per passing patch, median generation time 5s.",
+  "narrative": "mistralai/mistral-medium-3-5 passed 11/200 instances (5.5%, 95% CI 3.1%\u20139.6%) with a mean judge score of 0.164.\n\nAcross 3 independent runs the pass rate was 6.0%, 6.0%, 5.5% (mean 5.8% \u00b1 0.3%); 9.0% of instances passed in at least one run and 1.5% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 189 failed instances in the reference run: 131 (69%) because the patch modifies files unrelated to the ground-truth fix; 34 (18%) because the patch was judged irrelevant to the vulnerability; 19 (10%) because the model understood the issue but the fix was judged inadequate.\n\nRelative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); difficulty tier tier_3: 3% vs suite median 21% (n=66); cve year 2020: 0% vs suite median 17% (n=6).\n\nCost: $1.14 total generation spend, $0.10 per passing patch, median generation time 5s.",
   "relative_strengths": [],
   "relative_weaknesses": [
     "primary cwe CWE-1321: 0% vs suite median 40% (n=5)",
-    "primary cwe CWE-94: 6% vs suite median 28% (n=18)",
     "cve year 2021: 20% vs suite median 40% (n=5)",
     "ecosystem maven: 0% vs suite median 20% (n=5)",
-    "difficulty tier tier_3: 3% vs suite median 23% (n=66)"
+    "difficulty tier tier_3: 3% vs suite median 21% (n=66)",
+    "cve year 2020: 0% vs suite median 17% (n=6)"
   ]
 }

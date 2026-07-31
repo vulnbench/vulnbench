@@ -2,7 +2,7 @@
   "model": "openrouter/google/gemini-3.5-flash",
   "display_name": "google/gemini-3.5-flash",
   "metadata": {
-    "runs": 1,
+    "runs": 3,
     "evaluated_at": "2026-07-25T21:22:07.975240+00:00",
     "judge_models": [
       "openrouter/anthropic/claude-opus-4.8",
@@ -26,20 +26,22 @@
     "answer_rate": 0.82
   },
   "runs": {
-    "runs": 1,
+    "runs": 3,
     "common_instances": 200,
     "dropped_instances": 0,
     "per_run_pass_rates": [
+      0.295,
+      0.265,
       0.295
     ],
-    "mean_pass_rate": 0.295,
-    "pass_rate_std": 0.0,
+    "mean_pass_rate": 0.285,
+    "pass_rate_std": 0.0173,
     "pooled_wilson_95": [
-      0.2361,
-      0.3616
+      0.2503,
+      0.3224
     ],
-    "pass_at_k": 0.295,
-    "all_runs_pass_rate": 0.295
+    "pass_at_k": 0.41,
+    "all_runs_pass_rate": 0.165
   },
   "failure_modes": {
     "wrong_file": 39,
@@ -730,13 +732,13 @@
     "median_completion_tokens": 9150,
     "total_reasoning_tokens": 1996897
   },
-  "narrative": "google/gemini-3.5-flash passed 59/200 instances (29.5%, 95% CI 23.6%\u201336.2%) with a mean judge score of 0.376.\n\nOf the 141 failed instances in the reference run: 39 (28%) because the patch modifies files unrelated to the ground-truth fix; 36 (26%) because the model responded with prose or code instead of a unified diff; 22 (16%) because the diff appears cut off by the completion token limit.\n\nThe model produced a parseable diff on only 82% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.\n\nRelative strengths: cve year 2022: 29% vs suite median 12% (n=24); primary cwe CWE-94: 44% vs suite median 28% (n=18); cve year 2020: 33% vs suite median 17% (n=6); primary cwe CWE-79: 34% vs suite median 18% (n=38); severity high: 36% vs suite median 21% (n=42).\n\nCost: $19.00 total generation spend, $0.32 per passing patch, median generation time 53s.",
+  "narrative": "google/gemini-3.5-flash passed 59/200 instances (29.5%, 95% CI 23.6%\u201336.2%) with a mean judge score of 0.376.\n\nAcross 3 independent runs the pass rate was 29.5%, 26.5%, 29.5% (mean 28.5% \u00b1 1.7%); 41.0% of instances passed in at least one run and 16.5% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 141 failed instances in the reference run: 39 (28%) because the patch modifies files unrelated to the ground-truth fix; 36 (26%) because the model responded with prose or code instead of a unified diff; 22 (16%) because the diff appears cut off by the completion token limit.\n\nThe model produced a parseable diff on only 82% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.\n\nRelative strengths: primary cwe CWE-94: 44% vs suite median 22% (n=18); primary cwe CWE-79: 34% vs suite median 16% (n=38); cve year 2022: 29% vs suite median 12% (n=24); cve year 2020: 33% vs suite median 17% (n=6); cve year 2024: 31% vs suite median 17% (n=48).\n\nCost: $19.00 total generation spend, $0.32 per passing patch, median generation time 53s.",
   "relative_strengths": [
+    "primary cwe CWE-94: 44% vs suite median 22% (n=18)",
+    "primary cwe CWE-79: 34% vs suite median 16% (n=38)",
     "cve year 2022: 29% vs suite median 12% (n=24)",
-    "primary cwe CWE-94: 44% vs suite median 28% (n=18)",
     "cve year 2020: 33% vs suite median 17% (n=6)",
-    "primary cwe CWE-79: 34% vs suite median 18% (n=38)",
-    "severity high: 36% vs suite median 21% (n=42)"
+    "cve year 2024: 31% vs suite median 17% (n=48)"
   ],
   "relative_weaknesses": []
 }

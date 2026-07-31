@@ -1,10 +1,12 @@
 # anthropic/claude-fable-5 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 anthropic/claude-fable-5 passed 51/200 instances (25.5%, 95% CI 20.0%–32.0%) with a mean judge score of 0.267.
+
+Across 3 independent runs the pass rate was 23.5%, 25.0%, 25.5% (mean 24.7% ± 1.0%); 33.0% of instances passed in at least one run and 16.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
 
 Of the 149 failed instances in the reference run: 113 (76%) because the provider returned no patch text without exhausting the token budget; 12 (8%) because the patch modifies files unrelated to the ground-truth fix; 8 (5%) because the provider/API call failed after retries (not a model capability signal).
 
@@ -12,9 +14,9 @@ In total, 121 failures (60%) were harness or provider artifacts (API errors, emp
 
 The model produced a parseable diff on only 39% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.
 
-Relative strengths: cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-400: 48% vs suite median 16% (n=25); cve year 2022: 33% vs suite median 12% (n=24); ecosystem maven: 40% vs suite median 20% (n=5); primary cwe CWE-79: 34% vs suite median 18% (n=38).
+Relative strengths: cve year 2021: 80% vs suite median 40% (n=5); primary cwe CWE-400: 48% vs suite median 12% (n=25); cve year 2022: 33% vs suite median 12% (n=24); ecosystem maven: 40% vs suite median 20% (n=5); primary cwe CWE-79: 34% vs suite median 16% (n=38).
 
-Relative weaknesses: primary cwe CWE-1321: 20% vs suite median 40% (n=5); cve year 2020: 0% vs suite median 17% (n=6); severity critical: 5% vs suite median 19% (n=21); primary cwe CWE-22: 12% vs suite median 24% (n=25); primary cwe CWE-94: 17% vs suite median 28% (n=18).
+Relative weaknesses: primary cwe CWE-1321: 20% vs suite median 40% (n=5); cve year 2020: 0% vs suite median 17% (n=6); severity critical: 5% vs suite median 19% (n=21); primary cwe CWE-22: 12% vs suite median 24% (n=25).
 
 Cost: $23.30 total generation spend, $0.46 per passing patch, median generation time 222s.
 

@@ -1,14 +1,16 @@
 # deepseek/deepseek-v4-pro — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 deepseek/deepseek-v4-pro passed 30/200 instances (15.0%, 95% CI 10.7%–20.6%) with a mean judge score of 0.294.
 
+Across 3 independent runs the pass rate was 16.5%, 16.5%, 15.0% (mean 16.0% ± 0.9%); 26.5% of instances passed in at least one run and 7.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 170 failed instances in the reference run: 105 (62%) because the patch modifies files unrelated to the ground-truth fix; 30 (18%) because the model understood the issue but the fix was judged inadequate; 23 (14%) because the patch was judged irrelevant to the vulnerability.
 
-Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); primary cwe CWE-22: 12% vs suite median 24% (n=25); primary cwe CWE-94: 17% vs suite median 28% (n=18).
+Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); primary cwe CWE-22: 12% vs suite median 24% (n=25).
 
 Cost: $1.44 total generation spend, $0.05 per passing patch, median generation time 58s.
 

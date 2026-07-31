@@ -1,14 +1,16 @@
 # anthropic/claude-haiku-4.5 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 anthropic/claude-haiku-4.5 passed 17/200 instances (8.5%, 95% CI 5.4%–13.2%) with a mean judge score of 0.221.
 
+Across 3 independent runs the pass rate was 8.5%, 9.5%, 8.5% (mean 8.8% ± 0.6%); 12.0% of instances passed in at least one run and 6.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 183 failed instances in the reference run: 116 (63%) because the patch modifies files unrelated to the ground-truth fix; 33 (18%) because the patch was judged irrelevant to the vulnerability; 24 (13%) because the model understood the issue but the fix was judged inadequate.
 
-Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); primary cwe CWE-20: 4% vs suite median 22% (n=23); cve year 2020: 0% vs suite median 17% (n=6); difficulty tier tier_2: 6% vs suite median 22% (n=67).
+Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); cve year 2020: 0% vs suite median 17% (n=6); difficulty tier tier_2: 6% vs suite median 22% (n=67); cve year 2023: 0% vs suite median 15% (n=26).
 
 Cost: $1.05 total generation spend, $0.06 per passing patch, median generation time 8s.
 

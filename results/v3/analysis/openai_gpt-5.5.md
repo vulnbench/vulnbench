@@ -1,14 +1,16 @@
 # openai/gpt-5.5 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 openai/gpt-5.5 passed 71/200 instances (35.5%, 95% CI 29.2%–42.4%) with a mean judge score of 0.570.
 
+Across 3 independent runs the pass rate was 28.0%, 33.0%, 35.5% (mean 32.2% ± 3.8%); 53.0% of instances passed in at least one run and 14.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 129 failed instances in the reference run: 69 (53%) because the patch modifies files unrelated to the ground-truth fix; 33 (26%) because the judge scored the patch just below the pass threshold; 14 (11%) because the model understood the issue but the fix was judged inadequate.
 
-Relative strengths: cve year 2019: 43% vs suite median 14% (n=7); cve year 2024: 40% vs suite median 19% (n=48); ecosystem maven: 40% vs suite median 20% (n=5); primary cwe CWE-1321: 60% vs suite median 40% (n=5); severity critical: 38% vs suite median 19% (n=21).
+Relative strengths: cve year 2019: 43% vs suite median 14% (n=7); cve year 2024: 40% vs suite median 17% (n=48); primary cwe CWE-79: 37% vs suite median 16% (n=38); ecosystem maven: 40% vs suite median 20% (n=5); primary cwe CWE-1321: 60% vs suite median 40% (n=5).
 
 Cost: $28.93 total generation spend, $0.41 per passing patch, median generation time 64s.
 

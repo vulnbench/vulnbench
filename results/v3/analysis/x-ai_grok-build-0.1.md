@@ -1,16 +1,18 @@
 # x-ai/grok-build-0.1 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 x-ai/grok-build-0.1 passed 44/200 instances (22.0%, 95% CI 16.8%–28.2%) with a mean judge score of 0.349.
 
+Across 3 independent runs the pass rate was 24.0%, 25.0%, 22.0% (mean 23.7% ± 1.5%); 37.0% of instances passed in at least one run and 11.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 156 failed instances in the reference run: 75 (48%) because the diff appears cut off by the completion token limit; 40 (26%) because the patch modifies files unrelated to the ground-truth fix; 22 (14%) because the model understood the issue but the fix was judged inadequate.
 
 In total, 2 failures (1%) were harness or provider artifacts (API errors, empty responses, exhausted budgets) rather than judged model mistakes. Under the v2 quality gate, rows above 2% artifacts are not publishable.
 
-Relative strengths: primary cwe CWE-1321: 80% vs suite median 40% (n=5); cve year 2020: 50% vs suite median 17% (n=6).
+Relative strengths: primary cwe CWE-1321: 80% vs suite median 40% (n=5); cve year 2020: 50% vs suite median 17% (n=6); primary cwe CWE-20: 30% vs suite median 17% (n=23).
 
 Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5).
 

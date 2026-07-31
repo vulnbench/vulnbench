@@ -1,14 +1,16 @@
 # nvidia/nemotron-3-ultra-550b-a55b — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 nvidia/nemotron-3-ultra-550b-a55b passed 26/200 instances (13.0%, 95% CI 9.0%–18.4%) with a mean judge score of 0.243.
 
+Across 3 independent runs the pass rate was 10.0%, 9.5%, 13.0% (mean 10.8% ± 1.9%); 19.5% of instances passed in at least one run and 3.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 174 failed instances in the reference run: 110 (63%) because the patch modifies files unrelated to the ground-truth fix; 25 (14%) because the model understood the issue but the fix was judged inadequate; 25 (14%) because the patch was judged irrelevant to the vulnerability.
 
-Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); primary cwe CWE-400: 0% vs suite median 16% (n=25); cve year 2018: 0% vs suite median 14% (n=7).
+Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); cve year 2018: 0% vs suite median 14% (n=7); difficulty tier tier_2: 9% vs suite median 22% (n=67).
 
 Cost: $1.80 total generation spend, $0.07 per passing patch, median generation time 20s.
 

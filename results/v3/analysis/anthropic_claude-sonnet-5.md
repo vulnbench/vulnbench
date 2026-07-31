@@ -1,10 +1,12 @@
 # anthropic/claude-sonnet-5 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 anthropic/claude-sonnet-5 passed 45/200 instances (22.5%, 95% CI 17.3%–28.8%) with a mean judge score of 0.357.
+
+Across 3 independent runs the pass rate was 18.5%, 18.0%, 22.5% (mean 19.7% ± 2.5%); 33.0% of instances passed in at least one run and 8.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
 
 Of the 155 failed instances in the reference run: 82 (53%) because the patch modifies files unrelated to the ground-truth fix; 34 (22%) because the model understood the issue but the fix was judged inadequate; 28 (18%) because the patch was judged irrelevant to the vulnerability.
 

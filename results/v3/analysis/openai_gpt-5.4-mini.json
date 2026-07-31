@@ -2,7 +2,7 @@
   "model": "openrouter/openai/gpt-5.4-mini",
   "display_name": "openai/gpt-5.4-mini",
   "metadata": {
-    "runs": 1,
+    "runs": 3,
     "evaluated_at": "2026-07-24T05:08:51.059006+00:00",
     "judge_models": [
       "openrouter/anthropic/claude-opus-4.8",
@@ -26,20 +26,22 @@
     "answer_rate": 0.85
   },
   "runs": {
-    "runs": 1,
+    "runs": 3,
     "common_instances": 200,
     "dropped_instances": 0,
     "per_run_pass_rates": [
+      0.105,
+      0.08,
       0.125
     ],
-    "mean_pass_rate": 0.125,
-    "pass_rate_std": 0.0,
+    "mean_pass_rate": 0.1033,
+    "pass_rate_std": 0.0225,
     "pooled_wilson_95": [
-      0.0861,
-      0.178
+      0.0814,
+      0.1303
     ],
-    "pass_at_k": 0.125,
-    "all_runs_pass_rate": 0.125
+    "pass_at_k": 0.195,
+    "all_runs_pass_rate": 0.03
   },
   "failure_modes": {
     "wrong_file": 103,
@@ -729,13 +731,13 @@
     "median_completion_tokens": 317,
     "total_reasoning_tokens": 0
   },
-  "narrative": "openai/gpt-5.4-mini passed 25/200 instances (12.5%, 95% CI 8.6%\u201317.8%) with a mean judge score of 0.258.\n\nOf the 175 failed instances in the reference run: 103 (59%) because the patch modifies files unrelated to the ground-truth fix; 26 (15%) because the model responded with prose or code instead of a unified diff; 20 (11%) because the patch was judged irrelevant to the vulnerability.\n\nThe model produced a parseable diff on only 85% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.\n\nRelative weaknesses: primary cwe CWE-20: 4% vs suite median 22% (n=23); cve year 2020: 0% vs suite median 17% (n=6); primary cwe CWE-22: 8% vs suite median 24% (n=25); severity critical: 5% vs suite median 19% (n=21); difficulty tier tier_3: 9% vs suite median 23% (n=66).\n\nCost: $0.41 total generation spend, $0.02 per passing patch, median generation time 4s.",
+  "narrative": "openai/gpt-5.4-mini passed 25/200 instances (12.5%, 95% CI 8.6%\u201317.8%) with a mean judge score of 0.258.\n\nAcross 3 independent runs the pass rate was 10.5%, 8.0%, 12.5% (mean 10.3% \u00b1 2.2%); 19.5% of instances passed in at least one run and 3.0% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 175 failed instances in the reference run: 103 (59%) because the patch modifies files unrelated to the ground-truth fix; 26 (15%) because the model responded with prose or code instead of a unified diff; 20 (11%) because the patch was judged irrelevant to the vulnerability.\n\nThe model produced a parseable diff on only 85% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.\n\nRelative weaknesses: cve year 2020: 0% vs suite median 17% (n=6); primary cwe CWE-22: 8% vs suite median 24% (n=25); severity critical: 5% vs suite median 19% (n=21); primary cwe CWE-20: 4% vs suite median 17% (n=23); cve year 2026: 6% vs suite median 19% (n=16).\n\nCost: $0.41 total generation spend, $0.02 per passing patch, median generation time 4s.",
   "relative_strengths": [],
   "relative_weaknesses": [
-    "primary cwe CWE-20: 4% vs suite median 22% (n=23)",
     "cve year 2020: 0% vs suite median 17% (n=6)",
     "primary cwe CWE-22: 8% vs suite median 24% (n=25)",
     "severity critical: 5% vs suite median 19% (n=21)",
-    "difficulty tier tier_3: 9% vs suite median 23% (n=66)"
+    "primary cwe CWE-20: 4% vs suite median 17% (n=23)",
+    "cve year 2026: 6% vs suite median 19% (n=16)"
   ]
 }

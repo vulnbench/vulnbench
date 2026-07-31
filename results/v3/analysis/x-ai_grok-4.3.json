@@ -2,7 +2,7 @@
   "model": "openrouter/x-ai/grok-4.3",
   "display_name": "x-ai/grok-4.3",
   "metadata": {
-    "runs": 1,
+    "runs": 3,
     "evaluated_at": "2026-07-24T15:06:04.301615+00:00",
     "judge_models": [
       "openrouter/anthropic/claude-opus-4.8",
@@ -26,20 +26,22 @@
     "answer_rate": 1.0
   },
   "runs": {
-    "runs": 1,
+    "runs": 3,
     "common_instances": 200,
     "dropped_instances": 0,
     "per_run_pass_rates": [
+      0.125,
+      0.115,
       0.12
     ],
     "mean_pass_rate": 0.12,
-    "pass_rate_std": 0.0,
+    "pass_rate_std": 0.005,
     "pooled_wilson_95": [
-      0.082,
-      0.1723
+      0.0964,
+      0.1484
     ],
-    "pass_at_k": 0.12,
-    "all_runs_pass_rate": 0.12
+    "pass_at_k": 0.19,
+    "all_runs_pass_rate": 0.045
   },
   "failure_modes": {
     "wrong_file": 98,
@@ -728,15 +730,15 @@
     "median_completion_tokens": 788,
     "total_reasoning_tokens": 130101
   },
-  "narrative": "x-ai/grok-4.3 passed 24/200 instances (12.0%, 95% CI 8.2%\u201317.2%) with a mean judge score of 0.266.\n\nOf the 176 failed instances in the reference run: 98 (56%) because the patch modifies files unrelated to the ground-truth fix; 34 (19%) because the model understood the issue but the fix was judged inadequate; 33 (19%) because the patch was judged irrelevant to the vulnerability.\n\nRelative strengths: primary cwe CWE-1321: 60% vs suite median 40% (n=5).\n\nRelative weaknesses: ecosystem maven: 0% vs suite median 20% (n=5); cve year 2020: 0% vs suite median 17% (n=6); primary cwe CWE-94: 11% vs suite median 28% (n=18); cve year 2018: 0% vs suite median 14% (n=7); difficulty tier tier_3: 9% vs suite median 23% (n=66).\n\nCost: $0.57 total generation spend, $0.02 per passing patch, median generation time 12s.",
+  "narrative": "x-ai/grok-4.3 passed 24/200 instances (12.0%, 95% CI 8.2%\u201317.2%) with a mean judge score of 0.266.\n\nAcross 3 independent runs the pass rate was 12.5%, 11.5%, 12.0% (mean 12.0% \u00b1 0.5%); 19.0% of instances passed in at least one run and 4.5% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 176 failed instances in the reference run: 98 (56%) because the patch modifies files unrelated to the ground-truth fix; 34 (19%) because the model understood the issue but the fix was judged inadequate; 33 (19%) because the patch was judged irrelevant to the vulnerability.\n\nRelative strengths: primary cwe CWE-1321: 60% vs suite median 40% (n=5).\n\nRelative weaknesses: ecosystem maven: 0% vs suite median 20% (n=5); cve year 2020: 0% vs suite median 17% (n=6); cve year 2018: 0% vs suite median 14% (n=7); cve year 2022: 0% vs suite median 12% (n=24); difficulty tier tier_3: 9% vs suite median 21% (n=66).\n\nCost: $0.57 total generation spend, $0.02 per passing patch, median generation time 12s.",
   "relative_strengths": [
     "primary cwe CWE-1321: 60% vs suite median 40% (n=5)"
   ],
   "relative_weaknesses": [
     "ecosystem maven: 0% vs suite median 20% (n=5)",
     "cve year 2020: 0% vs suite median 17% (n=6)",
-    "primary cwe CWE-94: 11% vs suite median 28% (n=18)",
     "cve year 2018: 0% vs suite median 14% (n=7)",
-    "difficulty tier tier_3: 9% vs suite median 23% (n=66)"
+    "cve year 2022: 0% vs suite median 12% (n=24)",
+    "difficulty tier tier_3: 9% vs suite median 21% (n=66)"
   ]
 }

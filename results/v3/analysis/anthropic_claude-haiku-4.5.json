@@ -2,7 +2,7 @@
   "model": "openrouter/anthropic/claude-haiku-4.5",
   "display_name": "anthropic/claude-haiku-4.5",
   "metadata": {
-    "runs": 1,
+    "runs": 3,
     "evaluated_at": "2026-07-24T09:45:13.535240+00:00",
     "judge_models": [
       "openrouter/anthropic/claude-opus-4.8",
@@ -26,20 +26,22 @@
     "answer_rate": 0.985
   },
   "runs": {
-    "runs": 1,
+    "runs": 3,
     "common_instances": 200,
     "dropped_instances": 0,
     "per_run_pass_rates": [
+      0.085,
+      0.095,
       0.085
     ],
-    "mean_pass_rate": 0.085,
-    "pass_rate_std": 0.0,
+    "mean_pass_rate": 0.0883,
+    "pass_rate_std": 0.0058,
     "pooled_wilson_95": [
-      0.0537,
-      0.1319
+      0.0682,
+      0.1137
     ],
-    "pass_at_k": 0.085,
-    "all_runs_pass_rate": 0.085
+    "pass_at_k": 0.12,
+    "all_runs_pass_rate": 0.06
   },
   "failure_modes": {
     "wrong_file": 116,
@@ -729,13 +731,13 @@
     "median_completion_tokens": 863,
     "total_reasoning_tokens": 0
   },
-  "narrative": "anthropic/claude-haiku-4.5 passed 17/200 instances (8.5%, 95% CI 5.4%\u201313.2%) with a mean judge score of 0.221.\n\nOf the 183 failed instances in the reference run: 116 (63%) because the patch modifies files unrelated to the ground-truth fix; 33 (18%) because the patch was judged irrelevant to the vulnerability; 24 (13%) because the model understood the issue but the fix was judged inadequate.\n\nRelative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); primary cwe CWE-20: 4% vs suite median 22% (n=23); cve year 2020: 0% vs suite median 17% (n=6); difficulty tier tier_2: 6% vs suite median 22% (n=67).\n\nCost: $1.05 total generation spend, $0.06 per passing patch, median generation time 8s.",
+  "narrative": "anthropic/claude-haiku-4.5 passed 17/200 instances (8.5%, 95% CI 5.4%\u201313.2%) with a mean judge score of 0.221.\n\nAcross 3 independent runs the pass rate was 8.5%, 9.5%, 8.5% (mean 8.8% \u00b1 0.6%); 12.0% of instances passed in at least one run and 6.0% passed in every run \u2014 the gap between those two numbers is the model's run-to-run variance.\n\nOf the 183 failed instances in the reference run: 116 (63%) because the patch modifies files unrelated to the ground-truth fix; 33 (18%) because the patch was judged irrelevant to the vulnerability; 24 (13%) because the model understood the issue but the fix was judged inadequate.\n\nRelative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); cve year 2020: 0% vs suite median 17% (n=6); difficulty tier tier_2: 6% vs suite median 22% (n=67); cve year 2023: 0% vs suite median 15% (n=26).\n\nCost: $1.05 total generation spend, $0.06 per passing patch, median generation time 8s.",
   "relative_strengths": [],
   "relative_weaknesses": [
     "primary cwe CWE-1321: 0% vs suite median 40% (n=5)",
     "ecosystem maven: 0% vs suite median 20% (n=5)",
-    "primary cwe CWE-20: 4% vs suite median 22% (n=23)",
     "cve year 2020: 0% vs suite median 17% (n=6)",
-    "difficulty tier tier_2: 6% vs suite median 22% (n=67)"
+    "difficulty tier tier_2: 6% vs suite median 22% (n=67)",
+    "cve year 2023: 0% vs suite median 15% (n=26)"
   ]
 }

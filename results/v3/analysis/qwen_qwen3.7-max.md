@@ -10,7 +10,7 @@ Of the 149 failed instances in the reference run: 65 (44%) because the patch mod
 
 In total, 8 failures (4%) were harness or provider artifacts (API errors, empty responses, exhausted budgets) rather than judged model mistakes. Under the v2 quality gate, rows above 2% artifacts are not publishable.
 
-Relative strengths: cve year 2020: 33% vs suite median 17% (n=6); primary cwe CWE-20: 39% vs suite median 26% (n=23); cve year 2025: 42% vs suite median 31% (n=55).
+Relative strengths: primary cwe CWE-20: 39% vs suite median 22% (n=23); cve year 2020: 33% vs suite median 17% (n=6); cve year 2025: 42% vs suite median 29% (n=55); primary cwe CWE-400: 28% vs suite median 16% (n=25); primary cwe CWE-94: 33% vs suite median 22% (n=18).
 
 Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); primary cwe CWE-1321: 20% vs suite median 40% (n=5).
 

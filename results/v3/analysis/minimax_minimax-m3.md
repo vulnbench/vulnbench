@@ -1,14 +1,16 @@
 # minimax/minimax-m3 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 minimax/minimax-m3 passed 24/200 instances (12.0%, 95% CI 8.2%–17.2%) with a mean judge score of 0.229.
 
+Across 3 independent runs the pass rate was 12.5%, 12.5%, 12.0% (mean 12.3% ± 0.3%); 21.0% of instances passed in at least one run and 4.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 176 failed instances in the reference run: 92 (52%) because the patch modifies files unrelated to the ground-truth fix; 32 (18%) because the patch was judged irrelevant to the vulnerability; 23 (13%) because the diff appears cut off by the completion token limit.
 
-Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); cve year 2018: 0% vs suite median 14% (n=7); cve year 2019: 0% vs suite median 14% (n=7); primary cwe CWE-20: 9% vs suite median 22% (n=23); severity medium: 9% vs suite median 22% (n=137).
+Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); cve year 2018: 0% vs suite median 14% (n=7); cve year 2019: 0% vs suite median 14% (n=7); cve year 2023: 4% vs suite median 15% (n=26); ecosystem pip: 9% vs suite median 20% (n=54).
 
 Cost: $1.23 total generation spend, $0.05 per passing patch, median generation time 23s.
 

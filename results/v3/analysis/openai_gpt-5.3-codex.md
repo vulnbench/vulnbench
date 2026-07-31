@@ -1,14 +1,16 @@
 # openai/gpt-5.3-codex — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 openai/gpt-5.3-codex passed 77/200 instances (38.5%, 95% CI 32.0%–45.4%) with a mean judge score of 0.496.
 
+Across 3 independent runs the pass rate was 34.5%, 34.0%, 38.5% (mean 35.7% ± 2.5%); 50.5% of instances passed in at least one run and 20.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 123 failed instances in the reference run: 72 (59%) because the patch modifies files unrelated to the ground-truth fix; 24 (20%) because the model understood the issue but the fix was judged inadequate; 19 (15%) because the judge scored the patch just below the pass threshold.
 
-Relative strengths: cve year 2020: 83% vs suite median 17% (n=6); cve year 2018: 71% vs suite median 14% (n=7); primary cwe CWE-22: 48% vs suite median 24% (n=25); primary cwe CWE-94: 50% vs suite median 28% (n=18); primary cwe CWE-20: 43% vs suite median 22% (n=23).
+Relative strengths: cve year 2020: 83% vs suite median 17% (n=6); cve year 2018: 71% vs suite median 14% (n=7); primary cwe CWE-94: 50% vs suite median 22% (n=18); primary cwe CWE-20: 43% vs suite median 17% (n=23); primary cwe CWE-400: 36% vs suite median 12% (n=25).
 
 Relative weaknesses: primary cwe CWE-1321: 20% vs suite median 40% (n=5).
 

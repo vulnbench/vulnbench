@@ -1,16 +1,18 @@
 # openai/gpt-5.4-mini — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 openai/gpt-5.4-mini passed 25/200 instances (12.5%, 95% CI 8.6%–17.8%) with a mean judge score of 0.258.
 
+Across 3 independent runs the pass rate was 10.5%, 8.0%, 12.5% (mean 10.3% ± 2.2%); 19.5% of instances passed in at least one run and 3.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 175 failed instances in the reference run: 103 (59%) because the patch modifies files unrelated to the ground-truth fix; 26 (15%) because the model responded with prose or code instead of a unified diff; 20 (11%) because the patch was judged irrelevant to the vulnerability.
 
 The model produced a parseable diff on only 85% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.
 
-Relative weaknesses: primary cwe CWE-20: 4% vs suite median 22% (n=23); cve year 2020: 0% vs suite median 17% (n=6); primary cwe CWE-22: 8% vs suite median 24% (n=25); severity critical: 5% vs suite median 19% (n=21); difficulty tier tier_3: 9% vs suite median 23% (n=66).
+Relative weaknesses: cve year 2020: 0% vs suite median 17% (n=6); primary cwe CWE-22: 8% vs suite median 24% (n=25); severity critical: 5% vs suite median 19% (n=21); primary cwe CWE-20: 4% vs suite median 17% (n=23); cve year 2026: 6% vs suite median 19% (n=16).
 
 Cost: $0.41 total generation spend, $0.02 per passing patch, median generation time 4s.
 

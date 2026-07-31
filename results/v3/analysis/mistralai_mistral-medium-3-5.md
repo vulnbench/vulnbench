@@ -1,14 +1,16 @@
 # mistralai/mistral-medium-3-5 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 mistralai/mistral-medium-3-5 passed 11/200 instances (5.5%, 95% CI 3.1%–9.6%) with a mean judge score of 0.164.
 
+Across 3 independent runs the pass rate was 6.0%, 6.0%, 5.5% (mean 5.8% ± 0.3%); 9.0% of instances passed in at least one run and 1.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 189 failed instances in the reference run: 131 (69%) because the patch modifies files unrelated to the ground-truth fix; 34 (18%) because the patch was judged irrelevant to the vulnerability; 19 (10%) because the model understood the issue but the fix was judged inadequate.
 
-Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); primary cwe CWE-94: 6% vs suite median 28% (n=18); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); difficulty tier tier_3: 3% vs suite median 23% (n=66).
+Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); difficulty tier tier_3: 3% vs suite median 21% (n=66); cve year 2020: 0% vs suite median 17% (n=6).
 
 Cost: $1.14 total generation spend, $0.10 per passing patch, median generation time 5s.
 

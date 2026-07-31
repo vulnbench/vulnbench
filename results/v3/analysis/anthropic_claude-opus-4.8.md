@@ -1,10 +1,12 @@
 # anthropic/claude-opus-4.8 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 anthropic/claude-opus-4.8 passed 35/200 instances (17.5%, 95% CI 12.9%–23.4%) with a mean judge score of 0.422.
+
+Across 3 independent runs the pass rate was 19.0%, 26.0%, 17.5% (mean 20.8% ± 4.5%); 35.0% of instances passed in at least one run and 8.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
 
 Of the 165 failed instances in the reference run: 73 (44%) because the patch modifies files unrelated to the ground-truth fix; 35 (21%) because the judge scored the patch just below the pass threshold; 31 (19%) because the patch was judged irrelevant to the vulnerability.
 

@@ -1,16 +1,18 @@
 # deepseek/deepseek-v4-flash — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 deepseek/deepseek-v4-flash passed 11/200 instances (5.5%, 95% CI 3.1%–9.6%) with a mean judge score of 0.205.
 
+Across 3 independent runs the pass rate was 9.0%, 9.0%, 5.5% (mean 7.8% ± 2.0%); 15.5% of instances passed in at least one run and 2.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 189 failed instances in the reference run: 118 (62%) because the patch modifies files unrelated to the ground-truth fix; 35 (19%) because the model understood the issue but the fix was judged inadequate; 21 (11%) because the patch was judged irrelevant to the vulnerability.
 
 In total, 3 failures (2%) were harness or provider artifacts (API errors, empty responses, exhausted budgets) rather than judged model mistakes. Under the v2 quality gate, rows above 2% artifacts are not publishable.
 
-Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); severity high: 2% vs suite median 21% (n=42); cve year 2025: 9% vs suite median 27% (n=55).
+Relative weaknesses: primary cwe CWE-1321: 0% vs suite median 40% (n=5); cve year 2021: 20% vs suite median 40% (n=5); ecosystem maven: 0% vs suite median 20% (n=5); severity high: 2% vs suite median 21% (n=42); cve year 2020: 0% vs suite median 17% (n=6).
 
 Cost: $0.08 total generation spend, $0.01 per passing patch, median generation time 16s.
 

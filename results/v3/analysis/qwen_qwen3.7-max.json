@@ -731,11 +731,13 @@
     "median_completion_tokens": 4987,
     "total_reasoning_tokens": 1440021
   },
-  "narrative": "qwen/qwen3.7-max passed 51/200 instances (25.5%, 95% CI 20.0%\u201332.0%) with a mean judge score of 0.389.\n\nOf the 149 failed instances in the reference run: 65 (44%) because the patch modifies files unrelated to the ground-truth fix; 24 (16%) because the model understood the issue but the fix was judged inadequate; 22 (15%) because the judge scored the patch just below the pass threshold.\n\nIn total, 8 failures (4%) were harness or provider artifacts (API errors, empty responses, exhausted budgets) rather than judged model mistakes. Under the v2 quality gate, rows above 2% artifacts are not publishable.\n\nRelative strengths: cve year 2020: 33% vs suite median 17% (n=6); primary cwe CWE-20: 39% vs suite median 26% (n=23); cve year 2025: 42% vs suite median 31% (n=55).\n\nRelative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); primary cwe CWE-1321: 20% vs suite median 40% (n=5).\n\nCost: $7.22 total generation spend, $0.14 per passing patch, median generation time 113s.",
+  "narrative": "qwen/qwen3.7-max passed 51/200 instances (25.5%, 95% CI 20.0%\u201332.0%) with a mean judge score of 0.389.\n\nOf the 149 failed instances in the reference run: 65 (44%) because the patch modifies files unrelated to the ground-truth fix; 24 (16%) because the model understood the issue but the fix was judged inadequate; 22 (15%) because the judge scored the patch just below the pass threshold.\n\nIn total, 8 failures (4%) were harness or provider artifacts (API errors, empty responses, exhausted budgets) rather than judged model mistakes. Under the v2 quality gate, rows above 2% artifacts are not publishable.\n\nRelative strengths: primary cwe CWE-20: 39% vs suite median 22% (n=23); cve year 2020: 33% vs suite median 17% (n=6); cve year 2025: 42% vs suite median 29% (n=55); primary cwe CWE-400: 28% vs suite median 16% (n=25); primary cwe CWE-94: 33% vs suite median 22% (n=18).\n\nRelative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); primary cwe CWE-1321: 20% vs suite median 40% (n=5).\n\nCost: $7.22 total generation spend, $0.14 per passing patch, median generation time 113s.",
   "relative_strengths": [
+    "primary cwe CWE-20: 39% vs suite median 22% (n=23)",
     "cve year 2020: 33% vs suite median 17% (n=6)",
-    "primary cwe CWE-20: 39% vs suite median 26% (n=23)",
-    "cve year 2025: 42% vs suite median 31% (n=55)"
+    "cve year 2025: 42% vs suite median 29% (n=55)",
+    "primary cwe CWE-400: 28% vs suite median 16% (n=25)",
+    "primary cwe CWE-94: 33% vs suite median 22% (n=18)"
   ],
   "relative_weaknesses": [
     "cve year 2021: 20% vs suite median 40% (n=5)",

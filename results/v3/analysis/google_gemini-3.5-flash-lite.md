@@ -1,16 +1,18 @@
 # google/gemini-3.5-flash-lite — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 google/gemini-3.5-flash-lite passed 22/200 instances (11.0%, 95% CI 7.4%–16.1%) with a mean judge score of 0.245.
 
+Across 3 independent runs the pass rate was 13.5%, 11.0%, 11.0% (mean 11.8% ± 1.4%); 19.0% of instances passed in at least one run and 5.0% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 178 failed instances in the reference run: 91 (51%) because the patch modifies files unrelated to the ground-truth fix; 41 (23%) because the model understood the issue but the fix was judged inadequate; 36 (20%) because the patch was judged irrelevant to the vulnerability.
 
 Relative strengths: primary cwe CWE-1321: 60% vs suite median 40% (n=5); cve year 2021: 60% vs suite median 40% (n=5).
 
-Relative weaknesses: cve year 2020: 0% vs suite median 17% (n=6); primary cwe CWE-94: 11% vs suite median 28% (n=18); primary cwe CWE-22: 8% vs suite median 24% (n=25); difficulty tier tier_3: 8% vs suite median 23% (n=66); cve year 2024: 4% vs suite median 19% (n=48).
+Relative weaknesses: cve year 2020: 0% vs suite median 17% (n=6); primary cwe CWE-22: 8% vs suite median 24% (n=25); difficulty tier tier_3: 8% vs suite median 21% (n=66); cve year 2022: 0% vs suite median 12% (n=24); cve year 2026: 6% vs suite median 19% (n=16).
 
 Cost: $0.23 total generation spend, $0.01 per passing patch, median generation time 3s.
 

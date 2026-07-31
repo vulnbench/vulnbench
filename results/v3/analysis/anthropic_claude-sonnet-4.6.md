@@ -1,14 +1,16 @@
 # anthropic/claude-sonnet-4.6 — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 anthropic/claude-sonnet-4.6 passed 32/200 instances (16.0%, 95% CI 11.6%–21.7%) with a mean judge score of 0.315.
 
+Across 3 independent runs the pass rate was 16.5%, 19.0%, 16.0% (mean 17.2% ± 1.6%); 29.0% of instances passed in at least one run and 7.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
+
 Of the 168 failed instances in the reference run: 81 (48%) because the patch modifies files unrelated to the ground-truth fix; 42 (25%) because the patch was judged irrelevant to the vulnerability; 27 (16%) because the model understood the issue but the fix was judged inadequate.
 
-Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); cve year 2018: 0% vs suite median 14% (n=7); cve year 2019: 0% vs suite median 14% (n=7); primary cwe CWE-79: 8% vs suite median 18% (n=38).
+Relative weaknesses: cve year 2021: 20% vs suite median 40% (n=5); cve year 2018: 0% vs suite median 14% (n=7); cve year 2019: 0% vs suite median 14% (n=7).
 
 Cost: $4.16 total generation spend, $0.13 per passing patch, median generation time 17s.
 

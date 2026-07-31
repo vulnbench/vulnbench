@@ -1,10 +1,12 @@
 # google/gemini-3.6-flash — VulnBench performance analysis
 
-*Runs: 1 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
+*Runs: 3 · Judges: openrouter/anthropic/claude-opus-4.8, openrouter/openai/gpt-5.5 · hint mode: description · source context: True · max_tokens: 16384*
 
 ## Why this model performed the way it did
 
 google/gemini-3.6-flash passed 48/200 instances (24.0%, 95% CI 18.6%–30.4%) with a mean judge score of 0.320.
+
+Across 3 independent runs the pass rate was 29.5%, 26.5%, 24.0% (mean 26.7% ± 2.8%); 40.5% of instances passed in at least one run and 12.5% passed in every run — the gap between those two numbers is the model's run-to-run variance.
 
 Of the 152 failed instances in the reference run: 52 (34%) because the model responded with prose or code instead of a unified diff; 39 (26%) because the patch modifies files unrelated to the ground-truth fix; 23 (15%) because the diff appears cut off by the completion token limit.
 
@@ -12,7 +14,7 @@ In total, 4 failures (2%) were harness or provider artifacts (API errors, empty 
 
 The model produced a parseable diff on only 72% of instances (answer rate); capability comparisons against models with higher answer rates are confounded until this is resolved.
 
-Relative strengths: primary cwe CWE-1321: 60% vs suite median 40% (n=5); cve year 2022: 29% vs suite median 12% (n=24); cve year 2019: 29% vs suite median 14% (n=7).
+Relative strengths: primary cwe CWE-1321: 60% vs suite median 40% (n=5); cve year 2022: 29% vs suite median 12% (n=24); cve year 2019: 29% vs suite median 14% (n=7); primary cwe CWE-400: 24% vs suite median 12% (n=25); primary cwe CWE-94: 33% vs suite median 22% (n=18).
 
 Relative weaknesses: ecosystem maven: 0% vs suite median 20% (n=5); cve year 2018: 0% vs suite median 14% (n=7).
 
