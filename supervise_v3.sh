@@ -18,8 +18,10 @@ export VULNBENCH_MIN_CREDITS="${VULNBENCH_MIN_CREDITS:-150}"
 
 # Count only the models run_v3_200.sh actually runs (VULNBENCH_LATEST_MODELS),
 # not the VULNBENCH_OPTIONAL_EXPENSIVE_MODELS (-pro variants) below it.
-SUITE_MODELS=$(awk '/VULNBENCH_OPTIONAL/{exit} /^[[:space:]]+openrouter\//{c++} END{print c}' benchmark/model_suites.sh)
-SUITE_MODELS="${SUITE_MODELS:-32}"
+# Count only VULNBENCH_LATEST_MODELS — stop at the first of the SLOW or
+# OPTIONAL arrays (both excluded from the main leaderboard).
+SUITE_MODELS=$(awk '/VULNBENCH_SLOW|VULNBENCH_OPTIONAL/{exit} /^[[:space:]]+openrouter\//{c++} END{print c}' benchmark/model_suites.sh)
+SUITE_MODELS="${SUITE_MODELS:-29}"
 
 echo "[supervisor] waiting for any in-flight suite to drain…"
 while pgrep -f "bash run_v3_200.sh" > /dev/null; do
