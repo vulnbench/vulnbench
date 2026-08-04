@@ -6,3 +6,4 @@ tqdm>=4.66.0
 # (malicious .pth credential stealer). See: github.com/BerriAI/litellm/issues/24512
 litellm>=1.40.0,!=1.82.7,!=1.82.8
 pyyaml>=6.0
+pillow>=10.0  # social-card (og:image) generation

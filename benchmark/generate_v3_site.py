@@ -151,6 +151,31 @@ def render(rows: list[Row]) -> str:
     n = len(rows)
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
 
+    site_url = "https://vulnbench.ghostsecurity.com/"
+    page_title = "VulnBench v3 — Can LLMs Fix Real Vulnerabilities?"
+    social_desc = (
+        f"{n} LLMs scored on patching 200 real CVEs under an audited "
+        f"find-and-fix protocol. {top.display} leads at {pct(top.pass_rate)}."
+    )
+    # Absolute image URL (LinkedIn/Twitter require it); ?v bumps on redeploy
+    # so scrapers treat it as fresh. Card is 1200x630 (og-image.png).
+    og_image = f"{site_url}og-image.png?v={datetime.now(timezone.utc).strftime('%Y%m%d')}"
+    og_tags = (
+        f'<meta property="og:type" content="website">'
+        f'<meta property="og:site_name" content="Ghost Security">'
+        f'<meta property="og:url" content="{site_url}">'
+        f'<meta property="og:title" content="{html.escape(page_title)}">'
+        f'<meta property="og:description" content="{html.escape(social_desc)}">'
+        f'<meta property="og:image" content="{og_image}">'
+        f'<meta property="og:image:width" content="1200">'
+        f'<meta property="og:image:height" content="630">'
+        f'<meta property="og:image:alt" content="VulnBench v3 leaderboard — {html.escape(top.display)} leads at {pct(top.pass_rate)}">'
+        f'<meta name="twitter:card" content="summary_large_image">'
+        f'<meta name="twitter:title" content="{html.escape(page_title)}">'
+        f'<meta name="twitter:description" content="{html.escape(social_desc)}">'
+        f'<meta name="twitter:image" content="{og_image}">'
+    )
+
     findings = "".join([
         f'<div class="gs-vb-finding"><div class="gs-vb-finding__value">{pct(top.pass_rate)}</div>'
         f'<div class="gs-vb-finding__label">Leader — {html.escape(top.display)}</div>'
@@ -178,7 +203,7 @@ def render(rows: list[Row]) -> str:
         f'cross-vendor judge panel, and mean-of-3-runs with confidence intervals.</p></div>',
     ])
 
-    return f"""<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="./favicon.svg"><meta name="viewport" content="width=device-width"><meta name="description" content="VulnBench v3: {n} LLMs scored on fixing 200 real CVEs under an audited find-and-fix protocol. {html.escape(top.display)} leads at {pct(top.pass_rate)}."><link rel="preconnect" href="https://cdn.fonts.net" crossorigin><link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet"><title>VulnBench v3 — Can LLMs Fix Real Vulnerabilities?</title><link rel="stylesheet" href="./_astro/index.DCZr0Mhq.css"></head> <body>
+    return f"""<!DOCTYPE html><html lang="en"> <head><meta charset="utf-8"><link rel="icon" type="image/svg+xml" href="./favicon.svg"><meta name="viewport" content="width=device-width"><meta name="description" content="{html.escape(social_desc)}">{og_tags}<link rel="preconnect" href="https://cdn.fonts.net" crossorigin><link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/style.min.css" rel="stylesheet"><link href="https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-mono/style.min.css" rel="stylesheet"><title>VulnBench v3 — Can LLMs Fix Real Vulnerabilities?</title><link rel="stylesheet" href="./_astro/index.DCZr0Mhq.css"></head> <body>
 <header class="gs-nav"><div class="gs-nav__inner"><a href="/" class="gs-nav__pill" style="font-family:var(--gs-font-mono);font-size:12px;letter-spacing:.1em;color:#000;text-decoration:none">GHOST</a><nav class="gs-nav__links"><a href="#findings" class="gs-nav__link">[F] Findings</a><a href="#leaderboard" class="gs-nav__link">[L] Leaderboard</a><a href="#methodology" class="gs-nav__link">[M] Methodology</a><a href="#dataset" class="gs-nav__link">[D] Dataset</a></nav><a href="https://github.com/vulnbench/vulnbench" class="gs-nav__link gs-nav__login">[R] Repository</a><button class="gs-nav__hamburger" id="gs-nav-toggle" aria-label="Toggle menu"><span></span><span></span><span></span></button></div><div class="gs-nav__mobile" id="gs-nav-mobile"><a href="#findings" class="gs-nav__link">[F] Findings</a><a href="#leaderboard" class="gs-nav__link">[L] Leaderboard</a><a href="#methodology" class="gs-nav__link">[M] Methodology</a><a href="#dataset" class="gs-nav__link">[D] Dataset</a><a href="https://github.com/vulnbench/vulnbench" class="gs-nav__link">[R] Repository</a></div></header>
 <section class="gs-vb-hero"><div class="gs-vb-hero__shader" id="gs-vb-hero-shader"></div><div class="gs-vb-hero__inner"><div class="gs-vb-hero__content"><div class="gs-vb-hero__eyebrow"><span>Audited find-and-fix benchmark</span><span class="gs-vb-hero__eyebrow-sep">/</span><span>Ghost Security</span></div><h1 class="gs-vb-hero__title">Which LLMs Can Fix<br>Real Vulnerabilities?</h1><p class="gs-vb-hero__desc">VulnBench v3 scores {n} models on patching 200 real CVEs. Each model sees the vulnerability and source, never the reference fix, and a pinned cross-vendor judge panel decides whether the patch fixes the root cause. {html.escape(top.display)} leads at {pct(top.pass_rate)} &mdash; roughly double any other model.</p></div></div></section>
 <div class="gs-vb-stats"><div class="gs-vb-stats__inner"><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">{n}</div><div class="gs-vb-stats__label">Models Ranked</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">200</div><div class="gs-vb-stats__label">Real CVEs</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">3&times;</div><div class="gs-vb-stats__label">Runs Per Model</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">3</div><div class="gs-vb-stats__label">Cross-Vendor Judges</div></div><div class="gs-vb-stats__item"><div class="gs-vb-stats__value">48</div><div class="gs-vb-stats__label">CWE Types</div></div></div></div>
